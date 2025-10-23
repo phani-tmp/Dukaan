@@ -1157,6 +1157,27 @@ const ProfileView = ({ userProfile, orders, onLogout, language }) => {
   );
 };
 
+// --- TOAST NOTIFICATION ---
+const ToastNotification = ({ message, type, onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 5000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className={`toast-notification toast-${type}`}>
+      <div className="toast-content">
+        {type === 'success' && <CheckCircle className="w-5 h-5" />}
+        {type === 'info' && <Package className="w-5 h-5" />}
+        <p>{message}</p>
+      </div>
+      <button onClick={onClose} className="toast-close">
+        <X className="w-4 h-4" />
+      </button>
+    </div>
+  );
+};
+
 // --- BOTTOM NAVIGATION ---
 const BottomNavigation = ({ currentView, setCurrentView, cartItems, language }) => {
   const t = translations[language];
@@ -1203,6 +1224,8 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [language, setLanguage] = useState('en');
   const [location, setLocation] = useState('Ponnur, AP');
+  const [notification, setNotification] = useState(null);
+  const [previousOrderStatuses, setPreviousOrderStatuses] = useState({});
   
   const isShopkeeperMode = new URLSearchParams(window.location.search).get('mode') === 'shopkeeper';
 
@@ -1275,6 +1298,48 @@ function App() {
 
     return () => unsubscribe();
   }, [user, isShopkeeperMode]);
+
+  // Monitor order status changes and show notifications (for customers)
+  useEffect(() => {
+    if (!user || isShopkeeperMode || orders.length === 0) return;
+
+    // Build current status map
+    const currentStatuses = {};
+    orders.forEach(order => {
+      currentStatuses[order.id] = order.status;
+    });
+
+    // Check for status changes
+    orders.forEach(order => {
+      const previousStatus = previousOrderStatuses[order.id];
+      const currentStatus = order.status;
+
+      // If status changed and order was recently updated
+      if (previousStatus && previousStatus !== currentStatus && order.updatedAt) {
+        const updateTime = new Date(order.updatedAt).getTime();
+        const currentTime = new Date().getTime();
+        const timeDiff = currentTime - updateTime;
+
+        // If updated within last 10 seconds, show notification
+        if (timeDiff < 10000) {
+          if (currentStatus === 'processing') {
+            setNotification({
+              message: '🎉 Your order has been accepted! We are preparing it now.',
+              type: 'success'
+            });
+          } else if (currentStatus === 'delivered') {
+            setNotification({
+              message: '✅ Your order has been delivered! Thank you for shopping with us.',
+              type: 'success'
+            });
+          }
+        }
+      }
+    });
+
+    // Update previous statuses
+    setPreviousOrderStatuses(currentStatuses);
+  }, [orders, user, isShopkeeperMode]);
 
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'en' ? 'te' : 'en');
@@ -1418,6 +1483,14 @@ function App() {
         cartItems={cartItems}
         language={language}
       />
+
+      {notification && (
+        <ToastNotification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
     </div>
   );
 }
