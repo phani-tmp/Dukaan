@@ -931,12 +931,36 @@ body {
   background: var(--color-gray-50);
 }
 
+.shopkeeper-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: white;
+  border-bottom: 1px solid var(--color-gray-200);
+  position: sticky;
+  top: 60px;
+  z-index: 11;
+}
+
+.shopkeeper-search-bar .search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: var(--color-gray-900);
+}
+
+.shopkeeper-search-bar .search-input::placeholder {
+  color: var(--color-gray-400);
+}
+
 .shopkeeper-tabs {
   display: flex;
   background: white;
   border-bottom: 1px solid var(--color-gray-200);
   position: sticky;
-  top: 60px;
+  top: 105px;
   z-index: 10;
 }
 
@@ -950,7 +974,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--color-gray-600);
   transition: all 0.2s;
@@ -964,6 +988,29 @@ body {
 
 .shopkeeper-content {
   padding: 16px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.count-badge {
+  background: var(--color-green-600);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.section-description {
+  font-size: 14px;
+  color: var(--color-gray-600);
+  margin-bottom: 16px;
+  line-height: 1.5;
 }
 
 .shopkeeper-orders-list {
@@ -1052,6 +1099,269 @@ body {
 
 .delivered-btn:hover {
   background: #388E3C;
+}
+
+.delivered-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #E8F5E9;
+  color: #2E7D32;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Enhanced Order Cards */
+.shopkeeper-order-card-enhanced {
+  background: white;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+}
+
+.shopkeeper-order-card-enhanced:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.order-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.order-info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.order-id-row, .order-time-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.order-customer {
+  font-weight: 600;
+  color: var(--color-gray-900);
+}
+
+.order-timestamp {
+  color: var(--color-gray-500);
+}
+
+.order-status-badge-new {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.order-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--color-gray-50);
+  border-radius: 10px;
+}
+
+.order-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.item-name {
+  flex: 1;
+  font-weight: 500;
+  color: var(--color-gray-900);
+}
+
+.item-quantity {
+  color: var(--color-gray-600);
+  margin: 0 12px;
+}
+
+.item-price {
+  font-weight: 600;
+  color: var(--color-green-600);
+}
+
+.order-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 2px solid var(--color-gray-100);
+}
+
+.order-total-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.total-label {
+  font-size: 12px;
+  color: var(--color-gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.total-amount-large {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-green-600);
+}
+
+.order-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Category Filters */
+.category-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  border: 2px solid var(--color-gray-200);
+  background: white;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-gray-700);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  border-color: var(--color-green-400);
+  background: var(--color-green-50);
+}
+
+.filter-btn.active {
+  background: var(--color-green-600);
+  color: white;
+  border-color: var(--color-green-600);
+}
+
+/* Image Upload Section */
+.image-upload-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.upload-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  border: 2px dashed var(--color-gray-300);
+  border-radius: 12px;
+  background: var(--color-gray-50);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-gray-700);
+  transition: all 0.2s;
+}
+
+.upload-label:hover {
+  border-color: var(--color-green-500);
+  background: var(--color-green-50);
+  color: var(--color-green-700);
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.image-preview {
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  background: var(--color-gray-50);
+  border-radius: 12px;
+}
+
+.image-preview img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--color-gray-50);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-gray-700);
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.popular-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #FFF9C4;
+  color: #F57F17;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.popular-toggle-btn {
+  background: transparent;
+  border: 2px solid var(--color-gray-300);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.popular-toggle-btn:hover {
+  border-color: gold;
+  background: #FFF9C4;
+}
+
+.popular-toggle-btn.is-popular {
+  border-color: gold;
+  background: #FFF9C4;
 }
 
 /* --- EMPTY STATE --- */

@@ -7,7 +7,7 @@ import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc, collection, query, onSnapshot, getDoc, updateDoc, where, addDoc, deleteDoc } from 'firebase/firestore';
 
 // Icon Imports 
-import { Search, MapPin, ShoppingCart, User, Home, Package, ChevronLeft, Minus, Plus, IndianRupee, Mic, LogOut, CheckCircle, Clock, ShoppingBag, Truck, Check, X, Settings, PlusCircle, Edit, Trash2, Save, Image as ImageIcon } from 'lucide-react';
+import { Search, MapPin, ShoppingCart, User, Home, Package, ChevronLeft, Minus, Plus, IndianRupee, Mic, LogOut, CheckCircle, Clock, ShoppingBag, Truck, Check, X, Settings, PlusCircle, Edit, Trash2, Save, Image as ImageIcon, Upload, Star } from 'lucide-react';
 
 // --- FIREBASE CONFIGURATION ---
 const appId = localAppId;
@@ -654,14 +654,35 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
     discountedPrice: '',
     weight: '',
     imageUrl: '',
-    category: 'groceries'
+    category: 'groceries',
+    isPopular: false
   });
   const [editingId, setEditingId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [imagePreview, setImagePreview] = useState(null);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 500000) {
+        alert('Image size should be less than 500KB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, imageUrl: reader.result });
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
       await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
-        status: newStatus
+        status: newStatus,
+        updatedAt: new Date().toISOString()
       });
       alert(`Order status updated to ${newStatus}!`);
     } catch (error) {
@@ -678,6 +699,7 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
         ...formData,
         price: parseFloat(formData.price),
         discountedPrice: formData.discountedPrice ? parseFloat(formData.discountedPrice) : null,
+        isPopular: formData.isPopular || false,
         createdAt: new Date().toISOString()
       };
 
@@ -689,7 +711,8 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
         alert('Product added successfully!');
       }
 
-      setFormData({ name: '', price: '', discountedPrice: '', weight: '', imageUrl: '', category: 'groceries' });
+      setFormData({ name: '', price: '', discountedPrice: '', weight: '', imageUrl: '', category: 'groceries', isPopular: false });
+      setImagePreview(null);
       setShowForm(false);
       setEditingId(null);
     } catch (error) {
@@ -705,10 +728,13 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
       discountedPrice: product.discountedPrice?.toString() || '',
       weight: product.weight,
       imageUrl: product.imageUrl || '',
-      category: product.category
+      category: product.category,
+      isPopular: product.isPopular || false
     });
+    setImagePreview(product.imageUrl || null);
     setEditingId(product.id);
     setShowForm(true);
+    setActiveTab('products');
   };
 
   const handleDeleteProduct = async (productId) => {
@@ -723,6 +749,17 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
     }
   };
 
+  const togglePopularStatus = async (productId, currentStatus) => {
+    try {
+      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), {
+        isPopular: !currentStatus
+      });
+    } catch (error) {
+      console.error('Error updating popular status:', error);
+      alert('Failed to update popular status');
+    }
+  };
+
   const getStatusColor = (status) => {
     switch(status) {
       case 'pending': return '#FF9800';
@@ -733,6 +770,14 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
   };
 
   const sortedOrders = [...allOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const popularProducts = products.filter(p => p.isPopular);
 
   return (
     <div className="shopkeeper-dashboard">
@@ -741,6 +786,17 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
           <ChevronLeft className="w-6 h-6" />
         </button>
         <h2 className="view-title">{t.shopkeeperDashboard}</h2>
+      </div>
+
+      <div className="shopkeeper-search-bar">
+        <Search className="w-5 h-5 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search products, orders..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
+        />
       </div>
 
       <div className="shopkeeper-tabs">
@@ -758,12 +814,22 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
           <ShoppingBag className="w-5 h-5" />
           {t.productsTab}
         </button>
+        <button 
+          className={`tab-button ${activeTab === 'popular' ? 'active' : ''}`}
+          onClick={() => setActiveTab('popular')}
+        >
+          <Star className="w-5 h-5" />
+          Popular
+        </button>
       </div>
 
       <div className="shopkeeper-content">
         {activeTab === 'orders' && (
           <div className="orders-section">
-            <h3 className="section-subtitle">{t.incomingOrders} ({sortedOrders.length})</h3>
+            <div className="section-header">
+              <h3 className="section-subtitle">{t.incomingOrders}</h3>
+              <span className="count-badge">{sortedOrders.length}</span>
+            </div>
             {sortedOrders.length === 0 ? (
               <div className="empty-state">
                 <Package className="w-16 h-16 text-gray-400" />
@@ -772,50 +838,67 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
             ) : (
               <div className="shopkeeper-orders-list">
                 {sortedOrders.map(order => (
-                  <div key={order.id} className="shopkeeper-order-card">
-                    <div className="order-card-header">
-                      <div>
-                        <p className="order-id">{t.customer}: {order.userId?.substring(0, 8)}...</p>
-                        <p className="order-date">{new Date(order.createdAt).toLocaleString()}</p>
+                  <div key={order.id} className="shopkeeper-order-card-enhanced">
+                    <div className="order-card-top">
+                      <div className="order-info-section">
+                        <div className="order-id-row">
+                          <User className="w-4 h-4 text-gray-500" />
+                          <span className="order-customer">{order.userId?.substring(0, 12)}...</span>
+                        </div>
+                        <div className="order-time-row">
+                          <Clock className="w-4 h-4 text-gray-400" />
+                          <span className="order-timestamp">{new Date(order.createdAt).toLocaleString()}</span>
+                        </div>
                       </div>
-                      <div className="order-status-badge" style={{ backgroundColor: getStatusColor(order.status) }}>
-                        {order.status}
+                      <div className="order-status-badge-new" style={{ backgroundColor: getStatusColor(order.status) }}>
+                        {order.status.toUpperCase()}
                       </div>
                     </div>
                     
-                    <div className="order-items">
+                    <div className="order-items-list">
                       {order.items.map((item, idx) => (
-                        <p key={idx} className="order-item-text">
-                          {item.name} x {item.quantity} - ₹{(item.price * item.quantity).toFixed(0)}
-                        </p>
+                        <div key={idx} className="order-item-row">
+                          <span className="item-name">{item.name}</span>
+                          <span className="item-quantity">× {item.quantity}</span>
+                          <span className="item-price">₹{(item.price * item.quantity).toFixed(0)}</span>
+                        </div>
                       ))}
                     </div>
                     
-                    <div className="order-card-footer">
-                      <div className="order-total">
-                        <strong>{t.total}:</strong>
-                        <span className="total-amount">₹{order.total.toFixed(0)}</span>
+                    <div className="order-card-bottom">
+                      <div className="order-total-section">
+                        <span className="total-label">{t.total}</span>
+                        <span className="total-amount-large">₹{order.total.toFixed(0)}</span>
                       </div>
                       
-                      {order.status === 'pending' && (
-                        <button 
-                          onClick={() => handleUpdateStatus(order.id, 'processing')}
-                          className="status-btn processing-btn"
-                        >
-                          <Clock className="w-4 h-4" />
-                          {t.markProcessing}
-                        </button>
-                      )}
-                      
-                      {order.status === 'processing' && (
-                        <button 
-                          onClick={() => handleUpdateStatus(order.id, 'delivered')}
-                          className="status-btn delivered-btn"
-                        >
-                          <CheckCircle className="w-4 h-4" />
-                          {t.markDelivered}
-                        </button>
-                      )}
+                      <div className="order-actions">
+                        {order.status === 'pending' && (
+                          <button 
+                            onClick={() => handleUpdateStatus(order.id, 'processing')}
+                            className="status-btn processing-btn"
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                            Accept Order
+                          </button>
+                        )}
+                        
+                        {order.status === 'processing' && (
+                          <button 
+                            onClick={() => handleUpdateStatus(order.id, 'delivered')}
+                            className="status-btn delivered-btn"
+                          >
+                            <Package className="w-4 h-4" />
+                            Mark Delivered
+                          </button>
+                        )}
+                        
+                        {order.status === 'delivered' && (
+                          <div className="delivered-tag">
+                            <CheckCircle className="w-4 h-4" />
+                            Completed
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -864,13 +947,32 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
                   required
                   className="form-input"
                 />
-                <input
-                  type="text"
-                  placeholder={t.productImage}
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  className="form-input"
-                />
+                
+                <div className="image-upload-section">
+                  <label className="upload-label">
+                    <Upload className="w-5 h-5" />
+                    Upload Image (Max 500KB)
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="file-input-hidden"
+                    />
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Or paste image URL"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    className="form-input"
+                  />
+                  {imagePreview && (
+                    <div className="image-preview">
+                      <img src={imagePreview} alt="Preview" />
+                    </div>
+                  )}
+                </div>
+
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
@@ -882,20 +984,86 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
                     </option>
                   ))}
                 </select>
+
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={formData.isPopular}
+                    onChange={(e) => setFormData({ ...formData, isPopular: e.target.checked })}
+                  />
+                  Mark as Popular Product
+                </label>
+
                 <div className="form-actions">
                   <button type="submit" className="save-btn">
                     <Save className="w-4 h-4" />
                     {t.save}
                   </button>
-                  <button type="button" onClick={() => { setShowForm(false); setEditingId(null); }} className="cancel-btn">
+                  <button type="button" onClick={() => { setShowForm(false); setEditingId(null); setImagePreview(null); }} className="cancel-btn">
                     {t.cancel}
                   </button>
                 </div>
               </form>
             )}
 
+            <div className="category-filters">
+              <button 
+                className={`filter-btn ${selectedCategory === 'all' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('all')}
+              >
+                All ({products.length})
+              </button>
+              {categories.map(cat => {
+                const count = products.filter(p => p.category === cat.id).length;
+                return (
+                  <button 
+                    key={cat.id}
+                    className={`filter-btn ${selectedCategory === cat.id ? 'active' : ''}`}
+                    onClick={() => setSelectedCategory(cat.id)}
+                  >
+                    {cat.emoji} {cat.nameEn} ({count})
+                  </button>
+                );
+              })}
+            </div>
+
             <div className="products-admin-list">
-              <h3 className="section-subtitle">{t.manageProducts} ({products.length})</h3>
+              <h3 className="section-subtitle">{t.manageProducts} ({filteredProducts.length})</h3>
+              {filteredProducts.map(product => (
+                <div key={product.id} className="admin-product-card">
+                  <img src={product.imageUrl || 'https://via.placeholder.com/60'} alt={product.name} className="admin-product-img" />
+                  <div className="admin-product-info">
+                    <h4>{product.name}</h4>
+                    <p>{product.category} • {product.weight}</p>
+                    <p className="admin-price">₹{product.discountedPrice || product.price}</p>
+                    {product.isPopular && <span className="popular-tag">⭐ Popular</span>}
+                  </div>
+                  <div className="admin-product-actions">
+                    <button onClick={() => handleEditProduct(product)} className="edit-btn">
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleDeleteProduct(product.id)} className="delete-btn">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'popular' && (
+          <div className="popular-section">
+            <div className="section-header">
+              <h3 className="section-subtitle">Popular Products Management</h3>
+              <span className="count-badge">{popularProducts.length}</span>
+            </div>
+            <p className="section-description">
+              Manage which products appear in the "Popular Products" section on the customer app. 
+              Toggle the star to add/remove from popular items.
+            </p>
+
+            <div className="products-admin-list">
               {products.map(product => (
                 <div key={product.id} className="admin-product-card">
                   <img src={product.imageUrl || 'https://via.placeholder.com/60'} alt={product.name} className="admin-product-img" />
@@ -905,11 +1073,12 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
                     <p className="admin-price">₹{product.discountedPrice || product.price}</p>
                   </div>
                   <div className="admin-product-actions">
-                    <button onClick={() => handleEditProduct(product)} className="edit-btn">
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button onClick={() => handleDeleteProduct(product.id)} className="delete-btn">
-                      <Trash2 className="w-4 h-4" />
+                    <button 
+                      onClick={() => togglePopularStatus(product.id, product.isPopular)}
+                      className={`popular-toggle-btn ${product.isPopular ? 'is-popular' : ''}`}
+                      title={product.isPopular ? 'Remove from popular' : 'Add to popular'}
+                    >
+                      {product.isPopular ? <Star fill="gold" stroke="gold" className="w-5 h-5" /> : <Star className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
