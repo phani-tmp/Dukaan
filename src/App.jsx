@@ -82,12 +82,12 @@ const translations = {
 
 // --- CATEGORY DATA WITH BILINGUAL LABELS ---
 const categories = [
-  { id: 'groceries', nameEn: 'Groceries', nameTe: 'వీరగాణ', icon: '🏪', color: '#4CAF50' },
-  { id: 'vegetables', nameEn: 'Vegetables', nameTe: 'కూరగాయలు', icon: '🥬', color: '#8BC34A' },
-  { id: 'milk', nameEn: 'Milk', nameTe: 'పాలు', icon: '🥛', color: '#5DADE2' },
-  { id: 'snacks', nameEn: 'Snacks', nameTe: 'స్నాక్స్', icon: '🍿', color: '#FF9800' },
-  { id: 'medicines', nameEn: 'Medicines', nameTe: 'మందులు', icon: '💊', color: '#2196F3' },
-  { id: 'electronics', nameEn: 'Electronics', nameTe: 'ఎలక్ట్రానిక్స్', icon: '📱', color: '#9C27B0' }
+  { id: 'groceries', nameEn: 'Groceries', nameTe: 'వీరగాణ', icon: '🏪', color: '#4CAF50', gradient: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%)' },
+  { id: 'vegetables', nameEn: 'Vegetables', nameTe: 'కూరగాయలు', icon: '🥬', color: '#8BC34A', gradient: 'linear-gradient(135deg, #8BC34A 0%, #9CCC65 100%)' },
+  { id: 'milk', nameEn: 'Milk', nameTe: 'పాలు', icon: '🥛', color: '#5DADE2', gradient: 'linear-gradient(135deg, #5DADE2 0%, #74B9E8 100%)' },
+  { id: 'snacks', nameEn: 'Snacks', nameTe: 'స్నాక్స్', icon: '🍿', color: '#FF9800', gradient: 'linear-gradient(135deg, #FF9800 0%, #FFA726 100%)' },
+  { id: 'medicines', nameEn: 'Medicines', nameTe: 'మందులు', icon: '💊', color: '#2196F3', gradient: 'linear-gradient(135deg, #2196F3 0%, #42A5F5 100%)' },
+  { id: 'electronics', nameEn: 'Electronics', nameTe: 'ఎలక్ట్రానిక్స్', icon: '📱', color: '#9C27B0', gradient: 'linear-gradient(135deg, #9C27B0 0%, #AB47BC 100%)' }
 ];
 
 // --- SHARED COMPONENTS ---
@@ -154,7 +154,7 @@ const CategoryGrid = ({ setCurrentView, setSelectedCategory, language }) => {
             key={cat.id}
             onClick={() => handleCategoryClick(cat.id)}
             className="category-card"
-            style={{ backgroundColor: cat.color }}
+            style={{ background: cat.gradient }}
           >
             <div className="category-icon">{cat.icon}</div>
             <div className="category-labels">
