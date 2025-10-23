@@ -199,8 +199,9 @@ body {
   font-weight: 400;
 }
 
-/* --- POPULAR PRODUCTS --- */
-.popular-section {
+/* --- POPULAR PRODUCTS & SEARCH RESULTS --- */
+.popular-section,
+.search-results-section {
   padding: 0 16px 20px;
 }
 

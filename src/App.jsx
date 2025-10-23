@@ -277,9 +277,9 @@ const ProductCard = ({ product, onAddToCart, cartItems, language }) => {
 const HomeView = ({ products, onAddToCart, cartItems, setCurrentView, setSelectedCategory, searchTerm, language }) => {
   const t = translations[language];
 
-  // Filter products by search term
-  const filteredProducts = useMemo(() => {
-    if (!searchTerm) return products;
+  // When searching: show all matching products
+  const searchResults = useMemo(() => {
+    if (!searchTerm) return [];
     const term = searchTerm.toLowerCase();
     return products.filter(p => 
       p.name.toLowerCase().includes(term) || 
@@ -287,30 +287,67 @@ const HomeView = ({ products, onAddToCart, cartItems, setCurrentView, setSelecte
     );
   }, [products, searchTerm]);
 
-  const popularProducts = filteredProducts.slice(0, 6);
+  // When NOT searching: show only products marked as popular
+  const popularProducts = useMemo(() => {
+    return products.filter(p => p.isPopular === true);
+  }, [products]);
+
+  // Show search results OR popular products (like Zepto/Amazon)
+  const isSearching = searchTerm.trim().length > 0;
 
   return (
     <div className="home-view">
-      <CategoryGrid 
-        setCurrentView={setCurrentView} 
-        setSelectedCategory={setSelectedCategory}
-        language={language}
-      />
+      {!isSearching && (
+        <CategoryGrid 
+          setCurrentView={setCurrentView} 
+          setSelectedCategory={setSelectedCategory}
+          language={language}
+        />
+      )}
 
-      <div className="popular-section">
-        <h2 className="section-title">{t.popularProducts}</h2>
-        <div className="products-grid">
-          {popularProducts.map(product => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onAddToCart={onAddToCart}
-              cartItems={cartItems}
-              language={language}
-            />
-          ))}
+      {isSearching ? (
+        <div className="search-results-section">
+          <h2 className="section-title">Search Results ({searchResults.length})</h2>
+          {searchResults.length > 0 ? (
+            <div className="products-grid">
+              {searchResults.map(product => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={onAddToCart}
+                  cartItems={cartItems}
+                  language={language}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <p>No products found for "{searchTerm}"</p>
+            </div>
+          )}
         </div>
-      </div>
+      ) : (
+        <div className="popular-section">
+          <h2 className="section-title">{t.popularProducts}</h2>
+          {popularProducts.length > 0 ? (
+            <div className="products-grid">
+              {popularProducts.map(product => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={onAddToCart}
+                  cartItems={cartItems}
+                  language={language}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <p>No popular products yet. Visit Shopkeeper Dashboard to mark products as popular.</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
