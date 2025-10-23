@@ -10,6 +10,11 @@ Dukaan is a local marketplace application built with React, Vite, and Firebase. 
 - Set up development workflow for frontend server
 - Configured deployment settings for production (autoscale)
 - Updated .gitignore with proper Node.js exclusions
+- **Implemented Search & Filter System**: Added complete search functionality across stores and products
+  - Search bar now functional with real-time filtering
+  - Filters stores by name, location, and products they sell
+  - Filters products by name and category within store views
+  - Dynamic search results with helpful "no results" messaging
 
 ## Project Architecture
 
@@ -39,7 +44,9 @@ Dukaan is a local marketplace application built with React, Vite, and Firebase. 
 ### Key Features
 1. **Role-Based Access**: Users can choose to be buyers or shopkeepers
 2. **Buyer Features**:
-   - Browse local stores
+   - Browse local stores with real-time search
+   - Search for products across all stores by name or category
+   - Filter products within individual stores
    - View products by category
    - Add items to cart
    - Place and track orders
@@ -48,6 +55,11 @@ Dukaan is a local marketplace application built with React, Vite, and Firebase. 
    - Add/manage products with images
    - Track and update order status
    - View dashboard with order metrics
+4. **Search & Discovery**:
+   - Global search across stores and products
+   - Real-time filtering as you type
+   - Category-based browsing
+   - Smart search matching on product names, categories, and store details
 
 ### Firebase Integration
 - **Authentication**: Anonymous sign-in for local development

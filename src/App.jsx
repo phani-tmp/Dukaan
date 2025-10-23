@@ -616,6 +616,16 @@ const StoreDetailView = ({ store, setCurrentView, cartItems, setCartItems, authR
   const allCategories = Object.keys(productsByCategory);
   const [activeCategory, setActiveCategory] = useState(allCategories[0] || 'All');
 
+  // Sync activeCategory with filtered results - reset when categories change
+  useEffect(() => {
+    if (allCategories.length > 0) {
+      // If current activeCategory is not in the filtered categories, reset to first available
+      if (!allCategories.includes(activeCategory)) {
+        setActiveCategory(allCategories[0]);
+      }
+    }
+  }, [allCategories, activeCategory]);
+
   const addToCart = useCallback((product) => {
     const price = product.discountedPrice || product.price;
     const storeId = product.storeId;
@@ -690,7 +700,7 @@ const StoreDetailView = ({ store, setCurrentView, cartItems, setCartItems, authR
           {searchTerm ? `Search Results in ${activeCategory}` : activeCategory}
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-          {productsByCategory[activeCategory]?.map(product => (
+          {(productsByCategory[activeCategory] || []).map(product => (
             <ProductCard key={product.id} product={product} addToCart={addToCart} />
           ))}
         </div>
@@ -699,7 +709,7 @@ const StoreDetailView = ({ store, setCurrentView, cartItems, setCartItems, authR
             <p style={{ color: '#4b5563' }}>This store has not added any products yet.</p>
           </div>
         )}
-        {searchTerm && filteredProducts.length === 0 && (
+        {searchTerm && filteredProducts.length === 0 && storeProducts.length > 0 && (
           <div style={{ textAlign: 'center', padding: '32px', backgroundColor: 'var(--color-gray-100)', borderRadius: '12px' }}>
             <p style={{ color: '#4b5563' }}>No products found matching "{searchTerm}".</p>
           </div>
