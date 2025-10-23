@@ -496,34 +496,63 @@ const StoreCard = ({ store, setCurrentView, setSelectedStore }) => (
   </div>
 );
 
-const HomeView = ({ setCurrentView, setSelectedStore, stores }) => (
-  <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-    {/* Banner Section */}
-    <div style={{ position: 'relative', height: '128px', backgroundColor: '#fffbe7', borderRadius: '12px', boxShadow: 'var(--shadow-md)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px' }}>
-      <img src={`uploaded:Gemini_Generated_Image_meg8gqmeg8gqmeg8.jpg`} alt="Fresh Mangos Arrived!" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.3 }} onError={(e) => e.target.style.display = 'none'} />
-      <div style={{ zIndex: 10, color: 'var(--color-green-800)', fontWeight: 800, fontSize: '1.5rem' }}>
-        Fresh Mangos<br />Arrived!
-      </div>
-      <div style={{ zIndex: 10, backgroundColor: 'var(--color-red-600)', color: 'white', padding: '8px', borderRadius: '8px', fontWeight: 700, boxShadow: 'var(--shadow-lg)' }}>
-        Diwali<br />Special Offers!
-      </div>
-    </div>
+const HomeView = ({ setCurrentView, setSelectedStore, stores, products, searchTerm }) => {
+  // Filter stores and products based on search term
+  const filteredStores = useMemo(() => {
+    if (!searchTerm || searchTerm.trim() === '') return stores;
+    const lowerSearch = searchTerm.toLowerCase();
+    
+    // Filter stores by name or products they sell
+    return stores.filter(store => {
+      const storeNameMatch = store.name.toLowerCase().includes(lowerSearch);
+      const storeLocationMatch = store.location?.toLowerCase().includes(lowerSearch);
+      const hasMatchingProduct = products.some(product => 
+        product.storeId === store.id && 
+        (product.name.toLowerCase().includes(lowerSearch) || 
+         product.category.toLowerCase().includes(lowerSearch))
+      );
+      return storeNameMatch || storeLocationMatch || hasMatchingProduct;
+    });
+  }, [stores, products, searchTerm]);
 
-    {/* Local Favorites Section */}
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <h2 style={{ fontWeight: 700, fontSize: '1.25rem', color: 'var(--color-gray-800)' }}>Local Favorites ({stores.length})</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-        {stores.length > 0 ? (
-          stores.map(store => (
-            <StoreCard key={store.id} store={store} setCurrentView={setCurrentView} setSelectedStore={setSelectedStore} />
-          ))
-        ) : (
-          <p style={{ color: '#6b7280', padding: '24px', textAlign: 'center', border: '1px dashed var(--color-gray-300)', borderRadius: '8px' }}>No local stores registered yet. Be the first shopkeeper!</p>
+  return (
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {/* Banner Section - hide when searching */}
+      {!searchTerm && (
+        <div style={{ position: 'relative', height: '128px', backgroundColor: '#fffbe7', borderRadius: '12px', boxShadow: 'var(--shadow-md)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px' }}>
+          <img src={`uploaded:Gemini_Generated_Image_meg8gqmeg8gqmeg8.jpg`} alt="Fresh Mangos Arrived!" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.3 }} onError={(e) => e.target.style.display = 'none'} />
+          <div style={{ zIndex: 10, color: 'var(--color-green-800)', fontWeight: 800, fontSize: '1.5rem' }}>
+            Fresh Mangos<br />Arrived!
+          </div>
+          <div style={{ zIndex: 10, backgroundColor: 'var(--color-red-600)', color: 'white', padding: '8px', borderRadius: '8px', fontWeight: 700, boxShadow: 'var(--shadow-lg)' }}>
+            Diwali<br />Special Offers!
+          </div>
+        </div>
+      )}
+
+      {/* Local Favorites Section */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <h2 style={{ fontWeight: 700, fontSize: '1.25rem', color: 'var(--color-gray-800)' }}>
+          {searchTerm ? `Search Results (${filteredStores.length})` : `Local Favorites (${filteredStores.length})`}
+        </h2>
+        {searchTerm && filteredStores.length === 0 && (
+          <p style={{ color: '#6b7280', padding: '24px', textAlign: 'center', border: '1px dashed var(--color-gray-300)', borderRadius: '8px' }}>
+            No stores or products found matching "{searchTerm}". Try a different search term.
+          </p>
         )}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
+          {filteredStores.length > 0 ? (
+            filteredStores.map(store => (
+              <StoreCard key={store.id} store={store} setCurrentView={setCurrentView} setSelectedStore={setSelectedStore} />
+            ))
+          ) : !searchTerm ? (
+            <p style={{ color: '#6b7280', padding: '24px', textAlign: 'center', border: '1px dashed var(--color-gray-300)', borderRadius: '8px' }}>No local stores registered yet. Be the first shopkeeper!</p>
+          ) : null}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ProductCard = ({ product, addToCart }) => {
   const isDiscounted = product.discountedPrice && product.discountedPrice < product.price;
@@ -562,17 +591,27 @@ const ProductCard = ({ product, addToCart }) => {
   );
 };
 
-const StoreDetailView = ({ store, setCurrentView, cartItems, setCartItems, authReady, userId, products }) => {
+const StoreDetailView = ({ store, setCurrentView, cartItems, setCartItems, authReady, userId, products, searchTerm }) => {
   // Only show products belonging to the selected store
   const storeProducts = useMemo(() => getProductsByStore(products, store.id), [products, store.id]);
 
+  // Filter products by search term
+  const filteredProducts = useMemo(() => {
+    if (!searchTerm || searchTerm.trim() === '') return storeProducts;
+    const lowerSearch = searchTerm.toLowerCase();
+    return storeProducts.filter(product => 
+      product.name.toLowerCase().includes(lowerSearch) || 
+      product.category.toLowerCase().includes(lowerSearch)
+    );
+  }, [storeProducts, searchTerm]);
+
   const productsByCategory = useMemo(() => {
-    return storeProducts.reduce((acc, product) => {
+    return filteredProducts.reduce((acc, product) => {
       if (!acc[product.category]) acc[product.category] = [];
       acc[product.category].push(product);
       return acc;
     }, {});
-  }, [storeProducts]);
+  }, [filteredProducts]);
 
   const allCategories = Object.keys(productsByCategory);
   const [activeCategory, setActiveCategory] = useState(allCategories[0] || 'All');
@@ -647,7 +686,9 @@ const StoreDetailView = ({ store, setCurrentView, cartItems, setCartItems, authR
 
       {/* Product List */}
       <div style={{ flexGrow: 1, padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '80px' }}>
-        <h3 style={{ fontWeight: 700, fontSize: '1.25rem', color: 'var(--color-gray-800)' }}>{activeCategory}</h3>
+        <h3 style={{ fontWeight: 700, fontSize: '1.25rem', color: 'var(--color-gray-800)' }}>
+          {searchTerm ? `Search Results in ${activeCategory}` : activeCategory}
+        </h3>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
           {productsByCategory[activeCategory]?.map(product => (
             <ProductCard key={product.id} product={product} addToCart={addToCart} />
@@ -656,6 +697,11 @@ const StoreDetailView = ({ store, setCurrentView, cartItems, setCartItems, authR
         {storeProducts.length === 0 && (
           <div style={{ textAlign: 'center', padding: '32px', backgroundColor: 'var(--color-gray-100)', borderRadius: '12px' }}>
             <p style={{ color: '#4b5563' }}>This store has not added any products yet.</p>
+          </div>
+        )}
+        {searchTerm && filteredProducts.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '32px', backgroundColor: 'var(--color-gray-100)', borderRadius: '12px' }}>
+            <p style={{ color: '#4b5563' }}>No products found matching "{searchTerm}".</p>
           </div>
         )}
       </div>
@@ -856,14 +902,14 @@ const ConsumerOrdersView = ({ userId, allOrders, stores }) => {
 };
 
 
-const ConsumerApp = ({ currentView, setCurrentView, selectedStore, setSelectedStore, cartItems, setCartItems, authReady, userId, stores, products, allOrders }) => {
+const ConsumerApp = ({ currentView, setCurrentView, selectedStore, setSelectedStore, cartItems, setCartItems, authReady, userId, stores, products, allOrders, searchTerm, setSearchTerm }) => {
   let content;
   switch (currentView) {
     case 'Home':
-      content = <HomeView setCurrentView={setCurrentView} setSelectedStore={setSelectedStore} stores={stores} />;
+      content = <HomeView setCurrentView={setCurrentView} setSelectedStore={setSelectedStore} stores={stores} products={products} searchTerm={searchTerm} />;
       break;
     case 'Store':
-      content = <StoreDetailView store={selectedStore} setCurrentView={setCurrentView} cartItems={cartItems} setCartItems={setCartItems} authReady={authReady} userId={userId} products={products} />;
+      content = <StoreDetailView store={selectedStore} setCurrentView={setCurrentView} cartItems={cartItems} setCartItems={setCartItems} authReady={authReady} userId={userId} products={products} searchTerm={searchTerm} />;
       break;
     case 'Cart':
       content = <CartView cartItems={cartItems} setCartItems={setCartItems} authReady={authReady} userId={userId} setCurrentView={setCurrentView} />;
@@ -897,12 +943,12 @@ const ConsumerApp = ({ currentView, setCurrentView, selectedStore, setSelectedSt
       );
       break;
     default:
-      content = <HomeView setCurrentView={setCurrentView} setSelectedStore={setSelectedStore} stores={stores} />;
+      content = <HomeView setCurrentView={setCurrentView} setSelectedStore={setSelectedStore} stores={stores} products={products} searchTerm={searchTerm} />;
   }
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-gray-50)', display: 'flex', flexDirection: 'column' }}>
-      {currentView !== 'Store' && <AppHeader setCurrentView={setCurrentView} currentView={currentView} />}
+      {currentView !== 'Store' && <AppHeader setCurrentView={setCurrentView} currentView={currentView} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />}
       <main style={{ flexGrow: 1, paddingBottom: '80px' }}>
         {content}
       </main>
@@ -912,7 +958,7 @@ const ConsumerApp = ({ currentView, setCurrentView, selectedStore, setSelectedSt
   );
 };
 
-const AppHeader = ({ setCurrentView, currentView }) => (
+const AppHeader = ({ setCurrentView, currentView, searchTerm, setSearchTerm }) => (
   <div className="app-header">
     <div className="flex-between" style={{ marginBottom: '12px' }}>
       <div style={{ display: 'flex', alignItems: 'center', color: 'var(--color-green-700)', fontWeight: 600, fontSize: '0.875rem' }}>
@@ -929,6 +975,8 @@ const AppHeader = ({ setCurrentView, currentView }) => (
         <input
           type="text"
           placeholder="Search for groceries, services..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           style={{ flexGrow: 1, backgroundColor: 'var(--color-gray-100)', color: 'var(--color-gray-800)', outline: 'none', placeholderColor: '#6b7280', border: 'none' }}
         />
         <Mic style={{ width: '20px', height: '20px', color: 'var(--color-green-700)', margin: '0 8px', cursor: 'pointer' }} title="Voice Search" />
@@ -955,6 +1003,7 @@ const App = () => {
   const [shopOrders, setShopOrders] = useState([]);
   const [newOrderCount, setNewOrderCount] = useState(0);
   const [loadingData, setLoadingData] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // --- FIREBASE INITIALIZATION AND AUTHENTICATION ---
   useEffect(() => {
@@ -1206,7 +1255,7 @@ const App = () => {
         <div style={{ fontSize: '0.75rem', textAlign: 'center', padding: '4px', backgroundColor: '#fee2e2', color: '#b91c1c', fontWeight: 600 }}>
           SHOPKEEPER VIEW | Store ID: {linkedStoreId || 'Not Registered'}
         </div>
-        <AppHeader setCurrentView={setCurrentView} currentView={currentView} />
+        <AppHeader setCurrentView={setCurrentView} currentView={currentView} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         <main style={{ flexGrow: 1, paddingBottom: '80px' }}>
           {shopContent}
         </main>
@@ -1229,6 +1278,8 @@ const App = () => {
       stores={stores}
       products={products}
       allOrders={allOrders}
+      searchTerm={searchTerm}
+      setSearchTerm={setSearchTerm}
     />
   );
 };
