@@ -62,7 +62,17 @@ const translations = {
     totalSpent: 'Total Spent',
     enterAdminCode: 'Enter Admin Code',
     adminPanel: 'Admin Panel',
-    manageProducts: 'Manage Products'
+    manageProducts: 'Manage Products',
+    shopkeeperDashboard: 'Shopkeeper Dashboard',
+    incomingOrders: 'Incoming Orders',
+    orderDetails: 'Order Details',
+    customer: 'Customer',
+    updateStatus: 'Update Status',
+    markProcessing: 'Mark as Processing',
+    markDelivered: 'Mark as Delivered',
+    noIncomingOrders: 'No orders yet',
+    ordersTab: 'Orders',
+    productsTab: 'Products'
   },
   te: {
     appName: 'దుకాణ్',
@@ -110,7 +120,17 @@ const translations = {
     totalSpent: 'మొత్తం ఖర్చు',
     enterAdminCode: 'అడ్మిన్ కోడ్ నమోదు చేయండి',
     adminPanel: 'అడ్మిన్ ప్యానెల్',
-    manageProducts: 'ఉత్పత్తులను నిర్వహించండి'
+    manageProducts: 'ఉత్పత్తులను నిర్వహించండి',
+    shopkeeperDashboard: 'దుకాణదారుడి డాష్‌బోర్డ్',
+    incomingOrders: 'ఇన్‌కమింగ్ ఆర్డర్లు',
+    orderDetails: 'ఆర్డర్ వివరాలు',
+    customer: 'కస్టమర్',
+    updateStatus: 'స్థితిని అప్‌డేట్ చేయండి',
+    markProcessing: 'ప్రాసెసింగ్‌గా గుర్తించండి',
+    markDelivered: 'డెలివరీ అయినట్లు గుర్తించండి',
+    noIncomingOrders: 'ఆర్డర్లు లేవు',
+    ordersTab: 'ఆర్డర్లు',
+    productsTab: 'ఉత్పత్తులు'
   }
 };
 
@@ -623,24 +643,291 @@ const AdminPanel = ({ products, language, onClose }) => {
   );
 };
 
-// --- PROFILE VIEW ---
-const ProfileView = ({ userProfile, orders, onLogout, language, setCurrentView, isAdmin, setIsAdmin }) => {
+// --- SHOPKEEPER DASHBOARD ---
+const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
   const t = translations[language];
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const [adminCode, setAdminCode] = useState('');
+  const [activeTab, setActiveTab] = useState('orders');
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    price: '',
+    discountedPrice: '',
+    weight: '',
+    imageUrl: '',
+    category: 'groceries'
+  });
+  const [editingId, setEditingId] = useState(null);
+
+  const handleUpdateStatus = async (orderId, newStatus) => {
+    try {
+      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+        status: newStatus
+      });
+      alert(`Order status updated to ${newStatus}!`);
+    } catch (error) {
+      console.error('Error updating order:', error);
+      alert('Failed to update order status');
+    }
+  };
+
+  const handleSubmitProduct = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const productData = {
+        ...formData,
+        price: parseFloat(formData.price),
+        discountedPrice: formData.discountedPrice ? parseFloat(formData.discountedPrice) : null,
+        createdAt: new Date().toISOString()
+      };
+
+      if (editingId) {
+        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', editingId), productData);
+        alert('Product updated successfully!');
+      } else {
+        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'products'), productData);
+        alert('Product added successfully!');
+      }
+
+      setFormData({ name: '', price: '', discountedPrice: '', weight: '', imageUrl: '', category: 'groceries' });
+      setShowForm(false);
+      setEditingId(null);
+    } catch (error) {
+      console.error('Error saving product:', error);
+      alert('Failed to save product');
+    }
+  };
+
+  const handleEditProduct = (product) => {
+    setFormData({
+      name: product.name,
+      price: product.price.toString(),
+      discountedPrice: product.discountedPrice?.toString() || '',
+      weight: product.weight,
+      imageUrl: product.imageUrl || '',
+      category: product.category
+    });
+    setEditingId(product.id);
+    setShowForm(true);
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      try {
+        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId));
+        alert('Product deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        alert('Failed to delete product');
+      }
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'pending': return '#FF9800';
+      case 'processing': return '#2196F3';
+      case 'delivered': return '#4CAF50';
+      default: return '#9E9E9E';
+    }
+  };
+
+  const sortedOrders = [...allOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  return (
+    <div className="shopkeeper-dashboard">
+      <div className="view-header">
+        <button onClick={onExit} className="back-button">
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <h2 className="view-title">{t.shopkeeperDashboard}</h2>
+      </div>
+
+      <div className="shopkeeper-tabs">
+        <button 
+          className={`tab-button ${activeTab === 'orders' ? 'active' : ''}`}
+          onClick={() => setActiveTab('orders')}
+        >
+          <Package className="w-5 h-5" />
+          {t.ordersTab}
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'products' ? 'active' : ''}`}
+          onClick={() => setActiveTab('products')}
+        >
+          <ShoppingBag className="w-5 h-5" />
+          {t.productsTab}
+        </button>
+      </div>
+
+      <div className="shopkeeper-content">
+        {activeTab === 'orders' && (
+          <div className="orders-section">
+            <h3 className="section-subtitle">{t.incomingOrders} ({sortedOrders.length})</h3>
+            {sortedOrders.length === 0 ? (
+              <div className="empty-state">
+                <Package className="w-16 h-16 text-gray-400" />
+                <p>{t.noIncomingOrders}</p>
+              </div>
+            ) : (
+              <div className="shopkeeper-orders-list">
+                {sortedOrders.map(order => (
+                  <div key={order.id} className="shopkeeper-order-card">
+                    <div className="order-card-header">
+                      <div>
+                        <p className="order-id">{t.customer}: {order.userId?.substring(0, 8)}...</p>
+                        <p className="order-date">{new Date(order.createdAt).toLocaleString()}</p>
+                      </div>
+                      <div className="order-status-badge" style={{ backgroundColor: getStatusColor(order.status) }}>
+                        {order.status}
+                      </div>
+                    </div>
+                    
+                    <div className="order-items">
+                      {order.items.map((item, idx) => (
+                        <p key={idx} className="order-item-text">
+                          {item.name} x {item.quantity} - ₹{(item.price * item.quantity).toFixed(0)}
+                        </p>
+                      ))}
+                    </div>
+                    
+                    <div className="order-card-footer">
+                      <div className="order-total">
+                        <strong>{t.total}:</strong>
+                        <span className="total-amount">₹{order.total.toFixed(0)}</span>
+                      </div>
+                      
+                      {order.status === 'pending' && (
+                        <button 
+                          onClick={() => handleUpdateStatus(order.id, 'processing')}
+                          className="status-btn processing-btn"
+                        >
+                          <Clock className="w-4 h-4" />
+                          {t.markProcessing}
+                        </button>
+                      )}
+                      
+                      {order.status === 'processing' && (
+                        <button 
+                          onClick={() => handleUpdateStatus(order.id, 'delivered')}
+                          className="status-btn delivered-btn"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          {t.markDelivered}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'products' && (
+          <div className="products-section">
+            <button onClick={() => setShowForm(!showForm)} className="add-product-btn">
+              <PlusCircle className="w-5 h-5" />
+              {t.addProduct}
+            </button>
+
+            {showForm && (
+              <form onSubmit={handleSubmitProduct} className="product-form">
+                <input
+                  type="text"
+                  placeholder={t.productName}
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                  className="form-input"
+                />
+                <input
+                  type="number"
+                  placeholder={t.productPrice}
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  required
+                  className="form-input"
+                />
+                <input
+                  type="number"
+                  placeholder="Discounted Price (Optional)"
+                  value={formData.discountedPrice}
+                  onChange={(e) => setFormData({ ...formData, discountedPrice: e.target.value })}
+                  className="form-input"
+                />
+                <input
+                  type="text"
+                  placeholder={t.productWeight}
+                  value={formData.weight}
+                  onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                  required
+                  className="form-input"
+                />
+                <input
+                  type="text"
+                  placeholder={t.productImage}
+                  value={formData.imageUrl}
+                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                  className="form-input"
+                />
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  className="form-input"
+                >
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.nameEn} / {cat.nameTe}
+                    </option>
+                  ))}
+                </select>
+                <div className="form-actions">
+                  <button type="submit" className="save-btn">
+                    <Save className="w-4 h-4" />
+                    {t.save}
+                  </button>
+                  <button type="button" onClick={() => { setShowForm(false); setEditingId(null); }} className="cancel-btn">
+                    {t.cancel}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <div className="products-admin-list">
+              <h3 className="section-subtitle">{t.manageProducts} ({products.length})</h3>
+              {products.map(product => (
+                <div key={product.id} className="admin-product-card">
+                  <img src={product.imageUrl || 'https://via.placeholder.com/60'} alt={product.name} className="admin-product-img" />
+                  <div className="admin-product-info">
+                    <h4>{product.name}</h4>
+                    <p>{product.category} • {product.weight}</p>
+                    <p className="admin-price">₹{product.discountedPrice || product.price}</p>
+                  </div>
+                  <div className="admin-product-actions">
+                    <button onClick={() => handleEditProduct(product)} className="edit-btn">
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleDeleteProduct(product.id)} className="delete-btn">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// --- PROFILE VIEW ---
+const ProfileView = ({ userProfile, orders, onLogout, language }) => {
+  const t = translations[language];
 
   const totalOrders = orders.length;
   const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
-
-  const handleAdminLogin = () => {
-    if (adminCode === 'admin123') {
-      setIsAdmin(true);
-      setShowAdminLogin(false);
-      setCurrentView('AdminPanel');
-    } else {
-      alert('Invalid admin code!');
-    }
-  };
 
   return (
     <div className="profile-view">
@@ -693,35 +980,6 @@ const ProfileView = ({ userProfile, orders, onLogout, language, setCurrentView, 
         )}
       </div>
 
-      {!isAdmin && (
-        <button onClick={() => setShowAdminLogin(!showAdminLogin)} className="admin-access-btn">
-          <Settings className="w-5 h-5" />
-          {t.admin}
-        </button>
-      )}
-
-      {showAdminLogin && (
-        <div className="admin-login-form">
-          <input
-            type="password"
-            placeholder={t.enterAdminCode}
-            value={adminCode}
-            onChange={(e) => setAdminCode(e.target.value)}
-            className="form-input"
-          />
-          <button onClick={handleAdminLogin} className="save-btn">
-            {t.admin}
-          </button>
-        </div>
-      )}
-
-      {isAdmin && (
-        <button onClick={() => setCurrentView('AdminPanel')} className="admin-panel-btn">
-          <Settings className="w-5 h-5" />
-          {t.adminPanel}
-        </button>
-      )}
-
       <button onClick={onLogout} className="logout-button">
         <LogOut className="w-5 h-5" />
         {t.logout}
@@ -771,11 +1029,13 @@ function App() {
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState({});
   const [orders, setOrders] = useState([]);
+  const [allOrders, setAllOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [language, setLanguage] = useState('en');
   const [location, setLocation] = useState('Ponnur, AP');
-  const [isAdmin, setIsAdmin] = useState(false);
+  
+  const isShopkeeperMode = new URLSearchParams(window.location.search).get('mode') === 'shopkeeper';
 
   // Initialize Firebase
   useEffect(() => {
@@ -813,9 +1073,9 @@ function App() {
     return () => unsubscribe();
   }, [user]);
 
-  // Load user orders
+  // Load user orders (for customer view)
   useEffect(() => {
-    if (!user) return;
+    if (!user || isShopkeeperMode) return;
 
     const ordersQuery = query(
       collection(db, 'artifacts', appId, 'public', 'data', 'orders'),
@@ -829,7 +1089,23 @@ function App() {
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user, isShopkeeperMode]);
+
+  // Load all orders (for shopkeeper dashboard)
+  useEffect(() => {
+    if (!user || !isShopkeeperMode) return;
+
+    const allOrdersQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'orders'));
+    
+    const unsubscribe = onSnapshot(allOrdersQuery, (snapshot) => {
+      const ordersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      ordersData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setAllOrders(ordersData);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [user, isShopkeeperMode]);
 
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'en' ? 'te' : 'en');
@@ -894,6 +1170,17 @@ function App() {
     return <LoadingSpinner />;
   }
 
+  if (isShopkeeperMode) {
+    return (
+      <ShopkeeperDashboard
+        products={products}
+        allOrders={allOrders}
+        language={language}
+        onExit={() => window.location.href = '/'}
+      />
+    );
+  }
+
   return (
     <div className="app-container-modern">
       <AppHeader 
@@ -952,29 +1239,16 @@ function App() {
             orders={orders}
             onLogout={handleLogout}
             language={language}
-            setCurrentView={setCurrentView}
-            isAdmin={isAdmin}
-            setIsAdmin={setIsAdmin}
-          />
-        )}
-
-        {currentView === 'AdminPanel' && (
-          <AdminPanel
-            products={products}
-            language={language}
-            onClose={() => setCurrentView('Profile')}
           />
         )}
       </div>
 
-      {currentView !== 'AdminPanel' && (
-        <BottomNavigation
-          currentView={currentView}
-          setCurrentView={setCurrentView}
-          cartItems={cartItems}
-          language={language}
-        />
-      )}
+      <BottomNavigation
+        currentView={currentView}
+        setCurrentView={setCurrentView}
+        cartItems={cartItems}
+        language={language}
+      />
     </div>
   );
 }

@@ -925,6 +925,135 @@ body {
   background: #FFCDD2;
 }
 
+/* --- SHOPKEEPER DASHBOARD --- */
+.shopkeeper-dashboard {
+  min-height: 100vh;
+  background: var(--color-gray-50);
+}
+
+.shopkeeper-tabs {
+  display: flex;
+  background: white;
+  border-bottom: 1px solid var(--color-gray-200);
+  position: sticky;
+  top: 60px;
+  z-index: 10;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-gray-600);
+  transition: all 0.2s;
+  border-bottom: 3px solid transparent;
+}
+
+.tab-button.active {
+  color: var(--color-green-600);
+  border-bottom-color: var(--color-green-600);
+}
+
+.shopkeeper-content {
+  padding: 16px;
+}
+
+.shopkeeper-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shopkeeper-order-card {
+  background: white;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.order-id {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin-bottom: 4px;
+}
+
+.order-date {
+  font-size: 12px;
+  color: var(--color-gray-600);
+}
+
+.order-status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  text-transform: capitalize;
+}
+
+.order-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.total-amount {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-green-600);
+  margin-left: 8px;
+}
+
+.status-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.processing-btn {
+  background: #2196F3;
+  color: white;
+}
+
+.processing-btn:hover {
+  background: #1976D2;
+}
+
+.delivered-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.delivered-btn:hover {
+  background: #388E3C;
+}
+
 /* --- EMPTY STATE --- */
 .empty-state {
   display: flex;
