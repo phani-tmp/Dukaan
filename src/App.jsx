@@ -679,7 +679,12 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
   };
 
   const handleUpdateStatus = async (orderId, newStatus) => {
+    console.log('[Shopkeeper] Updating order:', orderId, 'to status:', newStatus);
+    console.log('[Shopkeeper] DB available:', !!db, 'AppId:', appId);
     try {
+      if (!db) {
+        throw new Error('Firebase database not initialized');
+      }
       await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
         status: newStatus,
         updatedAt: new Date().toISOString()
@@ -687,7 +692,7 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
       alert(`Order status updated to ${newStatus}!`);
     } catch (error) {
       console.error('Error updating order:', error);
-      alert('Failed to update order status');
+      alert(`Failed to update order status: ${error.message}`);
     }
   };
 
@@ -738,25 +743,34 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
   };
 
   const handleDeleteProduct = async (productId) => {
+    console.log('[Shopkeeper] Delete product clicked:', productId);
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
+        if (!db) {
+          throw new Error('Firebase database not initialized');
+        }
         await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId));
         alert('Product deleted successfully!');
       } catch (error) {
         console.error('Error deleting product:', error);
-        alert('Failed to delete product');
+        alert(`Failed to delete product: ${error.message}`);
       }
     }
   };
 
   const togglePopularStatus = async (productId, currentStatus) => {
+    console.log('[Shopkeeper] Toggle popular:', productId, 'current:', currentStatus);
     try {
+      if (!db) {
+        throw new Error('Firebase database not initialized');
+      }
       await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId), {
         isPopular: !currentStatus
       });
+      console.log('[Shopkeeper] Popular status updated successfully');
     } catch (error) {
       console.error('Error updating popular status:', error);
-      alert('Failed to update popular status');
+      alert(`Failed to update popular status: ${error.message}`);
     }
   };
 
@@ -1226,8 +1240,15 @@ function App() {
   const [location, setLocation] = useState('Ponnur, AP');
   const [notification, setNotification] = useState(null);
   const [previousOrderStatuses, setPreviousOrderStatuses] = useState({});
-  
-  const isShopkeeperMode = new URLSearchParams(window.location.search).get('mode') === 'shopkeeper';
+  const [isShopkeeperMode, setIsShopkeeperMode] = useState(false);
+
+  // Detect shopkeeper mode from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    setIsShopkeeperMode(mode === 'shopkeeper');
+    console.log('[Mode] Shopkeeper mode:', mode === 'shopkeeper', 'URL:', window.location.search);
+  }, []);
 
   // Initialize Firebase
   useEffect(() => {
