@@ -4,19 +4,50 @@
 Dukan is a modern quick commerce application built with React, Vite, and Firebase. Inspired by Zepto, it provides a seamless direct-to-consumer shopping experience for groceries, kirana items, medicines, snacks, and electronics. The app features bilingual support (English/Telugu) for better local accessibility.
 
 ## Recent Changes (October 23, 2025)
-- **Major Transformation to Quick Commerce Model**: Complete pivot from dual-mode marketplace to consumer-only app
-  - Removed all shopkeeper/provider functionality (dashboard, store management, order handling)
-  - Rebuilt app from scratch as pure consumer experience like Zepto
-  - No role selection - direct access to shopping experience
 
-- **Admin Panel & Product Management**: Full CRUD operations for product catalog
-  - Add new products with name, price, weight, image URL, category
-  - Edit existing products with inline forms
-  - Delete products from catalog
-  - Real-time Firebase sync for all operations
-  - Bilingual interface (English/Telugu)
-  - Password-protected access (development mode - production requires Firebase Auth with custom claims)
-  - **Security Note**: Current admin auth is client-side only for development; production deployment requires backend authentication
+### Latest Updates - Shopkeeper Dashboard Enhancements
+- **Separate Shopkeeper Dashboard**: Complete business management interface accessed via `?mode=shopkeeper`
+  - Three tabs: Orders, Products, Popular Products
+  - Clean separation from customer shopping experience
+  - Real-time order and product management
+
+- **Direct Image Upload**: Upload product images from device
+  - File picker with drag-and-drop interface
+  - Image preview before submission
+  - Converts to base64 (max 500KB)
+  - Alternative: Paste image URL
+
+- **Search & Filter System**: Advanced product and order search
+  - Sticky search bar at top of dashboard
+  - Category filters: All, Groceries, Vegetables, Milk, Snacks, Medicines, Electronics
+  - Product count badges per category
+  - Real-time filtering
+
+- **Enhanced Order Management**: Beautiful, functional order cards
+  - Modern card design with shadows and hover effects
+  - Color-coded status badges (pending/processing/delivered)
+  - Itemized order details with quantities and prices
+  - Action buttons: "Accept Order" and "Mark Delivered"
+  - Large, bold total amount display
+
+- **Real-time Notifications**: Customer notifications for order updates
+  - Toast notifications when shopkeeper accepts order
+  - Notifications when order is delivered
+  - Auto-dismiss after 5 seconds with manual close
+  - Slide-down animation
+  - Tracks ALL orders for status changes
+
+- **Popular Products Management**: Curate featured products
+  - Dedicated tab for managing popular items
+  - Star toggle to mark/unmark products
+  - Visual indicators (gold star) for popular status
+  - Syncs to customer "Popular Products" section
+
+### Previous Updates
+- **Dual Interface Architecture**: Two distinct user experiences
+  - Customer App: Pure shopping experience (default URL)
+  - Shopkeeper Dashboard: Business management (`?mode=shopkeeper`)
+  - **Security Note**: URL-based access for development; production requires Firebase Auth with custom claims
 
 - **Enhanced Profile Section**: Comprehensive user dashboard
   - Order history (last 5 orders) with date, items, and total
