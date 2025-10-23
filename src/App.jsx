@@ -4,10 +4,10 @@ import { firebaseConfig, localAppId } from './firebaseConfig.js';
 // Firebase Imports
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, setDoc, collection, query, onSnapshot, getDoc, updateDoc, where, addDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, collection, query, onSnapshot, getDoc, updateDoc, where, addDoc, deleteDoc } from 'firebase/firestore';
 
 // Icon Imports 
-import { Search, MapPin, ShoppingCart, User, Home, Package, ChevronLeft, Minus, Plus, IndianRupee, Mic, LogOut, CheckCircle, Clock, ShoppingBag, Truck, Check, X } from 'lucide-react';
+import { Search, MapPin, ShoppingCart, User, Home, Package, ChevronLeft, Minus, Plus, IndianRupee, Mic, LogOut, CheckCircle, Clock, ShoppingBag, Truck, Check, X, Settings, PlusCircle, Edit, Trash2, Save, Image as ImageIcon } from 'lucide-react';
 
 // --- FIREBASE CONFIGURATION ---
 const appId = localAppId;
@@ -45,7 +45,24 @@ const translations = {
     noOrders: 'No orders yet',
     orderPlaced: 'Order Placed',
     processing: 'Processing',
-    delivered: 'Delivered'
+    delivered: 'Delivered',
+    admin: 'Admin',
+    addProduct: 'Add Product',
+    productName: 'Product Name',
+    productPrice: 'Price',
+    productWeight: 'Weight',
+    productImage: 'Image URL',
+    category: 'Category',
+    save: 'Save',
+    cancel: 'Cancel',
+    delete: 'Delete',
+    edit: 'Edit',
+    orderHistory: 'Order History',
+    totalOrders: 'Total Orders',
+    totalSpent: 'Total Spent',
+    enterAdminCode: 'Enter Admin Code',
+    adminPanel: 'Admin Panel',
+    manageProducts: 'Manage Products'
   },
   te: {
     appName: 'దుకాణ్',
@@ -76,7 +93,24 @@ const translations = {
     noOrders: 'ఆర్డర్లు లేవు',
     orderPlaced: 'ఆర్డర్ చేయబడింది',
     processing: 'ప్రాసెస్ అవుతోంది',
-    delivered: 'డెలివరీ అయ్యింది'
+    delivered: 'డెలివరీ అయ్యింది',
+    admin: 'అడ్మిన్',
+    addProduct: 'ఉత్పత్తిని జోడించండి',
+    productName: 'ఉత్పత్తి పేరు',
+    productPrice: 'ధర',
+    productWeight: 'బరువు',
+    productImage: 'చిత్ర URL',
+    category: 'వర్గం',
+    save: 'సేవ్ చేయండి',
+    cancel: 'రద్దు',
+    delete: 'తొలగించు',
+    edit: 'సవరించు',
+    orderHistory: 'ఆర్డర్ చరిత్ర',
+    totalOrders: 'మొత్తం ఆర్డర్లు',
+    totalSpent: 'మొత్తం ఖర్చు',
+    enterAdminCode: 'అడ్మిన్ కోడ్ నమోదు చేయండి',
+    adminPanel: 'అడ్మిన్ ప్యానెల్',
+    manageProducts: 'ఉత్పత్తులను నిర్వహించండి'
   }
 };
 
@@ -418,19 +452,276 @@ const OrdersView = ({ orders, setCurrentView, language }) => {
   );
 };
 
-// --- PROFILE VIEW ---
-const ProfileView = ({ userProfile, onLogout, language }) => {
+// --- ADMIN PANEL ---
+const AdminPanel = ({ products, language, onClose }) => {
   const t = translations[language];
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    price: '',
+    discountedPrice: '',
+    weight: '',
+    imageUrl: '',
+    category: 'groceries'
+  });
+  const [editingId, setEditingId] = useState(null);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const productData = {
+        ...formData,
+        price: parseFloat(formData.price),
+        discountedPrice: formData.discountedPrice ? parseFloat(formData.discountedPrice) : null,
+        createdAt: new Date().toISOString()
+      };
+
+      if (editingId) {
+        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', editingId), productData);
+        alert('Product updated successfully!');
+      } else {
+        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'products'), productData);
+        alert('Product added successfully!');
+      }
+
+      setFormData({ name: '', price: '', discountedPrice: '', weight: '', imageUrl: '', category: 'groceries' });
+      setShowForm(false);
+      setEditingId(null);
+    } catch (error) {
+      console.error('Error saving product:', error);
+      alert('Failed to save product');
+    }
+  };
+
+  const handleEdit = (product) => {
+    setFormData({
+      name: product.name,
+      price: product.price.toString(),
+      discountedPrice: product.discountedPrice?.toString() || '',
+      weight: product.weight,
+      imageUrl: product.imageUrl || '',
+      category: product.category
+    });
+    setEditingId(product.id);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (productId) => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      try {
+        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId));
+        alert('Product deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        alert('Failed to delete product');
+      }
+    }
+  };
+
+  return (
+    <div className="admin-panel">
+      <div className="view-header">
+        <button onClick={onClose} className="back-button">
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <h2 className="view-title">{t.adminPanel}</h2>
+      </div>
+
+      <div className="admin-content">
+        <button onClick={() => setShowForm(!showForm)} className="add-product-btn">
+          <PlusCircle className="w-5 h-5" />
+          {t.addProduct}
+        </button>
+
+        {showForm && (
+          <form onSubmit={handleSubmit} className="product-form">
+            <input
+              type="text"
+              placeholder={t.productName}
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+              className="form-input"
+            />
+            <input
+              type="number"
+              placeholder={t.productPrice}
+              value={formData.price}
+              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+              required
+              className="form-input"
+            />
+            <input
+              type="number"
+              placeholder="Discounted Price (Optional)"
+              value={formData.discountedPrice}
+              onChange={(e) => setFormData({ ...formData, discountedPrice: e.target.value })}
+              className="form-input"
+            />
+            <input
+              type="text"
+              placeholder={t.productWeight}
+              value={formData.weight}
+              onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+              required
+              className="form-input"
+            />
+            <input
+              type="text"
+              placeholder={t.productImage}
+              value={formData.imageUrl}
+              onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+              className="form-input"
+            />
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="form-input"
+            >
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.nameEn} / {cat.nameTe}
+                </option>
+              ))}
+            </select>
+            <div className="form-actions">
+              <button type="submit" className="save-btn">
+                <Save className="w-4 h-4" />
+                {t.save}
+              </button>
+              <button type="button" onClick={() => { setShowForm(false); setEditingId(null); }} className="cancel-btn">
+                {t.cancel}
+              </button>
+            </div>
+          </form>
+        )}
+
+        <div className="products-admin-list">
+          <h3 className="section-subtitle">{t.manageProducts} ({products.length})</h3>
+          {products.map(product => (
+            <div key={product.id} className="admin-product-card">
+              <img src={product.imageUrl || 'https://via.placeholder.com/60'} alt={product.name} className="admin-product-img" />
+              <div className="admin-product-info">
+                <h4>{product.name}</h4>
+                <p>{product.category} • {product.weight}</p>
+                <p className="admin-price">₹{product.discountedPrice || product.price}</p>
+              </div>
+              <div className="admin-product-actions">
+                <button onClick={() => handleEdit(product)} className="edit-btn">
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button onClick={() => handleDelete(product.id)} className="delete-btn">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- PROFILE VIEW ---
+const ProfileView = ({ userProfile, orders, onLogout, language, setCurrentView, isAdmin, setIsAdmin }) => {
+  const t = translations[language];
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminCode, setAdminCode] = useState('');
+
+  const totalOrders = orders.length;
+  const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
+
+  const handleAdminLogin = () => {
+    if (adminCode === 'admin123') {
+      setIsAdmin(true);
+      setShowAdminLogin(false);
+      setCurrentView('AdminPanel');
+    } else {
+      alert('Invalid admin code!');
+    }
+  };
 
   return (
     <div className="profile-view">
       <h2 className="view-title">{t.profile}</h2>
+      
       <div className="profile-info">
         <div className="profile-avatar">
           <User className="w-12 h-12" />
         </div>
         <p className="profile-id">User ID: {userProfile?.userId?.slice(0, 8)}</p>
       </div>
+
+      <div className="profile-stats">
+        <div className="stat-card">
+          <Package className="w-6 h-6 text-green-600" />
+          <div>
+            <p className="stat-value">{totalOrders}</p>
+            <p className="stat-label">{t.totalOrders}</p>
+          </div>
+        </div>
+        <div className="stat-card">
+          <IndianRupee className="w-6 h-6 text-green-600" />
+          <div>
+            <p className="stat-value">₹{totalSpent.toFixed(0)}</p>
+            <p className="stat-label">{t.totalSpent}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="profile-section">
+        <h3 className="section-subtitle">{t.orderHistory}</h3>
+        {orders.length === 0 ? (
+          <p className="empty-text">{t.noOrders}</p>
+        ) : (
+          <div className="order-history-list">
+            {orders.slice(0, 5).map(order => (
+              <div key={order.id} className="order-history-item">
+                <div>
+                  <p className="order-history-date">
+                    {new Date(order.createdAt).toLocaleDateString()}
+                  </p>
+                  <p className="order-history-items">
+                    {order.items.length} items
+                  </p>
+                </div>
+                <p className="order-history-price">₹{order.total.toFixed(0)}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {!isAdmin && (
+        <button onClick={() => setShowAdminLogin(!showAdminLogin)} className="admin-access-btn">
+          <Settings className="w-5 h-5" />
+          {t.admin}
+        </button>
+      )}
+
+      {showAdminLogin && (
+        <div className="admin-login-form">
+          <input
+            type="password"
+            placeholder={t.enterAdminCode}
+            value={adminCode}
+            onChange={(e) => setAdminCode(e.target.value)}
+            className="form-input"
+          />
+          <button onClick={handleAdminLogin} className="save-btn">
+            {t.admin}
+          </button>
+        </div>
+      )}
+
+      {isAdmin && (
+        <button onClick={() => setCurrentView('AdminPanel')} className="admin-panel-btn">
+          <Settings className="w-5 h-5" />
+          {t.adminPanel}
+        </button>
+      )}
+
       <button onClick={onLogout} className="logout-button">
         <LogOut className="w-5 h-5" />
         {t.logout}
@@ -484,6 +775,7 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [language, setLanguage] = useState('en');
   const [location, setLocation] = useState('Ponnur, AP');
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Initialize Firebase
   useEffect(() => {
@@ -657,18 +949,32 @@ function App() {
         {currentView === 'Profile' && (
           <ProfileView
             userProfile={{ userId: user?.uid }}
+            orders={orders}
             onLogout={handleLogout}
             language={language}
+            setCurrentView={setCurrentView}
+            isAdmin={isAdmin}
+            setIsAdmin={setIsAdmin}
+          />
+        )}
+
+        {currentView === 'AdminPanel' && (
+          <AdminPanel
+            products={products}
+            language={language}
+            onClose={() => setCurrentView('Profile')}
           />
         )}
       </div>
 
-      <BottomNavigation
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-        cartItems={cartItems}
-        language={language}
-      />
+      {currentView !== 'AdminPanel' && (
+        <BottomNavigation
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+          cartItems={cartItems}
+          language={language}
+        />
+      )}
     </div>
   );
 }
