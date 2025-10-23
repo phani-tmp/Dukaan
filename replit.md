@@ -9,6 +9,22 @@ Dukan is a modern quick commerce application built with React, Vite, and Firebas
   - Rebuilt app from scratch as pure consumer experience like Zepto
   - No role selection - direct access to shopping experience
 
+- **Admin Panel & Product Management**: Full CRUD operations for product catalog
+  - Add new products with name, price, weight, image URL, category
+  - Edit existing products with inline forms
+  - Delete products from catalog
+  - Real-time Firebase sync for all operations
+  - Bilingual interface (English/Telugu)
+  - Password-protected access (development mode - production requires Firebase Auth with custom claims)
+  - **Security Note**: Current admin auth is client-side only for development; production deployment requires backend authentication
+
+- **Enhanced Profile Section**: Comprehensive user dashboard
+  - Order history (last 5 orders) with date, items, and total
+  - User statistics: total orders and total spent
+  - Visual stat cards with icons
+  - Admin panel access for authorized users
+  - Real-time order tracking integration
+
 - **Modern UI/UX Redesign**: Sleek, mobile-first interface with bilingual support
   - Green gradient header with location display (Ponnur, AP)
   - Language toggle (EN / తెలుగు) for bilingual experience
@@ -70,13 +86,29 @@ Dukan is a modern quick commerce application built with React, Vite, and Firebas
    - Place orders with single tap
    - Track order status (Pending, Processing, Delivered)
 
-3. **Bilingual Interface**:
+3. **Admin Panel** (Development Mode):
+   - Full product catalog management (CRUD operations)
+   - Add new products with all details
+   - Edit existing products inline
+   - Delete products from catalog
+   - Real-time Firebase integration
+   - Password access: "admin123" (dev only)
+   - **Production Note**: Requires Firebase Auth custom claims and Firestore security rules
+
+4. **Enhanced Profile Dashboard**:
+   - Order history (last 5 orders)
+   - User statistics (total orders, total spent)
+   - Visual stat cards
+   - Admin panel access
+   - Account management
+
+5. **Bilingual Interface**:
    - Toggle between English and Telugu
    - All UI elements translated
    - Category names in both languages
    - Culturally relevant for local users
 
-4. **Modern Design**:
+6. **Modern Design**:
    - Gradient-based category cards matching brand colors
    - Emoji icons for visual appeal
    - Smooth transitions and hover effects
