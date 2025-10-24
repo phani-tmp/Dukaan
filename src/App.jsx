@@ -192,21 +192,16 @@ const AppHeader = ({ searchTerm, setSearchTerm, location, language, toggleLangua
 };
 
 // --- CATEGORY CARDS ---
-const CategoryGrid = ({ setCurrentView, setSelectedCategory, language }) => {
+const CategoryGrid = ({ categoriesData, onCategoryClick, language }) => {
   const t = translations[language];
-
-  const handleCategoryClick = (categoryId) => {
-    setSelectedCategory(categoryId);
-    setCurrentView('CategoryProducts');
-  };
 
   return (
     <div className="category-section">
       <div className="category-grid">
-        {categories.map(cat => (
+        {categoriesData.map(cat => (
           <button
             key={cat.id}
-            onClick={() => handleCategoryClick(cat.id)}
+            onClick={() => onCategoryClick(cat.id)}
             className="category-card"
             style={{ background: cat.gradient }}
           >
@@ -273,8 +268,21 @@ const ProductCard = ({ product, onAddToCart, cartItems, language }) => {
   );
 };
 
-// --- HOME VIEW ---
-const HomeView = ({ products, onAddToCart, cartItems, setCurrentView, setSelectedCategory, searchTerm, language }) => {
+// --- HOME VIEW (with Subcategory Support) ---
+const HomeView = ({ 
+  products, 
+  onAddToCart, 
+  cartItems, 
+  setCurrentView, 
+  selectedCategory,
+  setSelectedCategory,
+  selectedSubcategory,
+  setSelectedSubcategory,
+  searchTerm, 
+  language,
+  categoriesData,
+  subcategoriesData
+}) => {
   const t = translations[language];
 
   // When searching: show all matching products
@@ -283,7 +291,7 @@ const HomeView = ({ products, onAddToCart, cartItems, setCurrentView, setSelecte
     const term = searchTerm.toLowerCase();
     return products.filter(p => 
       p.name.toLowerCase().includes(term) || 
-      p.category.toLowerCase().includes(term)
+      (p.category && p.category.toLowerCase().includes(term))
     );
   }, [products, searchTerm]);
 
@@ -295,12 +303,119 @@ const HomeView = ({ products, onAddToCart, cartItems, setCurrentView, setSelecte
   // Show search results OR popular products (like Zepto/Amazon)
   const isSearching = searchTerm.trim().length > 0;
 
+  // Get subcategories for selected category
+  const categorySubcategories = useMemo(() => {
+    if (!selectedCategory) return [];
+    return subcategoriesData.filter(sc => sc.categoryId === selectedCategory);
+  }, [subcategoriesData, selectedCategory]);
+
+  // Get products for selected subcategory
+  const subcategoryProducts = useMemo(() => {
+    if (!selectedSubcategory) return [];
+    return products.filter(p => p.subcategoryId === selectedSubcategory);
+  }, [products, selectedSubcategory]);
+
+  // Handle category click
+  const handleCategoryClick = (categoryId) => {
+    setSelectedCategory(categoryId);
+    setSelectedSubcategory(null);
+  };
+
+  // Handle subcategory click
+  const handleSubcategoryClick = (subcategoryId) => {
+    setSelectedSubcategory(subcategoryId);
+  };
+
+  // Handle back navigation
+  const handleBack = () => {
+    if (selectedSubcategory) {
+      setSelectedSubcategory(null);
+    } else if (selectedCategory) {
+      setSelectedCategory(null);
+    }
+  };
+
+  // LEVEL 3: Viewing products in a subcategory
+  if (selectedSubcategory) {
+    const subcategory = subcategoriesData.find(sc => sc.id === selectedSubcategory);
+    const category = categoriesData.find(c => c.id === selectedCategory);
+    
+    return (
+      <div className="subcategory-products-view">
+        <div className="view-header">
+          <button onClick={handleBack} className="back-button">
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <h2 className="view-title">
+            {language === 'en' ? subcategory?.nameEn : subcategory?.nameTe || subcategory?.nameEn}
+          </h2>
+        </div>
+        <div className="products-grid">
+          {subcategoryProducts.length > 0 ? (
+            subcategoryProducts.map(product => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onAddToCart={onAddToCart}
+                cartItems={cartItems}
+                language={language}
+              />
+            ))
+          ) : (
+            <div className="empty-state">
+              <p>No products in this subcategory yet.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // LEVEL 2: Viewing subcategories of a category
+  if (selectedCategory) {
+    const category = categoriesData.find(c => c.id === selectedCategory);
+    
+    return (
+      <div className="subcategories-view">
+        <div className="view-header">
+          <button onClick={handleBack} className="back-button">
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <h2 className="view-title">
+            {language === 'en' ? category?.nameEn : category?.nameTe || category?.nameEn}
+          </h2>
+        </div>
+        <div className="subcategory-grid">
+          {categorySubcategories.length > 0 ? (
+            categorySubcategories.map(subcategory => (
+              <button
+                key={subcategory.id}
+                onClick={() => handleSubcategoryClick(subcategory.id)}
+                className="subcategory-card"
+              >
+                <span className="subcategory-icon">{subcategory.icon || '📦'}</span>
+                <span className="subcategory-name">
+                  {language === 'en' ? subcategory.nameEn : subcategory.nameTe || subcategory.nameEn}
+                </span>
+              </button>
+            ))
+          ) : (
+            <div className="empty-state">
+              <p>No subcategories yet. Visit Shopkeeper Dashboard to add subcategories.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // LEVEL 1: Main home view with categories and popular products
   return (
     <div className="home-view">
       {!isSearching && (
         <CategoryGrid 
-          setCurrentView={setCurrentView} 
-          setSelectedCategory={setSelectedCategory}
+          categoriesData={categoriesData}
+          onCategoryClick={handleCategoryClick}
           language={language}
         />
       )}
@@ -1465,12 +1580,15 @@ function App() {
   const [allOrders, setAllOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [language, setLanguage] = useState('en');
   const [location, setLocation] = useState('Ponnur, AP');
   const [notification, setNotification] = useState(null);
   const [previousOrderStatuses, setPreviousOrderStatuses] = useState({});
   const [isShopkeeperMode, setIsShopkeeperMode] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [categoriesData, setCategoriesData] = useState([]);
+  const [subcategoriesData, setSubcategoriesData] = useState([]);
 
   // Detect shopkeeper mode from URL
   useEffect(() => {
@@ -1501,6 +1619,37 @@ function App() {
 
     return () => unsubscribe();
   }, []);
+
+  // Load categories from Firebase
+  useEffect(() => {
+    if (!user) return;
+
+    const categoriesQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'categories'));
+    const unsubscribe = onSnapshot(categoriesQuery, (snapshot) => {
+      const categoriesDataFromDB = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // If no categories in DB, use hardcoded defaults
+      if (categoriesDataFromDB.length === 0) {
+        setCategoriesData(categories);
+      } else {
+        setCategoriesData(categoriesDataFromDB);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  // Load subcategories from Firebase
+  useEffect(() => {
+    if (!user) return;
+
+    const subcategoriesQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'subcategories'));
+    const unsubscribe = onSnapshot(subcategoriesQuery, (snapshot) => {
+      const subcategoriesDataFromDB = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setSubcategoriesData(subcategoriesDataFromDB);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
 
   // Load products from Firebase
   useEffect(() => {
@@ -1686,9 +1835,14 @@ function App() {
             onAddToCart={handleAddToCart}
             cartItems={cartItems}
             setCurrentView={setCurrentView}
+            selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
+            selectedSubcategory={selectedSubcategory}
+            setSelectedSubcategory={setSelectedSubcategory}
             searchTerm={searchTerm}
             language={language}
+            categoriesData={categoriesData}
+            subcategoriesData={subcategoriesData}
           />
         )}
 

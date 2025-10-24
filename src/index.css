@@ -1937,3 +1937,47 @@ body {
     transform: rotate(360deg);
   }
 }
+
+/* --- SUBCATEGORY VIEWS --- */
+.subcategories-view,
+.subcategory-products-view {
+  padding: 16px;
+}
+
+.subcategory-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.subcategory-card {
+  background: white;
+  border: 2px solid var(--color-gray-200);
+  border-radius: 12px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.subcategory-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-color: var(--color-green-500);
+}
+
+.subcategory-icon {
+  font-size: 32px;
+}
+
+.subcategory-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-gray-800);
+  text-align: center;
+}
