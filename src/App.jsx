@@ -448,7 +448,7 @@ const CartView = ({ cartItems, onAddToCart, setCurrentView, onCheckout, language
   );
 };
 
-// --- ORDERS VIEW ---
+// --- ORDERS VIEW (Amazon-style) ---
 const OrdersView = ({ orders, setCurrentView, language }) => {
   const t = translations[language];
 
@@ -471,9 +471,15 @@ const OrdersView = ({ orders, setCurrentView, language }) => {
   };
 
   const getStatusIcon = (status) => {
-    if (status === 'delivered') return <CheckCircle className="w-5 h-5 text-green-600" />;
-    if (status === 'processing') return <Truck className="w-5 h-5 text-blue-600" />;
-    return <Clock className="w-5 h-5 text-orange-600" />;
+    if (status === 'delivered') return <CheckCircle className="w-5 h-5" />;
+    if (status === 'processing') return <Truck className="w-5 h-5" />;
+    return <Clock className="w-5 h-5" />;
+  };
+
+  const getStatusColor = (status) => {
+    if (status === 'delivered') return '#4CAF50';
+    if (status === 'processing') return '#2196F3';
+    return '#FF9800';
   };
 
   return (
@@ -481,26 +487,66 @@ const OrdersView = ({ orders, setCurrentView, language }) => {
       <h2 className="view-title">{t.myOrders}</h2>
       <div className="orders-list">
         {orders.map(order => (
-          <div key={order.id} className="order-card">
-            <div className="order-header">
-              <div className="order-status">
-                {getStatusIcon(order.status)}
-                <span>{getStatusText(order.status)}</span>
+          <div key={order.id} className="order-card-detailed">
+            {/* Order Header */}
+            <div className="order-header-detailed">
+              <div className="order-info-row">
+                <div className="order-meta">
+                  <span className="order-date-label">Order Date</span>
+                  <span className="order-date-value">
+                    {new Date(order.createdAt).toLocaleDateString('en-IN', { 
+                      day: 'numeric', 
+                      month: 'short', 
+                      year: 'numeric' 
+                    })}
+                  </span>
+                </div>
+                <div className="order-status-badge" style={{ backgroundColor: getStatusColor(order.status) }}>
+                  {getStatusIcon(order.status)}
+                  <span>{getStatusText(order.status)}</span>
+                </div>
               </div>
-              <span className="order-date">
-                {new Date(order.createdAt).toLocaleDateString()}
-              </span>
             </div>
-            <div className="order-items">
+
+            {/* Order Items - Amazon Style */}
+            <div className="order-items-detailed">
               {order.items.map((item, idx) => (
-                <p key={idx} className="order-item-text">
-                  {item.name} x {item.quantity}
-                </p>
+                <div key={idx} className="order-item-card">
+                  <div className="order-item-image">
+                    <img 
+                      src={item.imageUrl || 'https://via.placeholder.com/80'} 
+                      alt={item.name}
+                      onError={(e) => e.target.src = 'https://via.placeholder.com/80'}
+                    />
+                  </div>
+                  <div className="order-item-details">
+                    <h4 className="order-item-name">{item.name}</h4>
+                    <p className="order-item-weight">{item.weight}</p>
+                    <div className="order-item-pricing">
+                      <span className="order-item-quantity">Qty: {item.quantity}</span>
+                      <span className="order-item-price">
+                        <IndianRupee className="w-3 h-3" />
+                        {item.price.toFixed(0)} each
+                      </span>
+                    </div>
+                  </div>
+                  <div className="order-item-total">
+                    <IndianRupee className="w-4 h-4" />
+                    {(item.price * item.quantity).toFixed(0)}
+                  </div>
+                </div>
               ))}
             </div>
-            <div className="order-total">
-              <IndianRupee className="w-4 h-4" />
-              {order.total.toFixed(0)}
+
+            {/* Order Footer */}
+            <div className="order-footer-detailed">
+              <div className="order-total-row">
+                <span className="order-total-label">Order Total</span>
+                <span className="order-total-amount">
+                  <IndianRupee className="w-5 h-5" />
+                  {order.total.toFixed(0)}
+                </span>
+              </div>
             </div>
           </div>
         ))}

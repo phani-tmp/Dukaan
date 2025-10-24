@@ -5,7 +5,18 @@ Dukan is a modern quick commerce application built with React, Vite, and Firebas
 
 ## Recent Changes (October 23, 2025)
 
-### Latest Updates - Production-Ready Search & Popular Products Fix
+### Latest Updates - Amazon-Style Order Details (October 24, 2025)
+- **Professional Order Display**: Completely redesigned "My Orders" section to match Amazon/Flipkart
+  - Product images displayed for each item in order
+  - Individual item details: name, weight, quantity, price per item
+  - Item subtotals calculated and displayed
+  - Professional card layout with header, items section, and footer
+  - Color-coded status badges (green=delivered, blue=processing, orange=pending)
+  - Order date in readable format (e.g., "23 Oct 2024")
+  - Total amount prominently displayed in footer
+  - Production-quality UX matching market-leading e-commerce apps
+
+### Previous Updates - Production-Ready Search & Popular Products Fix
 - **CRITICAL FIX: Popular Products Filtering**: Fixed bug where ALL products were appearing in Popular section
   - Now correctly filters only products with `isPopular === true`
   - Empty state message when no products are marked as popular
