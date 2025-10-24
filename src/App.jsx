@@ -4,7 +4,7 @@ import { firebaseConfig, localAppId } from './firebaseConfig.js';
 // Firebase Imports
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, setDoc, collection, query, onSnapshot, getDoc, updateDoc, where, addDoc, deleteDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, collection, query, onSnapshot, getDoc, updateDoc, where, addDoc, deleteDoc, getDocs } from 'firebase/firestore';
 
 // Icon Imports 
 import { Search, MapPin, ShoppingCart, User, Home, Package, ChevronLeft, Minus, Plus, IndianRupee, Mic, LogOut, CheckCircle, Clock, ShoppingBag, Truck, Check, X, Settings, PlusCircle, Edit, Trash2, Save, Image as ImageIcon, Upload, Star } from 'lucide-react';
@@ -309,11 +309,17 @@ const HomeView = ({
     return subcategoriesData.filter(sc => sc.categoryId === selectedCategory);
   }, [subcategoriesData, selectedCategory]);
 
-  // Get products for selected subcategory
+  // Get products for selected subcategory (with fallback for legacy products)
   const subcategoryProducts = useMemo(() => {
     if (!selectedSubcategory) return [];
-    return products.filter(p => p.subcategoryId === selectedSubcategory);
-  }, [products, selectedSubcategory]);
+    // Include products that:
+    // 1. Match the subcategoryId (new products)
+    // 2. OR have matching category but no subcategoryId (legacy products as fallback)
+    return products.filter(p => 
+      p.subcategoryId === selectedSubcategory ||
+      (!p.subcategoryId && selectedCategory && subcategoriesData.find(sc => sc.id === selectedSubcategory)?.categoryId === p.category)
+    );
+  }, [products, selectedSubcategory, selectedCategory, subcategoriesData]);
 
   // Handle category click
   const handleCategoryClick = (categoryId) => {
@@ -856,8 +862,88 @@ const AdminPanel = ({ products, language, onClose }) => {
   );
 };
 
+// --- SEED DEFAULT DATA ---
+const seedDefaultData = async () => {
+  try {
+    // Check if already seeded
+    const categoriesSnapshot = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'categories'));
+    if (!categoriesSnapshot.empty) {
+      alert('Categories already exist. Clear existing categories first if you want to reseed.');
+      return;
+    }
+
+    // Default categories (Zepto-style) - using deterministic IDs
+    const defaultCategories = [
+      { id: 'groceries', nameEn: 'Groceries', nameTe: 'వీరగాణ', icon: '🏪', color: '#4CAF50', gradient: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%)' },
+      { id: 'vegetables', nameEn: 'Vegetables', nameTe: 'కూరగాయలు', icon: '🥬', color: '#8BC34A', gradient: 'linear-gradient(135deg, #8BC34A 0%, #9CCC65 100%)' },
+      { id: 'milk', nameEn: 'Milk & Dairy', nameTe: 'పాలు', icon: '🥛', color: '#5DADE2', gradient: 'linear-gradient(135deg, #5DADE2 0%, #74B9E8 100%)' },
+      { id: 'snacks', nameEn: 'Snacks', nameTe: 'స్నాక్స్', icon: '🍿', color: '#FF9800', gradient: 'linear-gradient(135deg, #FF9800 0%, #FFA726 100%)' },
+      { id: 'medicines', nameEn: 'Medicines', nameTe: 'మందులు', icon: '💊', color: '#2196F3', gradient: 'linear-gradient(135deg, #2196F3 0%, #42A5F5 100%)' },
+      { id: 'electronics', nameEn: 'Electronics', nameTe: 'ఎలక్ట్రానిక్స్', icon: '📱', color: '#9C27B0', gradient: 'linear-gradient(135deg, #9C27B0 0%, #AB47BC 100%)' }
+    ];
+
+    // Default subcategories (Zepto-style) - using deterministic IDs
+    const defaultSubcategories = [
+      // Groceries subcategories
+      { id: 'groceries-dals', nameEn: 'Dals & Pulses', nameTe: 'పప్పులు', categoryId: 'groceries', icon: '🫘' },
+      { id: 'groceries-rice', nameEn: 'Rice & Rice Products', nameTe: 'అన్నం', categoryId: 'groceries', icon: '🍚' },
+      { id: 'groceries-oils', nameEn: 'Oils & Ghee', nameTe: 'నూనెలు', categoryId: 'groceries', icon: '🛢️' },
+      { id: 'groceries-spices', nameEn: 'Spices', nameTe: 'మసాలా', categoryId: 'groceries', icon: '🌶️' },
+      { id: 'groceries-flours', nameEn: 'Flours & Atta', nameTe: 'పిండి', categoryId: 'groceries', icon: '🌾' },
+      
+      // Vegetables subcategories
+      { id: 'vegetables-leafy', nameEn: 'Leafy Vegetables', nameTe: 'ఆకు కూరలు', categoryId: 'vegetables', icon: '🥬' },
+      { id: 'vegetables-root', nameEn: 'Root Vegetables', nameTe: 'వేళ్ళు', categoryId: 'vegetables', icon: '🥕' },
+      { id: 'vegetables-seasonal', nameEn: 'Seasonal Vegetables', nameTe: 'కాల కూరలు', categoryId: 'vegetables', icon: '🥒' },
+      
+      // Milk & Dairy subcategories
+      { id: 'milk-fresh', nameEn: 'Fresh Milk', nameTe: 'పాలు', categoryId: 'milk', icon: '🥛' },
+      { id: 'milk-curd', nameEn: 'Curd & Yogurt', nameTe: 'పెరుగు', categoryId: 'milk', icon: '🍶' },
+      { id: 'milk-butter', nameEn: 'Butter & Ghee', nameTe: 'వెన్న', categoryId: 'milk', icon: '🧈' },
+      { id: 'milk-cheese', nameEn: 'Cheese & Paneer', nameTe: 'పన్నీర్', categoryId: 'milk', icon: '🧀' },
+      
+      // Snacks subcategories
+      { id: 'snacks-namkeen', nameEn: 'Namkeen', nameTe: 'నమ్కీన్', categoryId: 'snacks', icon: '🥨' },
+      { id: 'snacks-biscuits', nameEn: 'Biscuits & Cookies', nameTe: 'బిస్కెట్లు', categoryId: 'snacks', icon: '🍪' },
+      { id: 'snacks-chips', nameEn: 'Chips', nameTe: 'చిప్స్', categoryId: 'snacks', icon: '🍟' },
+      
+      // Medicines subcategories
+      { id: 'medicines-firstaid', nameEn: 'First Aid', nameTe: 'ప్రాథమిక చికిత్స', categoryId: 'medicines', icon: '🩹' },
+      { id: 'medicines-supplements', nameEn: 'Health Supplements', nameTe: 'ఆరోగ్య', categoryId: 'medicines', icon: '💊' },
+      
+      // Electronics subcategories
+      { id: 'electronics-mobiles', nameEn: 'Mobiles & Accessories', nameTe: 'మొబైల్స్', categoryId: 'electronics', icon: '📱' },
+      { id: 'electronics-headphones', nameEn: 'Headphones & Earphones', nameTe: 'హెడ్‌ఫోన్లు', categoryId: 'electronics', icon: '🎧' },
+      { id: 'electronics-chargers', nameEn: 'Chargers & Cables', nameTe: 'చార్జర్లు', categoryId: 'electronics', icon: '🔌' }
+    ];
+
+    // Add categories with deterministic IDs
+    for (const cat of defaultCategories) {
+      const { id, ...catData } = cat;
+      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'categories', id), {
+        ...catData,
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    // Add subcategories with deterministic IDs
+    for (const subcat of defaultSubcategories) {
+      const { id, ...subcatData } = subcat;
+      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'subcategories', id), {
+        ...subcatData,
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    alert('Default categories and subcategories added successfully! Refresh the page to see them.');
+  } catch (error) {
+    console.error('Error seeding data:', error);
+    alert(`Failed to seed data: ${error.message}`);
+  }
+};
+
 // --- SHOPKEEPER DASHBOARD ---
-const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
+const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categoriesData, subcategoriesData }) => {
   const t = translations[language];
   const [activeTab, setActiveTab] = useState('orders');
   const [showForm, setShowForm] = useState(false);
@@ -867,13 +953,35 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
     discountedPrice: '',
     weight: '',
     imageUrl: '',
-    category: 'groceries',
+    category: '',
+    subcategoryId: '',
     isPopular: false
   });
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [imagePreview, setImagePreview] = useState(null);
+  
+  // Category management state
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [categoryFormData, setCategoryFormData] = useState({
+    nameEn: '',
+    nameTe: '',
+    icon: '',
+    color: '#4CAF50',
+    gradient: ''
+  });
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  
+  // Subcategory management state
+  const [showSubcategoryForm, setShowSubcategoryForm] = useState(false);
+  const [subcategoryFormData, setSubcategoryFormData] = useState({
+    nameEn: '',
+    nameTe: '',
+    categoryId: '',
+    icon: ''
+  });
+  const [editingSubcategoryId, setEditingSubcategoryId] = useState(null);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -912,6 +1020,12 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
   const handleSubmitProduct = async (e) => {
     e.preventDefault();
     
+    // Validate required fields
+    if (!formData.category || !formData.subcategoryId) {
+      alert('Please select both Category and Subcategory before saving the product.');
+      return;
+    }
+    
     try {
       const productData = {
         ...formData,
@@ -929,7 +1043,7 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
         alert('Product added successfully!');
       }
 
-      setFormData({ name: '', price: '', discountedPrice: '', weight: '', imageUrl: '', category: 'groceries', isPopular: false });
+      setFormData({ name: '', price: '', discountedPrice: '', weight: '', imageUrl: '', category: '', subcategoryId: '', isPopular: false });
       setImagePreview(null);
       setShowForm(false);
       setEditingId(null);
@@ -946,7 +1060,8 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
       discountedPrice: product.discountedPrice?.toString() || '',
       weight: product.weight,
       imageUrl: product.imageUrl || '',
-      category: product.category,
+      category: product.category || '',
+      subcategoryId: product.subcategoryId || '',
       isPopular: product.isPopular || false
     });
     setImagePreview(product.imageUrl || null);
@@ -984,6 +1099,106 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
     } catch (error) {
       console.error('Error updating popular status:', error);
       alert(`Failed to update popular status: ${error.message}`);
+    }
+  };
+
+  // Category handlers
+  const handleSubmitCategory = async (e) => {
+    e.preventDefault();
+    try {
+      const categoryData = {
+        ...categoryFormData,
+        gradient: categoryFormData.gradient || `linear-gradient(135deg, ${categoryFormData.color} 0%, ${categoryFormData.color}dd 100%)`,
+        createdAt: new Date().toISOString()
+      };
+
+      if (editingCategoryId) {
+        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'categories', editingCategoryId), categoryData);
+        alert('Category updated successfully!');
+      } else {
+        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'categories'), categoryData);
+        alert('Category added successfully!');
+      }
+
+      setCategoryFormData({ nameEn: '', nameTe: '', icon: '', color: '#4CAF50', gradient: '' });
+      setShowCategoryForm(false);
+      setEditingCategoryId(null);
+    } catch (error) {
+      console.error('Error saving category:', error);
+      alert('Failed to save category');
+    }
+  };
+
+  const handleEditCategory = (category) => {
+    setCategoryFormData({
+      nameEn: category.nameEn,
+      nameTe: category.nameTe || '',
+      icon: category.icon || '',
+      color: category.color || '#4CAF50',
+      gradient: category.gradient || ''
+    });
+    setEditingCategoryId(category.id);
+    setShowCategoryForm(true);
+  };
+
+  const handleDeleteCategory = async (categoryId) => {
+    if (window.confirm('Are you sure? This will affect related subcategories and products.')) {
+      try {
+        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'categories', categoryId));
+        alert('Category deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting category:', error);
+        alert(`Failed to delete category: ${error.message}`);
+      }
+    }
+  };
+
+  // Subcategory handlers
+  const handleSubmitSubcategory = async (e) => {
+    e.preventDefault();
+    try {
+      const subcategoryData = {
+        ...subcategoryFormData,
+        createdAt: new Date().toISOString()
+      };
+
+      if (editingSubcategoryId) {
+        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'subcategories', editingSubcategoryId), subcategoryData);
+        alert('Subcategory updated successfully!');
+      } else {
+        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'subcategories'), subcategoryData);
+        alert('Subcategory added successfully!');
+      }
+
+      setSubcategoryFormData({ nameEn: '', nameTe: '', categoryId: '', icon: '' });
+      setShowSubcategoryForm(false);
+      setEditingSubcategoryId(null);
+    } catch (error) {
+      console.error('Error saving subcategory:', error);
+      alert('Failed to save subcategory');
+    }
+  };
+
+  const handleEditSubcategory = (subcategory) => {
+    setSubcategoryFormData({
+      nameEn: subcategory.nameEn,
+      nameTe: subcategory.nameTe || '',
+      categoryId: subcategory.categoryId,
+      icon: subcategory.icon || ''
+    });
+    setEditingSubcategoryId(subcategory.id);
+    setShowSubcategoryForm(true);
+  };
+
+  const handleDeleteSubcategory = async (subcategoryId) => {
+    if (window.confirm('Are you sure? This will affect related products.')) {
+      try {
+        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'subcategories', subcategoryId));
+        alert('Subcategory deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting subcategory:', error);
+        alert(`Failed to delete subcategory: ${error.message}`);
+      }
     }
   };
 
@@ -1032,14 +1247,28 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
           onClick={() => setActiveTab('orders')}
         >
           <Package className="w-5 h-5" />
-          {t.ordersTab}
+          Orders
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'categories' ? 'active' : ''}`}
+          onClick={() => setActiveTab('categories')}
+        >
+          <Settings className="w-5 h-5" />
+          Categories
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'subcategories' ? 'active' : ''}`}
+          onClick={() => setActiveTab('subcategories')}
+        >
+          <ShoppingBag className="w-5 h-5" />
+          Subcategories
         </button>
         <button 
           className={`tab-button ${activeTab === 'products' ? 'active' : ''}`}
           onClick={() => setActiveTab('products')}
         >
-          <ShoppingBag className="w-5 h-5" />
-          {t.productsTab}
+          <Package className="w-5 h-5" />
+          Products
         </button>
         <button 
           className={`tab-button ${activeTab === 'popular' ? 'active' : ''}`}
@@ -1202,15 +1431,35 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
 
                 <select
                   value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value, subcategoryId: '' })}
                   className="form-input"
+                  required
                 >
-                  {categories.map(cat => (
+                  <option value="">Select Category</option>
+                  {categoriesData.map(cat => (
                     <option key={cat.id} value={cat.id}>
-                      {cat.nameEn} / {cat.nameTe}
+                      {cat.nameEn} / {cat.nameTe || ''}
                     </option>
                   ))}
                 </select>
+                
+                {formData.category && (
+                  <select
+                    value={formData.subcategoryId}
+                    onChange={(e) => setFormData({ ...formData, subcategoryId: e.target.value })}
+                    className="form-input"
+                    required
+                  >
+                    <option value="">Select Subcategory</option>
+                    {subcategoriesData
+                      .filter(sc => sc.categoryId === formData.category)
+                      .map(sc => (
+                        <option key={sc.id} value={sc.id}>
+                          {sc.nameEn} / {sc.nameTe || ''}
+                        </option>
+                      ))}
+                  </select>
+                )}
 
                 <label className="checkbox-label">
                   <input
@@ -1275,6 +1524,173 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'categories' && (
+          <div className="categories-section">
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+              <button onClick={() => setShowCategoryForm(!showCategoryForm)} className="add-product-btn">
+                <PlusCircle className="w-5 h-5" />
+                Add Category
+              </button>
+              {categoriesData.length === 0 && (
+                <button onClick={seedDefaultData} className="add-product-btn" style={{ background: '#FF9800' }}>
+                  <Settings className="w-5 h-5" />
+                  Seed Default Data (Zepto-style)
+                </button>
+              )}
+            </div>
+
+            {showCategoryForm && (
+              <form onSubmit={handleSubmitCategory} className="product-form">
+                <input
+                  type="text"
+                  placeholder="Category Name (English)"
+                  value={categoryFormData.nameEn}
+                  onChange={(e) => setCategoryFormData({ ...categoryFormData, nameEn: e.target.value })}
+                  required
+                  className="form-input"
+                />
+                <input
+                  type="text"
+                  placeholder="Category Name (Telugu)"
+                  value={categoryFormData.nameTe}
+                  onChange={(e) => setCategoryFormData({ ...categoryFormData, nameTe: e.target.value })}
+                  className="form-input"
+                />
+                <input
+                  type="text"
+                  placeholder="Icon (emoji)"
+                  value={categoryFormData.icon}
+                  onChange={(e) => setCategoryFormData({ ...categoryFormData, icon: e.target.value })}
+                  required
+                  className="form-input"
+                />
+                <input
+                  type="color"
+                  value={categoryFormData.color}
+                  onChange={(e) => setCategoryFormData({ ...categoryFormData, color: e.target.value })}
+                  className="form-input"
+                />
+                <div className="form-actions">
+                  <button type="submit" className="save-btn">
+                    <Save className="w-4 h-4" />
+                    Save
+                  </button>
+                  <button type="button" onClick={() => { setShowCategoryForm(false); setEditingCategoryId(null); }} className="cancel-btn">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <div className="products-admin-list">
+              <h3 className="section-subtitle">Manage Categories ({categoriesData.length})</h3>
+              {categoriesData.map(category => (
+                <div key={category.id} className="admin-product-card">
+                  <div className="category-icon-preview" style={{ background: category.gradient }}>
+                    {category.icon}
+                  </div>
+                  <div className="admin-product-info">
+                    <h4>{category.nameEn}</h4>
+                    <p>{category.nameTe}</p>
+                    <p className="admin-price">{category.color}</p>
+                  </div>
+                  <div className="admin-product-actions">
+                    <button onClick={() => handleEditCategory(category)} className="edit-btn">
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleDeleteCategory(category.id)} className="delete-btn">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'subcategories' && (
+          <div className="subcategories-section">
+            <button onClick={() => setShowSubcategoryForm(!showSubcategoryForm)} className="add-product-btn">
+              <PlusCircle className="w-5 h-5" />
+              Add Subcategory
+            </button>
+
+            {showSubcategoryForm && (
+              <form onSubmit={handleSubmitSubcategory} className="product-form">
+                <select
+                  value={subcategoryFormData.categoryId}
+                  onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, categoryId: e.target.value })}
+                  required
+                  className="form-input"
+                >
+                  <option value="">Select Parent Category</option>
+                  {categoriesData.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.nameEn}</option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  placeholder="Subcategory Name (English)"
+                  value={subcategoryFormData.nameEn}
+                  onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, nameEn: e.target.value })}
+                  required
+                  className="form-input"
+                />
+                <input
+                  type="text"
+                  placeholder="Subcategory Name (Telugu)"
+                  value={subcategoryFormData.nameTe}
+                  onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, nameTe: e.target.value })}
+                  className="form-input"
+                />
+                <input
+                  type="text"
+                  placeholder="Icon (emoji)"
+                  value={subcategoryFormData.icon}
+                  onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, icon: e.target.value })}
+                  className="form-input"
+                />
+                <div className="form-actions">
+                  <button type="submit" className="save-btn">
+                    <Save className="w-4 h-4" />
+                    Save
+                  </button>
+                  <button type="button" onClick={() => { setShowSubcategoryForm(false); setEditingSubcategoryId(null); }} className="cancel-btn">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <div className="products-admin-list">
+              <h3 className="section-subtitle">Manage Subcategories ({subcategoriesData.length})</h3>
+              {subcategoriesData.map(subcategory => {
+                const parentCategory = categoriesData.find(c => c.id === subcategory.categoryId);
+                return (
+                  <div key={subcategory.id} className="admin-product-card">
+                    <div className="subcategory-icon-preview">
+                      {subcategory.icon || '📦'}
+                    </div>
+                    <div className="admin-product-info">
+                      <h4>{subcategory.nameEn}</h4>
+                      <p>{subcategory.nameTe}</p>
+                      <p className="admin-price">Parent: {parentCategory?.nameEn || 'N/A'}</p>
+                    </div>
+                    <div className="admin-product-actions">
+                      <button onClick={() => handleEditSubcategory(subcategory)} className="edit-btn">
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => handleDeleteSubcategory(subcategory.id)} className="delete-btn">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -1814,6 +2230,8 @@ function App() {
         allOrders={allOrders}
         language={language}
         onExit={() => window.location.href = '/'}
+        categoriesData={categoriesData}
+        subcategoriesData={subcategoriesData}
       />
     );
   }

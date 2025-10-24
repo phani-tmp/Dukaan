@@ -5,7 +5,48 @@ Dukan is a modern quick commerce application built with React, Vite, and Firebas
 
 ## Recent Changes (October 23, 2025)
 
-### Latest Updates - Complete Order Management System (October 24, 2025)
+### Latest Updates - Zepto-Style Subcategory System (October 24, 2025)
+- **MAJOR FEATURE: Three-Level Category Hierarchy**: Complete subcategory navigation system like Zepto
+  - **Level 1 (Home)**: Shows main category grid + popular products
+  - **Level 2 (Subcategories)**: Click category → Shows subcategory grid (e.g., Groceries → Dals, Rice, Oils, Spices, Flours)
+  - **Level 3 (Products)**: Click subcategory → Shows products in that subcategory
+  - Back button navigation at each level
+  - Bilingual support for all category and subcategory names (English/Telugu)
+
+- **Shopkeeper Category Management**: New Categories tab with full CRUD operations
+  - Add/edit/delete main categories
+  - Customize: Name (EN/TE), Icon (emoji), Color, Gradient
+  - Icon preview with category color
+  - Real-time Firebase sync
+
+- **Shopkeeper Subcategory Management**: New Subcategories tab with full CRUD operations
+  - Add/edit/delete subcategories linked to parent categories
+  - Select parent category from dropdown
+  - Customize: Name (EN/TE), Icon (emoji)
+  - Shows parent category relationship in list
+  - Real-time Firebase sync
+
+- **Enhanced Products Tab**: Now requires category + subcategory selection
+  - Category dropdown filters available subcategories
+  - Form validation: Cannot save without subcategory
+  - Legacy product support: Old products without subcategoryId still visible as fallback
+  - Automatic product organization by subcategory
+
+- **Seed Default Data**: One-click Zepto-style data population
+  - 6 main categories: Groceries, Vegetables, Milk & Dairy, Snacks, Medicines, Electronics
+  - 20+ subcategories across all categories
+  - "Seed Default Data" button appears when categories collection is empty
+  - Prevents duplicate seeding with smart checks
+  - Deterministic IDs prevent conflicts
+
+- **Production-Ready Implementation**:
+  - Legacy product fallback: Products without subcategoryId show in category-matching subcategories
+  - Form validation enforces subcategoryId before saving
+  - Idempotent seed function prevents duplicate data
+  - Firebase collections: `/categories` and `/subcategories`
+  - Products store both `category` and `subcategoryId` fields
+
+### Previous Updates - Complete Order Management System (October 24, 2025)
 - **FIXED: Product Images & Details in Orders**: Orders now save complete product data
   - Product images (imageUrl) saved with each order item
   - Weight and category information preserved
