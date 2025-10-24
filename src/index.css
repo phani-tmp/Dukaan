@@ -1133,6 +1133,39 @@ body {
   margin-bottom: 16px;
 }
 
+.order-history-button {
+  width: 100%;
+  background: white;
+  border: 2px solid var(--color-green-600);
+  color: var(--color-green-600);
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: all 0.2s;
+  margin-bottom: 16px;
+}
+
+.order-history-button:hover {
+  background: var(--color-green-50);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.15);
+}
+
+.order-history-button span {
+  flex: 1;
+  text-align: left;
+}
+
+.order-history-view {
+  padding: 16px;
+  min-height: calc(100vh - 120px);
+}
+
 .logout-button {
   width: 100%;
   background: var(--color-gray-900);

@@ -513,32 +513,44 @@ const OrdersView = ({ orders, setCurrentView, language }) => {
 
             {/* Order Items - Amazon Style */}
             <div className="order-items-detailed">
-              {order.items.map((item, idx) => (
-                <div key={idx} className="order-item-card">
-                  <div className="order-item-image">
-                    <img 
-                      src={item.imageUrl || 'https://via.placeholder.com/80'} 
-                      alt={item.name}
-                      onError={(e) => e.target.src = 'https://via.placeholder.com/80'}
-                    />
-                  </div>
-                  <div className="order-item-details">
-                    <h4 className="order-item-name">{item.name}</h4>
-                    <p className="order-item-weight">{item.weight}</p>
-                    <div className="order-item-pricing">
-                      <span className="order-item-quantity">Qty: {item.quantity}</span>
-                      <span className="order-item-price">
-                        <IndianRupee className="w-3 h-3" />
-                        {item.price.toFixed(0)} each
-                      </span>
+              {order.items.map((item, idx) => {
+                // Debug: Log item data to console
+                console.log('[Order Item Debug]', {
+                  name: item.name,
+                  hasImageUrl: !!item.imageUrl,
+                  imageUrl: item.imageUrl,
+                  weight: item.weight
+                });
+                return (
+                  <div key={idx} className="order-item-card">
+                    <div className="order-item-image">
+                      <img 
+                        src={item.imageUrl || 'https://via.placeholder.com/80?text=No+Image'} 
+                        alt={item.name}
+                        onError={(e) => {
+                          console.log('[Image Error]', item.name, 'failed to load:', item.imageUrl);
+                          e.target.src = 'https://via.placeholder.com/80?text=No+Image';
+                        }}
+                      />
+                    </div>
+                    <div className="order-item-details">
+                      <h4 className="order-item-name">{item.name}</h4>
+                      <p className="order-item-weight">{item.weight || 'N/A'}</p>
+                      <div className="order-item-pricing">
+                        <span className="order-item-quantity">Qty: {item.quantity}</span>
+                        <span className="order-item-price">
+                          <IndianRupee className="w-3 h-3" />
+                          {item.price.toFixed(0)} each
+                        </span>
+                      </div>
+                    </div>
+                    <div className="order-item-total">
+                      <IndianRupee className="w-4 h-4" />
+                      {(item.price * item.quantity).toFixed(0)}
                     </div>
                   </div>
-                  <div className="order-item-total">
-                    <IndianRupee className="w-4 h-4" />
-                    {(item.price * item.quantity).toFixed(0)}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Order Footer */}
@@ -1283,10 +1295,59 @@ const OrderDetailsModal = ({ order, onClose, language }) => {
   );
 };
 
-// --- PROFILE VIEW ---
-const ProfileView = ({ userProfile, orders, onLogout, language }) => {
+// --- ORDER HISTORY VIEW ---
+const OrderHistoryView = ({ orders, onBack, onSelectOrder, language }) => {
   const t = translations[language];
-  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  return (
+    <div className="order-history-view">
+      <div className="view-header">
+        <button onClick={onBack} className="back-button">
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <h2 className="view-title">Order History</h2>
+      </div>
+
+      {orders.length === 0 ? (
+        <div className="empty-state">
+          <Package className="empty-icon" />
+          <p className="empty-text">{t.noOrders}</p>
+        </div>
+      ) : (
+        <div className="orders-list">
+          {orders.map(order => (
+            <div 
+              key={order.id} 
+              className="order-history-item clickable"
+              onClick={() => onSelectOrder(order)}
+            >
+              <div className="order-history-info">
+                <p className="order-history-date">
+                  {new Date(order.createdAt).toLocaleDateString('en-IN', { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    year: 'numeric' 
+                  })}
+                </p>
+                <p className="order-history-items">
+                  {order.items.length} items • {order.status}
+                </p>
+              </div>
+              <div className="order-history-right">
+                <p className="order-history-price">₹{order.total.toFixed(0)}</p>
+                <ChevronLeft className="chevron-icon" style={{ transform: 'rotate(180deg)' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// --- PROFILE VIEW ---
+const ProfileView = ({ userProfile, orders, onLogout, language, setCurrentView }) => {
+  const t = translations[language];
 
   const totalOrders = orders.length;
   const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
@@ -1319,53 +1380,22 @@ const ProfileView = ({ userProfile, orders, onLogout, language }) => {
         </div>
       </div>
 
+      {/* Order History Button */}
       <div className="profile-section">
-        <h3 className="section-subtitle">{t.orderHistory}</h3>
-        {orders.length === 0 ? (
-          <p className="empty-text">{t.noOrders}</p>
-        ) : (
-          <div className="order-history-list">
-            {orders.map(order => (
-              <div 
-                key={order.id} 
-                className="order-history-item clickable"
-                onClick={() => setSelectedOrder(order)}
-              >
-                <div className="order-history-info">
-                  <p className="order-history-date">
-                    {new Date(order.createdAt).toLocaleDateString('en-IN', { 
-                      day: 'numeric', 
-                      month: 'short', 
-                      year: 'numeric' 
-                    })}
-                  </p>
-                  <p className="order-history-items">
-                    {order.items.length} items • {order.status}
-                  </p>
-                </div>
-                <div className="order-history-right">
-                  <p className="order-history-price">₹{order.total.toFixed(0)}</p>
-                  <ChevronLeft className="chevron-icon" style={{ transform: 'rotate(180deg)' }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <button 
+          className="order-history-button"
+          onClick={() => setCurrentView('OrderHistory')}
+        >
+          <Package className="w-5 h-5" />
+          <span>View Order History ({totalOrders})</span>
+          <ChevronLeft className="w-5 h-5" style={{ transform: 'rotate(180deg)' }} />
+        </button>
       </div>
 
       <button onClick={onLogout} className="logout-button">
         <LogOut className="w-5 h-5" />
         {t.logout}
       </button>
-
-      {/* Order Details Modal */}
-      {selectedOrder && (
-        <OrderDetailsModal 
-          order={selectedOrder} 
-          onClose={() => setSelectedOrder(null)}
-          language={language}
-        />
-      )}
     </div>
   );
 };
@@ -1440,6 +1470,7 @@ function App() {
   const [notification, setNotification] = useState(null);
   const [previousOrderStatuses, setPreviousOrderStatuses] = useState({});
   const [isShopkeeperMode, setIsShopkeeperMode] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   // Detect shopkeeper mode from URL
   useEffect(() => {
@@ -1687,6 +1718,7 @@ function App() {
             orders={orders}
             setCurrentView={setCurrentView}
             language={language}
+            onSelectOrder={setSelectedOrder}
           />
         )}
 
@@ -1695,6 +1727,16 @@ function App() {
             userProfile={{ userId: user?.uid }}
             orders={orders}
             onLogout={handleLogout}
+            language={language}
+            setCurrentView={setCurrentView}
+          />
+        )}
+
+        {currentView === 'OrderHistory' && (
+          <OrderHistoryView
+            orders={orders}
+            onBack={() => setCurrentView('Profile')}
+            onSelectOrder={setSelectedOrder}
             language={language}
           />
         )}
@@ -1712,6 +1754,14 @@ function App() {
           message={notification.message}
           type={notification.type}
           onClose={() => setNotification(null)}
+        />
+      )}
+
+      {selectedOrder && (
+        <OrderDetailsModal 
+          order={selectedOrder} 
+          onClose={() => setSelectedOrder(null)}
+          language={language}
         />
       )}
     </div>

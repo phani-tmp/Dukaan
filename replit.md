@@ -25,8 +25,12 @@ Dukan is a modern quick commerce application built with React, Vite, and Firebas
   - Order date in readable format (e.g., "23 Oct 2024")
   - Total amount prominently displayed in footer
 
-- **Order History in Profile**: Complete order history with interactive details
-  - All orders (including delivered) displayed in Profile tab
+- **Clean Order History Button**: Professional button-based navigation (not cluttered list)
+  - "View Order History" button in Profile shows total count
+  - Clicking opens dedicated Order History view
+  - All orders (including delivered) displayed in separate page
+  - Prevents profile clutter as orders increase
+  - Back button to return to Profile
   - Clickable order cards with hover effects
   - Shows date, item count, status, and total amount
   - Chevron indicator for clickability
