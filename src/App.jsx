@@ -448,15 +448,18 @@ const CartView = ({ cartItems, onAddToCart, setCurrentView, onCheckout, language
   );
 };
 
-// --- ORDERS VIEW (Amazon-style) ---
+// --- ORDERS VIEW (Amazon-style - Active Orders Only) ---
 const OrdersView = ({ orders, setCurrentView, language }) => {
   const t = translations[language];
 
-  if (orders.length === 0) {
+  // Filter to show only ACTIVE orders (pending/processing)
+  const activeOrders = orders.filter(order => order.status !== 'delivered');
+
+  if (activeOrders.length === 0) {
     return (
       <div className="empty-state">
         <Package className="empty-icon" />
-        <p className="empty-text">{t.noOrders}</p>
+        <p className="empty-text">No active orders</p>
       </div>
     );
   }
@@ -484,9 +487,9 @@ const OrdersView = ({ orders, setCurrentView, language }) => {
 
   return (
     <div className="orders-view">
-      <h2 className="view-title">{t.myOrders}</h2>
+      <h2 className="view-title">Active Orders</h2>
       <div className="orders-list">
-        {orders.map(order => (
+        {activeOrders.map(order => (
           <div key={order.id} className="order-card-detailed">
             {/* Order Header */}
             <div className="order-header-detailed">
@@ -1188,9 +1191,102 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit }) => {
   );
 };
 
+// --- ORDER DETAILS MODAL ---
+const OrderDetailsModal = ({ order, onClose, language }) => {
+  const t = translations[language];
+
+  const getStatusText = (status) => {
+    const statusMap = {
+      pending: t.orderPlaced,
+      processing: t.processing,
+      delivered: t.delivered
+    };
+    return statusMap[status] || status;
+  };
+
+  const getStatusColor = (status) => {
+    if (status === 'delivered') return '#4CAF50';
+    if (status === 'processing') return '#2196F3';
+    return '#FF9800';
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        {/* Modal Header with Close Button */}
+        <div className="modal-header">
+          <h3 className="modal-title">Order Details</h3>
+          <button onClick={onClose} className="modal-close-btn">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Order Info */}
+        <div className="modal-body">
+          <div className="modal-order-info">
+            <div className="modal-info-row">
+              <span className="modal-label">Order Date</span>
+              <span className="modal-value">
+                {new Date(order.createdAt).toLocaleDateString('en-IN', { 
+                  day: 'numeric', 
+                  month: 'short', 
+                  year: 'numeric' 
+                })}
+              </span>
+            </div>
+            <div className="modal-info-row">
+              <span className="modal-label">Status</span>
+              <span className="modal-status-badge" style={{ backgroundColor: getStatusColor(order.status) }}>
+                {getStatusText(order.status)}
+              </span>
+            </div>
+          </div>
+
+          {/* Order Items */}
+          <div className="modal-items-section">
+            <h4 className="modal-section-title">Items Ordered</h4>
+            <div className="modal-items-list">
+              {order.items.map((item, idx) => (
+                <div key={idx} className="modal-item-card">
+                  <div className="modal-item-image">
+                    <img 
+                      src={item.imageUrl || 'https://via.placeholder.com/60'} 
+                      alt={item.name}
+                      onError={(e) => e.target.src = 'https://via.placeholder.com/60'}
+                    />
+                  </div>
+                  <div className="modal-item-details">
+                    <h5 className="modal-item-name">{item.name}</h5>
+                    <p className="modal-item-weight">{item.weight}</p>
+                    <p className="modal-item-quantity">Qty: {item.quantity}</p>
+                  </div>
+                  <div className="modal-item-price">
+                    <IndianRupee className="w-4 h-4" />
+                    {(item.price * item.quantity).toFixed(0)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Order Total */}
+          <div className="modal-total-section">
+            <span className="modal-total-label">Order Total</span>
+            <span className="modal-total-amount">
+              <IndianRupee className="w-5 h-5" />
+              {order.total.toFixed(0)}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- PROFILE VIEW ---
 const ProfileView = ({ userProfile, orders, onLogout, language }) => {
   const t = translations[language];
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   const totalOrders = orders.length;
   const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
@@ -1229,17 +1325,28 @@ const ProfileView = ({ userProfile, orders, onLogout, language }) => {
           <p className="empty-text">{t.noOrders}</p>
         ) : (
           <div className="order-history-list">
-            {orders.slice(0, 5).map(order => (
-              <div key={order.id} className="order-history-item">
-                <div>
+            {orders.map(order => (
+              <div 
+                key={order.id} 
+                className="order-history-item clickable"
+                onClick={() => setSelectedOrder(order)}
+              >
+                <div className="order-history-info">
                   <p className="order-history-date">
-                    {new Date(order.createdAt).toLocaleDateString()}
+                    {new Date(order.createdAt).toLocaleDateString('en-IN', { 
+                      day: 'numeric', 
+                      month: 'short', 
+                      year: 'numeric' 
+                    })}
                   </p>
                   <p className="order-history-items">
-                    {order.items.length} items
+                    {order.items.length} items • {order.status}
                   </p>
                 </div>
-                <p className="order-history-price">₹{order.total.toFixed(0)}</p>
+                <div className="order-history-right">
+                  <p className="order-history-price">₹{order.total.toFixed(0)}</p>
+                  <ChevronLeft className="chevron-icon" style={{ transform: 'rotate(180deg)' }} />
+                </div>
               </div>
             ))}
           </div>
@@ -1250,6 +1357,15 @@ const ProfileView = ({ userProfile, orders, onLogout, language }) => {
         <LogOut className="w-5 h-5" />
         {t.logout}
       </button>
+
+      {/* Order Details Modal */}
+      {selectedOrder && (
+        <OrderDetailsModal 
+          order={selectedOrder} 
+          onClose={() => setSelectedOrder(null)}
+          language={language}
+        />
+      )}
     </div>
   );
 };
@@ -1479,7 +1595,10 @@ function App() {
         id: item.id,
         name: item.name,
         price: item.discountedPrice || item.price,
-        quantity: item.quantity
+        quantity: item.quantity,
+        imageUrl: item.imageUrl || '',
+        weight: item.weight || '',
+        category: item.category || ''
       })),
       total,
       status: 'pending',
