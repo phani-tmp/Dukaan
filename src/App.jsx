@@ -7,7 +7,7 @@ import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc, collection, query, onSnapshot, getDoc, updateDoc, where, addDoc, deleteDoc, getDocs } from 'firebase/firestore';
 
 // Icon Imports 
-import { Search, MapPin, ShoppingCart, User, Home, Package, ChevronLeft, Minus, Plus, IndianRupee, Mic, LogOut, CheckCircle, Clock, ShoppingBag, Truck, Check, X, Settings, PlusCircle, Edit, Trash2, Save, Image as ImageIcon, Upload, Star } from 'lucide-react';
+import { Search, MapPin, ShoppingCart, User, Home, Package, ChevronLeft, Minus, Plus, IndianRupee, Mic, LogOut, CheckCircle, Clock, ShoppingBag, Truck, Check, X, Settings, PlusCircle, Edit, Trash2, Save, Image as ImageIcon, Upload, Star, Phone, Eye, XCircle } from 'lucide-react';
 
 // --- FIREBASE CONFIGURATION ---
 const appId = localAppId;
@@ -231,14 +231,20 @@ const CategoryGrid = ({ categoriesData, onCategoryClick, language }) => {
 const ProductCard = ({ product, onAddToCart, cartItems, language }) => {
   const t = translations[language];
   const quantity = cartItems[product.id]?.quantity || 0;
+  const isOutOfStock = product.outOfStock === true;
 
   return (
-    <div className="product-card-modern">
+    <div className={`product-card-modern ${isOutOfStock ? 'out-of-stock-card' : ''}`}>
       <img 
         src={product.imageUrl || 'https://via.placeholder.com/150'} 
         alt={product.name}
         className="product-image"
       />
+      {isOutOfStock && (
+        <div className="out-of-stock-overlay">
+          <span className="out-of-stock-badge">OUT OF STOCK</span>
+        </div>
+      )}
       <div className="product-info">
         <h3 className="product-name">{product.name}</h3>
         <p className="product-weight">{product.weight}</p>
@@ -256,7 +262,14 @@ const ProductCard = ({ product, onAddToCart, cartItems, language }) => {
         </div>
       </div>
       
-      {quantity === 0 ? (
+      {isOutOfStock ? (
+        <button
+          className="add-to-cart-btn disabled-btn"
+          disabled
+        >
+          Out of Stock
+        </button>
+      ) : quantity === 0 ? (
         <button
           onClick={() => onAddToCart(product)}
           className="add-to-cart-btn"
@@ -1000,7 +1013,8 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
     imageUrl: '',
     category: '',
     subcategoryId: '',
-    isPopular: false
+    isPopular: false,
+    outOfStock: false
   });
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -1027,6 +1041,8 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
     icon: ''
   });
   const [editingSubcategoryId, setEditingSubcategoryId] = useState(null);
+  const [selectedOrderForDetails, setSelectedOrderForDetails] = useState(null);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -1062,6 +1078,29 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
     }
   };
 
+  const handleCancelOrder = async (orderId) => {
+    const reason = prompt('Please enter reason for cancellation:');
+    if (!reason || reason.trim() === '') return;
+    
+    try {
+      if (!db) throw new Error('Firebase database not initialized');
+      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+        status: 'cancelled',
+        cancellationReason: reason.trim(),
+        updatedAt: new Date().toISOString()
+      });
+      alert('Order cancelled successfully!');
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      alert(`Failed to cancel order: ${error.message}`);
+    }
+  };
+
+  const handleViewOrderDetails = (order) => {
+    setSelectedOrderForDetails(order);
+    setShowOrderDetails(true);
+  };
+
   const handleSubmitProduct = async (e) => {
     e.preventDefault();
     
@@ -1088,7 +1127,7 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
         alert('Product added successfully!');
       }
 
-      setFormData({ name: '', price: '', discountedPrice: '', weight: '', imageUrl: '', category: '', subcategoryId: '', isPopular: false });
+      setFormData({ name: '', price: '', discountedPrice: '', weight: '', imageUrl: '', category: '', subcategoryId: '', isPopular: false, outOfStock: false });
       setImagePreview(null);
       setShowForm(false);
       setEditingId(null);
@@ -1107,7 +1146,8 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
       imageUrl: product.imageUrl || '',
       category: product.category || '',
       subcategoryId: product.subcategoryId || '',
-      isPopular: product.isPopular || false
+      isPopular: product.isPopular || false,
+      outOfStock: product.outOfStock || false
     });
     setImagePreview(product.imageUrl || null);
     setEditingId(product.id);
@@ -1344,24 +1384,47 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                       <div className="order-info-section">
                         <div className="order-id-row">
                           <User className="w-4 h-4 text-gray-500" />
-                          <span className="order-customer">{order.userId?.substring(0, 12)}...</span>
+                          <span className="order-customer">Order #{order.id.substring(0, 8)}</span>
                         </div>
                         <div className="order-time-row">
                           <Clock className="w-4 h-4 text-gray-400" />
                           <span className="order-timestamp">{new Date(order.createdAt).toLocaleString()}</span>
                         </div>
+                        {order.phoneNumber && (
+                          <div className="order-phone-row">
+                            <Phone className="w-4 h-4 text-green-600" />
+                            <a href={`tel:${order.phoneNumber}`} className="order-phone-link">
+                              {order.phoneNumber}
+                            </a>
+                          </div>
+                        )}
                       </div>
                       <div className="order-status-badge-new" style={{ backgroundColor: getStatusColor(order.status) }}>
                         {order.status.toUpperCase()}
                       </div>
                     </div>
                     
-                    <div className="order-items-list">
+                    {order.deliveryAddress && (
+                      <div className="order-address-section">
+                        <MapPin className="w-4 h-4 text-gray-500" />
+                        <span className="order-address-text">{order.deliveryAddress}</span>
+                      </div>
+                    )}
+                    
+                    <div className="order-items-list-enhanced">
                       {order.items.map((item, idx) => (
-                        <div key={idx} className="order-item-row">
-                          <span className="item-name">{item.name}</span>
-                          <span className="item-quantity">× {item.quantity}</span>
-                          <span className="item-price">₹{(item.price * item.quantity).toFixed(0)}</span>
+                        <div key={idx} className="order-item-row-enhanced">
+                          <img 
+                            src={item.imageUrl || 'https://via.placeholder.com/50'} 
+                            alt={item.name} 
+                            className="order-item-image"
+                          />
+                          <div className="order-item-details">
+                            <span className="item-name">{item.name}</span>
+                            <span className="item-weight">{item.weight}</span>
+                          </div>
+                          <span className="item-quantity-badge">× {item.quantity}</span>
+                          <span className="item-price-bold">₹{(item.price * item.quantity).toFixed(0)}</span>
                         </div>
                       ))}
                     </div>
@@ -1372,33 +1435,43 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                         <span className="total-amount-large">₹{order.total.toFixed(0)}</span>
                       </div>
                       
-                      <div className="order-actions">
-                        {order.status === 'pending' && (
-                          <button 
-                            onClick={() => handleUpdateStatus(order.id, 'processing')}
-                            className="status-btn processing-btn"
+                      <div className="order-management-section">
+                        <div className="order-status-controls">
+                          <label className="status-dropdown-label">Status:</label>
+                          <select 
+                            value={order.status}
+                            onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
+                            className="status-dropdown"
+                            disabled={order.status === 'cancelled' || order.status === 'completed'}
                           >
-                            <CheckCircle className="w-4 h-4" />
-                            Accept Order
-                          </button>
-                        )}
+                            <option value="pending">Pending</option>
+                            <option value="accepted">Accepted</option>
+                            <option value="ready">Ready</option>
+                            <option value="out_for_delivery">Out for Delivery</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                          </select>
+                        </div>
                         
-                        {order.status === 'processing' && (
+                        <div className="order-action-buttons">
                           <button 
-                            onClick={() => handleUpdateStatus(order.id, 'delivered')}
-                            className="status-btn delivered-btn"
+                            onClick={() => handleViewOrderDetails(order)}
+                            className="view-details-btn"
                           >
-                            <Package className="w-4 h-4" />
-                            Mark Delivered
+                            <Eye className="w-4 h-4" />
+                            View Details
                           </button>
-                        )}
-                        
-                        {order.status === 'delivered' && (
-                          <div className="delivered-tag">
-                            <CheckCircle className="w-4 h-4" />
-                            Completed
-                          </div>
-                        )}
+                          
+                          {order.status !== 'cancelled' && order.status !== 'completed' && (
+                            <button 
+                              onClick={() => handleCancelOrder(order.id)}
+                              className="cancel-order-btn"
+                            >
+                              <XCircle className="w-4 h-4" />
+                              Cancel
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1513,6 +1586,15 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                     onChange={(e) => setFormData({ ...formData, isPopular: e.target.checked })}
                   />
                   Mark as Popular Product
+                </label>
+
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={formData.outOfStock}
+                    onChange={(e) => setFormData({ ...formData, outOfStock: e.target.checked })}
+                  />
+                  Out of Stock (unavailable for pickup/delivery)
                 </label>
 
                 <div className="form-actions">
@@ -1783,6 +1865,15 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
           </div>
         )}
       </div>
+
+      {/* Order Details Modal */}
+      {showOrderDetails && selectedOrderForDetails && (
+        <OrderDetailsModal 
+          order={selectedOrderForDetails} 
+          onClose={() => setShowOrderDetails(false)}
+          language={language}
+        />
+      )}
     </div>
   );
 };
@@ -1821,12 +1912,18 @@ const OrderDetailsModal = ({ order, onClose, language }) => {
         <div className="modal-body">
           <div className="modal-order-info">
             <div className="modal-info-row">
+              <span className="modal-label">Order ID</span>
+              <span className="modal-value">#{order.id.substring(0, 12)}</span>
+            </div>
+            <div className="modal-info-row">
               <span className="modal-label">Order Date</span>
               <span className="modal-value">
                 {new Date(order.createdAt).toLocaleDateString('en-IN', { 
                   day: 'numeric', 
                   month: 'short', 
-                  year: 'numeric' 
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
                 })}
               </span>
             </div>
@@ -1836,7 +1933,34 @@ const OrderDetailsModal = ({ order, onClose, language }) => {
                 {getStatusText(order.status)}
               </span>
             </div>
+            {order.phoneNumber && (
+              <div className="modal-info-row">
+                <span className="modal-label">Customer Phone</span>
+                <a href={`tel:${order.phoneNumber}`} className="modal-phone-link">
+                  <Phone className="w-4 h-4" />
+                  {order.phoneNumber}
+                </a>
+              </div>
+            )}
           </div>
+
+          {/* Delivery Details */}
+          {order.deliveryAddress && (
+            <div className="modal-delivery-section">
+              <h4 className="modal-section-title">Delivery Details</h4>
+              <div className="modal-address-card">
+                <MapPin className="w-5 h-5 text-green-600" />
+                <div className="modal-address-content">
+                  <p className="modal-address-text">{order.deliveryAddress}</p>
+                  {order.deliveryInstructions && (
+                    <p className="modal-instructions-text">
+                      <strong>Instructions:</strong> {order.deliveryInstructions}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Order Items */}
           <div className="modal-items-section">
@@ -2239,6 +2363,21 @@ function App() {
     const items = Object.values(cartItems);
     const total = items.reduce((sum, item) => sum + (item.discountedPrice || item.price) * item.quantity, 0);
 
+    // Get customer contact info
+    const phoneNumber = prompt('Please enter your phone number for order updates:');
+    if (!phoneNumber || phoneNumber.trim() === '') {
+      alert('Phone number is required to place an order');
+      return;
+    }
+
+    const deliveryAddress = prompt('Please enter your delivery address:');
+    if (!deliveryAddress || deliveryAddress.trim() === '') {
+      alert('Delivery address is required to place an order');
+      return;
+    }
+
+    const deliveryInstructions = prompt('Any delivery instructions? (Optional - press OK to skip)') || '';
+
     const orderData = {
       userId: user.uid,
       items: items.map(item => ({
@@ -2252,7 +2391,11 @@ function App() {
       })),
       total,
       status: 'pending',
-      createdAt: new Date().toISOString()
+      phoneNumber: phoneNumber.trim(),
+      deliveryAddress: deliveryAddress.trim(),
+      deliveryInstructions: deliveryInstructions.trim(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
 
     try {
