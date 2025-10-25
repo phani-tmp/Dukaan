@@ -3,6 +3,57 @@
 ## Overview
 Dukan is a modern quick commerce application built with React, Vite, and Firebase, inspired by Zepto. It provides a seamless direct-to-consumer shopping experience for various products like groceries, medicines, and electronics. The application features a three-level category hierarchy, comprehensive order management, and bilingual support (English/Telugu), targeting a professional and intuitive user experience akin to leading e-commerce platforms. The project aims to deliver a production-ready, scalable solution for quick commerce.
 
+## Recent Changes (October 25, 2025)
+
+### Production-Ready Order Workflow System
+- **COMPREHENSIVE ORDER WORKFLOW**: Complete 6-status order management
+  - Pending → Accepted → Ready → Out for Delivery → Completed + Cancelled
+  - Status dropdown for easy updates in shopkeeper dashboard
+  - Real-time order status tracking and management
+  
+- **CUSTOMER CONTACT & DELIVERY**: Full address management system
+  - Phone number required at checkout (clickable tel: links for shopkeepers)
+  - Delivery address + optional delivery instructions
+  - All contact info visible in shopkeeper dashboard
+  - Order cancellation with reason tracking
+
+- **ENHANCED SHOPKEEPER ORDER DISPLAY**: Professional order cards like Zepto
+  - Product images (50x50px) for all order items
+  - Quantity badges (× quantity) displayed clearly
+  - Customer phone with click-to-call functionality
+  - Full delivery address visible in order cards
+  - Professional status dropdown for order management
+  - View Details and Cancel Order buttons
+  
+- **ORDER DETAILS MODAL**: Comprehensive order information view
+  - Order ID, date/time, status badge
+  - Customer phone with click-to-call
+  - Full delivery address + instructions in highlighted card
+  - All items with images, quantities, and prices
+  - Order total prominently displayed
+  - Professional modal design with overlay
+  
+- **INVENTORY MANAGEMENT**: Out of stock functionality
+  - Toggle in shopkeeper dashboard to mark products out of stock
+  - Out-of-stock products cannot be added to cart (button disabled)
+  - Visual indicators: dimmed appearance + red "OUT OF STOCK" badge
+  - Perfect for both pickup and delivery scenarios
+  - Prevents customer orders for unavailable items
+
+- **UI/UX ENHANCEMENTS**: Production-ready design improvements
+  - 450+ lines of new CSS for order management features
+  - Hover effects and smooth transitions throughout
+  - Color-coded status badges for quick order identification
+  - Professional modal overlay design
+  - Fully responsive and mobile-friendly
+
+### Image-Based Design (Previous Update)
+- Removed ALL emojis - using real product images only
+- Fixed navigation for categories without subcategories
+- Search precision: only matches product names
+- Logo support in app header
+- Professional, modern look matching Zepto/Amazon standards
+
 ## User Preferences
 I prefer the agent to be meticulous and thorough, avoiding the introduction of new bugs or regressions. When making changes, prioritize robust, production-quality code. For any significant architectural decisions or feature implementations, please ask for confirmation before proceeding. Ensure that the design philosophy adheres to a professional, emoji-free aesthetic with real product imagery. I value clear and concise explanations for complex technical concepts. Do not make changes to the `App.jsx` file without explicit instruction.
 
