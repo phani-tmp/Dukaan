@@ -2235,6 +2235,13 @@ function App() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [categoriesData, setCategoriesData] = useState([]);
   const [subcategoriesData, setSubcategoriesData] = useState([]);
+  
+  // User Profile & Address Management
+  const [userProfile, setUserProfile] = useState(null);
+  const [userAddresses, setUserAddresses] = useState([]);
+  const [showProfileSetup, setShowProfileSetup] = useState(false);
+  const [showAddressManager, setShowAddressManager] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
 
   // Detect shopkeeper mode from URL
   useEffect(() => {
@@ -2387,6 +2394,41 @@ function App() {
     setPreviousOrderStatuses(currentStatuses);
   }, [orders, user, isShopkeeperMode]);
 
+  // Load user profile from Firebase
+  useEffect(() => {
+    if (!user || isShopkeeperMode) return;
+
+    const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid);
+    const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setUserProfile({ id: docSnap.id, ...docSnap.data() });
+      } else {
+        // No profile yet - show setup modal for first-time users
+        setShowProfileSetup(true);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [user, isShopkeeperMode]);
+
+  // Load user addresses from Firebase
+  useEffect(() => {
+    if (!user || isShopkeeperMode) return;
+
+    const addressesQuery = query(
+      collection(db, 'artifacts', appId, 'public', 'data', 'addresses'),
+      where('userId', '==', user.uid)
+    );
+    
+    const unsubscribe = onSnapshot(addressesQuery, (snapshot) => {
+      const addressesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      addressesData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setUserAddresses(addressesData);
+    });
+
+    return () => unsubscribe();
+  }, [user, isShopkeeperMode]);
+
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'en' ? 'te' : 'en');
   };
@@ -2408,6 +2450,102 @@ function App() {
       };
     });
   }, []);
+
+  // Save or update user profile
+  const handleSaveProfile = async (profileData) => {
+    if (!user) return;
+    
+    try {
+      const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid);
+      await setDoc(userDocRef, {
+        ...profileData,
+        createdAt: new Date().toISOString()
+      }, { merge: true });
+      
+      setShowProfileSetup(false);
+      alert('Profile saved successfully!');
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      alert('Failed to save profile. Please try again.');
+    }
+  };
+
+  // Save or update address
+  const handleSaveAddress = async (addressData) => {
+    if (!user) return;
+    
+    try {
+      if (editingAddress?.id) {
+        // Update existing address
+        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'addresses', editingAddress.id), {
+          ...addressData,
+          updatedAt: new Date().toISOString()
+        });
+        alert('Address updated successfully!');
+      } else {
+        // Create new address
+        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'addresses'), {
+          ...addressData,
+          userId: user.uid,
+          isDefault: userAddresses.length === 0, // First address is default
+          createdAt: new Date().toISOString()
+        });
+        alert('Address added successfully!');
+      }
+      
+      setShowAddressManager(false);
+      setEditingAddress(null);
+    } catch (error) {
+      console.error('Error saving address:', error);
+      alert('Failed to save address. Please try again.');
+    }
+  };
+
+  // Delete address
+  const handleDeleteAddress = async (addressId) => {
+    if (!user) return;
+    
+    const confirmDelete = window.confirm('Are you sure you want to delete this address?');
+    if (!confirmDelete) return;
+    
+    try {
+      await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'addresses', addressId));
+      alert('Address deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting address:', error);
+      alert('Failed to delete address. Please try again.');
+    }
+  };
+
+  // Set address as default
+  const handleSetDefaultAddress = async (addressId) => {
+    if (!user) return;
+    
+    try {
+      // Unset all addresses as default
+      const batch = [];
+      userAddresses.forEach(addr => {
+        const addressRef = doc(db, 'artifacts', appId, 'public', 'data', 'addresses', addr.id);
+        batch.push(updateDoc(addressRef, { isDefault: false }));
+      });
+      await Promise.all(batch);
+      
+      // Set selected address as default
+      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'addresses', addressId), {
+        isDefault: true
+      });
+      
+      // Update user profile with default address ID
+      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid), {
+        defaultAddressId: addressId
+      });
+      
+      alert('Default address updated!');
+    } catch (error) {
+      console.error('Error setting default address:', error);
+      alert('Failed to set default address. Please try again.');
+    }
+  };
 
   const handleCheckout = useCallback(async () => {
     if (Object.keys(cartItems).length === 0) return;
