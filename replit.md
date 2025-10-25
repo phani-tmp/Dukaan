@@ -5,11 +5,12 @@ Dukan is a modern quick commerce application built with React, Vite, and Firebas
 
 ## Recent Changes (October 25, 2025)
 
-### Production-Ready Order Workflow System
-- **COMPREHENSIVE ORDER WORKFLOW**: Complete 6-status order management
-  - Pending → Accepted → Ready → Out for Delivery → Completed + Cancelled
-  - Status dropdown for easy updates in shopkeeper dashboard
-  - Real-time order status tracking and management
+### Production-Ready Order Workflow System (Updated October 25, 2025)
+- **SIMPLIFIED ORDER WORKFLOW**: Clear 4-status progression
+  - **New Workflow**: Pending → Accepted → Out for Delivery → Delivered (+ Cancelled option)
+  - **Removed Confusing Statuses**: "Ready" and "Completed" eliminated for clarity
+  - Status dropdown with only essential options
+  - Dropdown auto-disables once order is Delivered or Cancelled
   
 - **CUSTOMER CONTACT & DELIVERY**: Full address management system
   - Phone number required at checkout (clickable tel: links for shopkeepers)
@@ -17,13 +18,25 @@ Dukan is a modern quick commerce application built with React, Vite, and Firebas
   - All contact info visible in shopkeeper dashboard
   - Order cancellation with reason tracking
 
+- **SHOPKEEPER ORDER ORGANIZATION**: Professional tabs for better order management
+  - **Active Orders Tab**: Shows Pending, Accepted, Out for Delivery orders
+  - **Completed Orders Tab**: Shows Delivered and Cancelled orders
+  - Real-time order counts displayed in tab labels
+  - Clean separation between ongoing and finished orders
+  
 - **ENHANCED SHOPKEEPER ORDER DISPLAY**: Professional order cards like Zepto
   - Product images (50x50px) for all order items
   - Quantity badges (× quantity) displayed clearly
   - Customer phone with click-to-call functionality
   - Full delivery address visible in order cards
   - Professional status dropdown for order management
-  - View Details and Cancel Order buttons
+  - View Details and Cancel Order buttons (auto-hidden for completed orders)
+  
+- **ORDER CANCELLATION TRANSPARENCY**: Customer sees why orders were cancelled
+  - Cancellation reason visible in customer Orders tab
+  - Beautiful red-gradient card highlights cancellation
+  - Clear messaging with icon and label
+  - Complete transparency between shopkeeper and customer
   
 - **ORDER DETAILS MODAL**: Comprehensive order information view
   - Order ID, date/time, status badge
