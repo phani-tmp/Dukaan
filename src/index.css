@@ -2568,3 +2568,413 @@ body {
   padding-left: 28px;
   font-style: italic;
 }
+
+/* ===== PHONE LOGIN UI ===== */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  padding: 20px;
+}
+
+.login-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-title {
+  font-size: 32px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+
+.login-subtitle {
+  color: #666;
+  font-size: 14px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.form-hint {
+  color: #666;
+  font-size: 14px;
+  margin: 0 0 16px 0;
+}
+
+.phone-input-group {
+  display: flex;
+  gap: 12px;
+}
+
+.country-code-select {
+  padding: 12px;
+  border: 2px solid #E0E0E0;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s;
+  min-width: 120px;
+}
+
+.country-code-select:focus {
+  border-color: #4CAF50;
+}
+
+.phone-input {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #E0E0E0;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.phone-input:focus {
+  border-color: #4CAF50;
+}
+
+.otp-input {
+  padding: 16px;
+  border: 2px solid #E0E0E0;
+  border-radius: 8px;
+  font-size: 24px;
+  text-align: center;
+  letter-spacing: 8px;
+  outline: none;
+  transition: border-color 0.3s;
+  font-weight: 600;
+}
+
+.otp-input:focus {
+  border-color: #4CAF50;
+}
+
+.login-btn {
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.back-btn {
+  padding: 12px;
+  background: transparent;
+  color: #666;
+  border: 2px solid #E0E0E0;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background: #F5F5F5;
+  border-color: #4CAF50;
+  color: #4CAF50;
+}
+
+/* ===== PROFILE SETUP & ADDRESS MODALS ===== */
+.profile-setup-form,
+.address-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.form-input {
+  padding: 12px;
+  border: 2px solid #E0E0E0;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.form-input:focus {
+  border-color: #4CAF50;
+}
+
+.form-hint {
+  font-size: 12px;
+  color: #999;
+  font-style: italic;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.btn-primary {
+  flex: 1;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.btn-secondary {
+  flex: 1;
+  padding: 14px 24px;
+  background: white;
+  color: #666;
+  border: 2px solid #E0E0E0;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #F5F5F5;
+  border-color: #4CAF50;
+  color: #4CAF50;
+}
+
+/* ===== ADDRESS MANAGER ===== */
+.address-manager-modal .modal-content {
+  max-width: 600px;
+  max-height: 80vh;
+}
+
+.address-manager-body {
+  padding: 20px 0;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.add-address-btn {
+  width: 100%;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.add-address-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.addresses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.address-card {
+  background: #F9F9F9;
+  border: 2px solid #E0E0E0;
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s;
+}
+
+.address-card:hover {
+  border-color: #4CAF50;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+}
+
+.address-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.address-label-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.address-label-badge {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.address-label-badge.home {
+  background: #E3F2FD;
+  color: #1976D2;
+}
+
+.address-label-badge.work {
+  background: #FFF3E0;
+  color: #F57C00;
+}
+
+.address-label-badge.other {
+  background: #F3E5F5;
+  color: #7B1FA2;
+}
+
+.default-badge {
+  padding: 4px 8px;
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  color: white;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.address-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  padding: 8px;
+  background: white;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover {
+  background: #F5F5F5;
+  border-color: #4CAF50;
+  color: #4CAF50;
+}
+
+.icon-btn.delete:hover {
+  border-color: #f44336;
+  color: #f44336;
+}
+
+.address-card-body {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.address-text {
+  flex: 1;
+  color: #333;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.address-instructions {
+  font-size: 13px;
+  color: #666;
+  margin: 8px 0 0 0;
+  font-style: italic;
+}
+
+.set-default-btn {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: white;
+  border: 2px solid #4CAF50;
+  color: #4CAF50;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.set-default-btn:hover {
+  background: #4CAF50;
+  color: white;
+}
+
+/* ===== PROFILE VIEW UPDATES ===== */
+.profile-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.profile-phone {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}

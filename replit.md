@@ -5,6 +5,43 @@ Dukan is a modern quick commerce application built with React, Vite, and Firebas
 
 ## Recent Changes (October 25, 2025)
 
+### Phase 1: Phone Authentication & Address Management (October 25, 2025 - LATEST)
+- **PHONE AUTHENTICATION WITH OTP**: Professional login system replacing anonymous auth
+  - Firebase phone authentication with reCAPTCHA verification
+  - Country code selection (+91 India as default)
+  - 6-digit OTP input with beautiful gradient design
+  - Automatic first-time user detection and profile setup
+  - Secure logout functionality with state cleanup
+  
+- **USER PROFILE MANAGEMENT**: Complete customer information system
+  - Firestore-backed users collection for data persistence
+  - Name, email, and phone number storage
+  - Profile setup modal for first-time users
+  - Integrated with checkout flow (phone required for orders)
+  - Profile display in Profile tab
+  
+- **ADDRESS MANAGEMENT SYSTEM**: Amazon-style saved addresses
+  - Full CRUD operations: add, edit, delete addresses
+  - Address labels: Home, Work, Other with color-coded badges
+  - Default address selection for quick checkout
+  - Delivery instructions field for each address
+  - Addresses collection in Firestore with real-time sync
+  - Beautiful modal-based UI with AddressManager, AddressForm components
+  
+- **CHECKOUT INTEGRATION**: Seamless order placement with saved data
+  - Automatic validation: profile and address required before checkout
+  - Uses default address (or first address) for delivery
+  - Order data includes full address and customer phone
+  - Smooth UX flow: Profile → Addresses → Cart → Checkout
+  
+- **PROFESSIONAL UI/UX**: 400+ lines of polished CSS
+  - Login screen with green gradient background
+  - Modal overlays for profile and address management
+  - Color-coded address labels and default badges
+  - Hover effects and smooth transitions
+  - Mobile-first responsive design
+  - Click-to-call phone links for shopkeepers
+
 ### Production-Ready Order Workflow System (Updated October 25, 2025)
 - **SIMPLIFIED ORDER WORKFLOW**: Clear 4-status progression
   - **New Workflow**: Pending → Accepted → Out for Delivery → Delivered (+ Cancelled option)

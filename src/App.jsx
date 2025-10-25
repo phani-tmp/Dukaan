@@ -3,7 +3,7 @@ import { firebaseConfig, localAppId } from './firebaseConfig.js';
 
 // Firebase Imports
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, signInWithPhoneNumber, RecaptchaVerifier, signOut, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc, collection, query, onSnapshot, getDoc, updateDoc, where, addDoc, deleteDoc, getDocs } from 'firebase/firestore';
 
 // Icon Imports 
@@ -2355,7 +2355,14 @@ const ProfileView = ({ userProfile, orders, onLogout, language, setCurrentView, 
         <div className="profile-avatar">
           <User className="w-12 h-12" />
         </div>
-        <p className="profile-id">User ID: {userProfile?.userId?.slice(0, 8)}</p>
+        {userProfile ? (
+          <div>
+            <p className="profile-name">{userProfile.name}</p>
+            <p className="profile-phone">{userProfile.phoneNumber}</p>
+          </div>
+        ) : (
+          <p className="profile-id">Loading profile...</p>
+        )}
       </div>
 
       <div className="profile-stats">
@@ -2375,6 +2382,18 @@ const ProfileView = ({ userProfile, orders, onLogout, language, setCurrentView, 
         </div>
       </div>
 
+      {/* Address Management Button */}
+      <div className="profile-section">
+        <button 
+          className="order-history-button"
+          onClick={onManageAddresses}
+        >
+          <MapPin className="w-5 h-5" />
+          <span>Manage Addresses ({userAddresses.length})</span>
+          <ChevronLeft className="w-5 h-5" style={{ transform: 'rotate(180deg)' }} />
+        </button>
+      </div>
+
       {/* Order History Button */}
       <div className="profile-section">
         <button 
@@ -2391,6 +2410,91 @@ const ProfileView = ({ userProfile, orders, onLogout, language, setCurrentView, 
         <LogOut className="w-5 h-5" />
         {t.logout}
       </button>
+    </div>
+  );
+};
+
+// --- PHONE LOGIN UI ---
+const PhoneLoginUI = ({ 
+  countryCode, 
+  phoneNumber, 
+  otp, 
+  authStep,
+  onCountryCodeChange,
+  onPhoneChange,
+  onOtpChange,
+  onSendOTP,
+  onVerifyOTP
+}) => {
+  return (
+    <div className="login-container">
+      <div className="login-card">
+        <div className="login-header">
+          <h1 className="login-title">దుకాణ్ Dukan</h1>
+          <p className="login-subtitle">Quick Commerce at your doorstep</p>
+        </div>
+
+        {authStep === 'phone' ? (
+          <div className="login-form">
+            <h2 className="form-title">Sign in with Phone</h2>
+            <p className="form-hint">Enter your phone number to receive an OTP</p>
+            
+            <div className="phone-input-group">
+              <select 
+                value={countryCode} 
+                onChange={(e) => onCountryCodeChange(e.target.value)}
+                className="country-code-select"
+              >
+                <option value="+91">+91 (India)</option>
+                <option value="+1">+1 (US)</option>
+                <option value="+44">+44 (UK)</option>
+                <option value="+971">+971 (UAE)</option>
+              </select>
+              <input
+                type="tel"
+                placeholder="Phone Number"
+                value={phoneNumber}
+                onChange={(e) => onPhoneChange(e.target.value)}
+                className="phone-input"
+                maxLength="10"
+              />
+            </div>
+            
+            <button onClick={onSendOTP} className="login-btn">
+              <Phone className="w-5 h-5" />
+              Send OTP
+            </button>
+            
+            <div id="recaptcha-container"></div>
+          </div>
+        ) : (
+          <div className="login-form">
+            <h2 className="form-title">Enter OTP</h2>
+            <p className="form-hint">We sent a 6-digit code to {countryCode}{phoneNumber}</p>
+            
+            <input
+              type="text"
+              placeholder="Enter 6-digit OTP"
+              value={otp}
+              onChange={(e) => onOtpChange(e.target.value)}
+              className="otp-input"
+              maxLength="6"
+            />
+            
+            <button onClick={onVerifyOTP} className="login-btn">
+              <CheckCircle className="w-5 h-5" />
+              Verify & Login
+            </button>
+            
+            <button 
+              onClick={() => authStep === 'otp' && window.location.reload()} 
+              className="back-btn"
+            >
+              Back to Phone Number
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -2476,7 +2580,15 @@ function App() {
   const [userAddresses, setUserAddresses] = useState([]);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [showAddressManager, setShowAddressManager] = useState(false);
+  const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
+  
+  // Phone Authentication
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [countryCode, setCountryCode] = useState('+91');
+  const [otp, setOtp] = useState('');
+  const [confirmationResult, setConfirmationResult] = useState(null);
+  const [authStep, setAuthStep] = useState('phone'); // 'phone' or 'otp'
 
   // Detect shopkeeper mode from URL
   useEffect(() => {
@@ -2492,16 +2604,15 @@ function App() {
     db = getFirestore(app);
     auth = getAuth(app);
 
-    console.log('[Auth] Signing in anonymously for local development...');
-    signInAnonymously(auth).catch(err => console.error('[Auth] Sign-in error:', err));
-
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         console.log('[Auth] User authenticated:', firebaseUser.uid);
         setUser(firebaseUser);
+        setLoading(false);
       } else {
         console.log('[Auth] No user authenticated');
         setUser(null);
+        setLoading(false);
       }
     });
 
@@ -2629,6 +2740,32 @@ function App() {
     setPreviousOrderStatuses(currentStatuses);
   }, [orders, user, isShopkeeperMode]);
 
+  // Setup reCAPTCHA for phone auth
+  useEffect(() => {
+    // Only setup if user is not logged in and auth is initialized
+    if (!auth || user || window.recaptchaVerifier) return;
+    
+    // Add small delay to ensure DOM is ready
+    const setupRecaptcha = setTimeout(() => {
+      try {
+        const container = document.getElementById('recaptcha-container');
+        if (container && !window.recaptchaVerifier) {
+          window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
+            size: 'invisible',
+            callback: () => {
+              console.log('[Auth] reCAPTCHA verified');
+            }
+          }, auth);
+          console.log('[Auth] reCAPTCHA setup successful');
+        }
+      } catch (error) {
+        console.error('[Auth] reCAPTCHA setup error:', error);
+      }
+    }, 100);
+
+    return () => clearTimeout(setupRecaptcha);
+  }, [auth, user]);
+
   // Load user profile from Firebase
   useEffect(() => {
     if (!user || isShopkeeperMode) return;
@@ -2666,6 +2803,77 @@ function App() {
 
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'en' ? 'te' : 'en');
+  };
+
+  // Phone Authentication - Send OTP
+  const handleSendOTP = async () => {
+    if (!phoneNumber || phoneNumber.length < 10) {
+      alert('Please enter a valid phone number');
+      return;
+    }
+
+    try {
+      const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+      const appVerifier = window.recaptchaVerifier;
+      const confirmation = await signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier);
+      setConfirmationResult(confirmation);
+      setAuthStep('otp');
+      alert('OTP sent successfully!');
+    } catch (error) {
+      console.error('[Auth] OTP send error:', error);
+      alert(`Failed to send OTP: ${error.message}`);
+    }
+  };
+
+  // Phone Authentication - Verify OTP
+  const handleVerifyOTP = async () => {
+    if (!otp || otp.length !== 6) {
+      alert('Please enter a valid 6-digit OTP');
+      return;
+    }
+
+    if (!confirmationResult) {
+      alert('Please request OTP first');
+      return;
+    }
+
+    try {
+      const result = await confirmationResult.confirm(otp);
+      console.log('[Auth] Login successful for user:', result.user.uid);
+      
+      // Check if this is a first-time user
+      const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', result.user.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (!userDoc.exists()) {
+        // First-time user - show profile setup modal
+        setShowProfileSetup(true);
+      }
+      
+      setOtp('');
+      setPhoneNumber('');
+      setAuthStep('phone');
+    } catch (error) {
+      console.error('[Auth] OTP verification error:', error);
+      alert('Invalid OTP. Please try again.');
+    }
+  };
+
+  // Logout function
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+      setUserProfile(null);
+      setUserAddresses([]);
+      setCartItems({});
+      setOrders([]);
+      setCurrentView('Home');
+      alert('Logged out successfully!');
+    } catch (error) {
+      console.error('[Auth] Logout error:', error);
+      alert('Failed to logout');
+    }
   };
 
   const handleAddToCart = useCallback((product, quantityChange = 1) => {
@@ -2728,7 +2936,7 @@ function App() {
         alert('Address added successfully!');
       }
       
-      setShowAddressManager(false);
+      setShowAddressForm(false);
       setEditingAddress(null);
     } catch (error) {
       console.error('Error saving address:', error);
@@ -2785,26 +2993,30 @@ function App() {
   const handleCheckout = useCallback(async () => {
     if (Object.keys(cartItems).length === 0) return;
 
+    // Check if user has profile set up
+    if (!userProfile || !userProfile.phoneNumber) {
+      alert('Please set up your profile first (Profile tab → Add phone number)');
+      setCurrentView('Profile');
+      return;
+    }
+
+    // Check if user has addresses
+    if (userAddresses.length === 0) {
+      alert('Please add a delivery address first (Profile tab → Manage Addresses)');
+      setCurrentView('Profile');
+      return;
+    }
+
+    // Use default address or first address
+    const defaultAddress = userAddresses.find(addr => addr.isDefault) || userAddresses[0];
+
     const items = Object.values(cartItems);
     const total = items.reduce((sum, item) => sum + (item.discountedPrice || item.price) * item.quantity, 0);
 
-    // Get customer contact info
-    const phoneNumber = prompt('Please enter your phone number for order updates:');
-    if (!phoneNumber || phoneNumber.trim() === '') {
-      alert('Phone number is required to place an order');
-      return;
-    }
-
-    const deliveryAddress = prompt('Please enter your delivery address:');
-    if (!deliveryAddress || deliveryAddress.trim() === '') {
-      alert('Delivery address is required to place an order');
-      return;
-    }
-
-    const deliveryInstructions = prompt('Any delivery instructions? (Optional - press OK to skip)') || '';
-
     const orderData = {
       userId: user.uid,
+      userName: userProfile.name || 'Customer',
+      userPhone: userProfile.phoneNumber,
       items: items.map(item => ({
         id: item.id,
         name: item.name,
@@ -2816,9 +3028,11 @@ function App() {
       })),
       total,
       status: 'pending',
-      phoneNumber: phoneNumber.trim(),
-      deliveryAddress: deliveryAddress.trim(),
-      deliveryInstructions: deliveryInstructions.trim(),
+      phoneNumber: userProfile.phoneNumber,
+      deliveryAddress: defaultAddress.fullAddress,
+      deliveryInstructions: defaultAddress.deliveryInstructions || '',
+      selectedAddressId: defaultAddress.id,
+      deliveryMethod: 'delivery',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -2832,16 +3046,9 @@ function App() {
       console.error('Error placing order:', error);
       alert('Failed to place order. Please try again.');
     }
-  }, [cartItems, user]);
+  }, [cartItems, user, userProfile, userAddresses]);
 
-  const handleLogout = useCallback(() => {
-    setCartItems({});
-    setOrders([]);
-    setCurrentView('Home');
-    window.location.reload();
-  }, []);
-
-  if (loading || !user) {
+  if (loading) {
     return <LoadingSpinner />;
   }
 
@@ -2855,6 +3062,32 @@ function App() {
         categoriesData={categoriesData}
         subcategoriesData={subcategoriesData}
       />
+    );
+  }
+
+  // Show login screen if not authenticated
+  if (!user) {
+    return (
+      <>
+        <PhoneLoginUI
+          countryCode={countryCode}
+          phoneNumber={phoneNumber}
+          otp={otp}
+          authStep={authStep}
+          onCountryCodeChange={setCountryCode}
+          onPhoneChange={setPhoneNumber}
+          onOtpChange={setOtp}
+          onSendOTP={handleSendOTP}
+          onVerifyOTP={handleVerifyOTP}
+        />
+        {notification && (
+          <ToastNotification
+            message={notification.message}
+            type={notification.type}
+            onClose={() => setNotification(null)}
+          />
+        )}
+      </>
     );
   }
 
@@ -2919,11 +3152,13 @@ function App() {
 
         {currentView === 'Profile' && (
           <ProfileView
-            userProfile={{ userId: user?.uid }}
+            userProfile={userProfile}
             orders={orders}
             onLogout={handleLogout}
             language={language}
             setCurrentView={setCurrentView}
+            userAddresses={userAddresses}
+            onManageAddresses={() => setShowAddressManager(true)}
           />
         )}
 
@@ -2957,6 +3192,46 @@ function App() {
           order={selectedOrder} 
           onClose={() => setSelectedOrder(null)}
           language={language}
+        />
+      )}
+
+      {/* Profile Setup Modal */}
+      {showProfileSetup && (
+        <ProfileSetupModal
+          onSave={handleSaveProfile}
+          onClose={() => setShowProfileSetup(false)}
+        />
+      )}
+
+      {/* Address Manager Modal */}
+      {showAddressManager && (
+        <AddressManager
+          addresses={userAddresses}
+          onAddAddress={() => {
+            setShowAddressManager(false);
+            setShowAddressForm(true);
+            setEditingAddress(null);
+          }}
+          onEditAddress={(address) => {
+            setEditingAddress(address);
+            setShowAddressManager(false);
+            setShowAddressForm(true);
+          }}
+          onDeleteAddress={handleDeleteAddress}
+          onSetDefault={handleSetDefaultAddress}
+          onClose={() => setShowAddressManager(false)}
+        />
+      )}
+
+      {/* Address Form Modal */}
+      {showAddressForm && (
+        <AddressForm
+          onSave={handleSaveAddress}
+          onClose={() => {
+            setShowAddressForm(false);
+            setEditingAddress(null);
+          }}
+          editingAddress={editingAddress}
         />
       )}
     </div>
