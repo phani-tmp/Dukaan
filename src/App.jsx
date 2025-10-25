@@ -2105,8 +2105,243 @@ const OrderHistoryView = ({ orders, onBack, onSelectOrder, language }) => {
   );
 };
 
+// --- PROFILE SETUP MODAL ---
+const ProfileSetupModal = ({ onSave, onClose }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    phoneNumber: ''
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!formData.name.trim() || !formData.phoneNumber.trim()) {
+      alert('Please fill in all fields');
+      return;
+    }
+    
+    onSave(formData);
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3 className="modal-title">Welcome! Set Up Your Profile</h3>
+          <button onClick={onClose} className="modal-close-btn">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="profile-setup-form">
+          <div className="form-group">
+            <label className="form-label">Your Name</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Enter your name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label">Phone Number</label>
+            <input
+              type="tel"
+              className="form-input"
+              placeholder="Enter your phone number"
+              value={formData.phoneNumber}
+              onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+              required
+            />
+          </div>
+          
+          <button type="submit" className="btn-primary">
+            <Save className="w-5 h-5" />
+            Save Profile
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// --- ADDRESS FORM ---
+const AddressForm = ({ onSave, onClose, editingAddress }) => {
+  const [formData, setFormData] = useState({
+    label: editingAddress?.label || 'Home',
+    fullAddress: editingAddress?.fullAddress || '',
+    deliveryInstructions: editingAddress?.deliveryInstructions || ''
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!formData.fullAddress.trim()) {
+      alert('Please enter an address');
+      return;
+    }
+    
+    onSave(formData);
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3 className="modal-title">{editingAddress ? 'Edit Address' : 'Add New Address'}</h3>
+          <button onClick={onClose} className="modal-close-btn">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="address-form">
+          <div className="form-group">
+            <label className="form-label">Address Label</label>
+            <select
+              className="form-input"
+              value={formData.label}
+              onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+            >
+              <option value="Home">Home</option>
+              <option value="Work">Work</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label">Full Address</label>
+            <textarea
+              className="form-input"
+              rows="3"
+              placeholder="Enter complete delivery address"
+              value={formData.fullAddress}
+              onChange={(e) => setFormData({ ...formData, fullAddress: e.target.value })}
+              required
+            />
+            <p className="form-hint">In Phase 2, this will use Google Maps for easy address selection</p>
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label">Delivery Instructions (Optional)</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="e.g., Ring bell twice, Gate code 1234"
+              value={formData.deliveryInstructions}
+              onChange={(e) => setFormData({ ...formData, deliveryInstructions: e.target.value })}
+            />
+          </div>
+          
+          <div className="form-actions">
+            <button type="button" onClick={onClose} className="btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary">
+              <Save className="w-5 h-5" />
+              {editingAddress ? 'Update Address' : 'Add Address'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// --- ADDRESS MANAGER ---
+const AddressManager = ({ 
+  addresses, 
+  onAddAddress, 
+  onEditAddress, 
+  onDeleteAddress, 
+  onSetDefault,
+  onClose
+}) => {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content address-manager-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3 className="modal-title">Manage Addresses</h3>
+          <button onClick={onClose} className="modal-close-btn">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        
+        <div className="address-manager-body">
+          <button onClick={onAddAddress} className="add-address-btn">
+            <PlusCircle className="w-5 h-5" />
+            Add New Address
+          </button>
+          
+          {addresses.length === 0 ? (
+            <div className="empty-state">
+              <MapPin className="w-16 h-16 text-gray-400" />
+              <p>No saved addresses yet</p>
+            </div>
+          ) : (
+            <div className="addresses-list">
+              {addresses.map(address => (
+                <div key={address.id} className="address-card">
+                  <div className="address-card-header">
+                    <div className="address-label-section">
+                      <span className={`address-label-badge ${address.label.toLowerCase()}`}>
+                        {address.label}
+                      </span>
+                      {address.isDefault && (
+                        <span className="default-badge">Default</span>
+                      )}
+                    </div>
+                    <div className="address-actions">
+                      <button 
+                        onClick={() => onEditAddress(address)} 
+                        className="icon-btn"
+                        title="Edit"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => onDeleteAddress(address.id)} 
+                        className="icon-btn delete"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="address-card-body">
+                    <MapPin className="w-4 h-4 text-gray-500" />
+                    <p className="address-text">{address.fullAddress}</p>
+                  </div>
+                  
+                  {address.deliveryInstructions && (
+                    <p className="address-instructions">
+                      <strong>Instructions:</strong> {address.deliveryInstructions}
+                    </p>
+                  )}
+                  
+                  {!address.isDefault && (
+                    <button 
+                      onClick={() => onSetDefault(address.id)}
+                      className="set-default-btn"
+                    >
+                      Set as Default
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- PROFILE VIEW ---
-const ProfileView = ({ userProfile, orders, onLogout, language, setCurrentView }) => {
+const ProfileView = ({ userProfile, orders, onLogout, language, setCurrentView, userAddresses, onManageAddresses }) => {
   const t = translations[language];
 
   const totalOrders = orders.length;
