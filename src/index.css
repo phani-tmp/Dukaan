@@ -2978,3 +2978,241 @@ body {
   color: #666;
   margin: 0;
 }
+
+/* ===== DELIVERY METHOD SELECTION ===== */
+.delivery-method-section {
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  margin: 16px 0;
+  border: 2px solid #E0E0E0;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+.delivery-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.delivery-option-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background: white;
+  border: 2px solid #E0E0E0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delivery-option-btn:hover {
+  border-color: #4CAF50;
+  background: #F1F8F4;
+}
+
+.delivery-option-btn.active {
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  border-color: #4CAF50;
+  color: white;
+}
+
+.delivery-option-btn span {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ===== ADDRESS SELECTION IN CART ===== */
+.address-selection-section {
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  margin: 16px 0;
+  border: 2px solid #E0E0E0;
+}
+
+.no-address-msg {
+  text-align: center;
+  padding: 24px;
+  color: #666;
+}
+
+.no-address-msg p {
+  margin: 0 0 16px 0;
+}
+
+.add-address-link {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.add-address-link:hover {
+  transform: translateY(-2px);
+}
+
+.address-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.address-option {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border: 2px solid #E0E0E0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+}
+
+.address-option:hover {
+  border-color: #4CAF50;
+  background: #F1F8F4;
+}
+
+.address-option.selected {
+  border-color: #4CAF50;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(46, 125, 50, 0.1) 100%);
+  border-width: 3px;
+}
+
+.address-radio {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #E0E0E0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.address-option.selected .address-radio {
+  border-color: #4CAF50;
+  background: #4CAF50;
+  color: white;
+}
+
+.address-content {
+  flex: 1;
+}
+
+.address-label-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.address-text-small {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* ===== USERS MANAGEMENT (SHOPKEEPER) ===== */
+.users-section {
+  padding: 20px;
+}
+
+.users-list {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.user-card {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: white;
+  border: 2px solid #E0E0E0;
+  border-radius: 12px;
+  transition: all 0.3s;
+}
+
+.user-card:hover {
+  border-color: #4CAF50;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+}
+
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.user-phone {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #666;
+  margin: 4px 0;
+}
+
+.user-phone a {
+  color: #4CAF50;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.user-phone a:hover {
+  text-decoration: underline;
+}
+
+.user-email {
+  font-size: 13px;
+  color: #999;
+  margin: 4px 0;
+}
+
+.user-date {
+  font-size: 12px;
+  color: #999;
+  margin: 8px 0 0 0;
+  font-style: italic;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  font-size: 16px;
+}

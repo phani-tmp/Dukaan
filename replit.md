@@ -1,4 +1,4 @@
-# Dukan - Quick Commerce Application (దుకాణ్)
+# DUKAAN - Quick Commerce Application (ఘుకాన్)
 
 ## Overview
 Dukan is a modern quick commerce application built with React, Vite, and Firebase, inspired by Zepto. It provides a seamless direct-to-consumer shopping experience for various products like groceries, medicines, and electronics. The application features a three-level category hierarchy, comprehensive order management, and bilingual support (English/Telugu), targeting a professional and intuitive user experience akin to leading e-commerce platforms. The project aims to deliver a production-ready, scalable solution for quick commerce.

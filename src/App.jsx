@@ -17,7 +17,7 @@ let app, db, auth;
 // --- BILINGUAL SUPPORT ---
 const translations = {
   en: {
-    appName: 'Dukan',
+    appName: 'DUKAAN',
     search: 'Search for groceries, services...',
     deliveryTo: 'Delivery to',
     categories: {
@@ -563,7 +563,7 @@ const CategoryProductsView = ({ products, selectedCategory, onAddToCart, cartIte
 };
 
 // --- CART VIEW ---
-const CartView = ({ cartItems, onAddToCart, setCurrentView, onCheckout, language }) => {
+const CartView = ({ cartItems, onAddToCart, setCurrentView, onCheckout, language, deliveryMethod, setDeliveryMethod, userAddresses, selectedAddress, setSelectedAddress }) => {
   const t = translations[language];
   const items = Object.values(cartItems);
   const total = items.reduce((sum, item) => sum + (item.discountedPrice || item.price) * item.quantity, 0);
@@ -610,6 +610,65 @@ const CartView = ({ cartItems, onAddToCart, setCurrentView, onCheckout, language
           </div>
         ))}
       </div>
+
+      {/* Delivery Method Selection */}
+      <div className="delivery-method-section">
+        <h3 className="section-title">Delivery Method</h3>
+        <div className="delivery-options">
+          <button 
+            className={`delivery-option-btn ${deliveryMethod === 'delivery' ? 'active' : ''}`}
+            onClick={() => setDeliveryMethod('delivery')}
+          >
+            <Truck className="w-5 h-5" />
+            <span>Home Delivery</span>
+          </button>
+          <button 
+            className={`delivery-option-btn ${deliveryMethod === 'pickup' ? 'active' : ''}`}
+            onClick={() => setDeliveryMethod('pickup')}
+          >
+            <ShoppingBag className="w-5 h-5" />
+            <span>Store Pickup</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Address Selection (only for delivery) */}
+      {deliveryMethod === 'delivery' && (
+        <div className="address-selection-section">
+          <h3 className="section-title">Delivery Address</h3>
+          {userAddresses.length === 0 ? (
+            <div className="no-address-msg">
+              <p>No saved addresses. Please add an address from your Profile.</p>
+              <button onClick={() => setCurrentView('Profile')} className="add-address-link">
+                Add Address
+              </button>
+            </div>
+          ) : (
+            <div className="address-options">
+              {userAddresses.map(addr => (
+                <div 
+                  key={addr.id} 
+                  className={`address-option ${selectedAddress?.id === addr.id ? 'selected' : ''}`}
+                  onClick={() => setSelectedAddress(addr)}
+                >
+                  <div className="address-radio">
+                    {selectedAddress?.id === addr.id && <Check className="w-4 h-4" />}
+                  </div>
+                  <div className="address-content">
+                    <div className="address-label-row">
+                      <span className={`address-label-badge ${addr.label.toLowerCase()}`}>
+                        {addr.label}
+                      </span>
+                      {addr.isDefault && <span className="default-badge">DEFAULT</span>}
+                    </div>
+                    <p className="address-text-small">{addr.fullAddress}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="cart-footer">
         <div className="cart-total">
@@ -1020,6 +1079,68 @@ const seedDefaultData = async () => {
   }
 };
 
+// --- USERS MANAGEMENT COMPONENT ---
+const UsersManagement = () => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const usersRef = collection(db, 'artifacts', appId, 'public', 'data', 'users');
+    const unsubscribe = onSnapshot(usersRef, (snapshot) => {
+      const usersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      usersData.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      setUsers(usersData);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return <div className="loading-state">Loading users...</div>;
+  }
+
+  return (
+    <div className="users-section">
+      <div className="section-header">
+        <h3 className="section-subtitle">Registered Users</h3>
+        <span className="count-badge">{users.length}</span>
+      </div>
+      <p className="section-description">
+        All users who have registered via phone authentication.
+      </p>
+
+      {users.length === 0 ? (
+        <div className="empty-state">
+          <User className="empty-icon" />
+          <p className="empty-text">No users registered yet</p>
+        </div>
+      ) : (
+        <div className="users-list">
+          {users.map(user => (
+            <div key={user.id} className="user-card">
+              <div className="user-avatar">
+                <User className="w-8 h-8" />
+              </div>
+              <div className="user-info">
+                <h4 className="user-name">{user.name || 'No name'}</h4>
+                <p className="user-phone">
+                  <Phone className="w-4 h-4" />
+                  <a href={`tel:${user.phoneNumber}`}>{user.phoneNumber}</a>
+                </p>
+                {user.email && <p className="user-email">{user.email}</p>}
+                <p className="user-date">
+                  Joined: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // --- SHOPKEEPER DASHBOARD ---
 const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categoriesData, subcategoriesData }) => {
   const t = translations[language];
@@ -1396,6 +1517,13 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
         >
           <Star className="w-5 h-5" />
           Popular
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
+          onClick={() => setActiveTab('users')}
+        >
+          <User className="w-5 h-5" />
+          Users
         </button>
       </div>
 
@@ -1916,6 +2044,10 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
             </div>
           </div>
         )}
+
+        {activeTab === 'users' && (
+          <UsersManagement />
+        )}
       </div>
 
       {/* Order Details Modal */}
@@ -2430,7 +2562,7 @@ const PhoneLoginUI = ({
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <h1 className="login-title">దుకాణ్ Dukan</h1>
+          <h1 className="login-title">DUKAAN ఘుకాన్</h1>
           <p className="login-subtitle">Quick Commerce at your doorstep</p>
         </div>
 
@@ -2567,7 +2699,7 @@ function App() {
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [language, setLanguage] = useState('en');
   const [location, setLocation] = useState('Ponnur, AP');
-  const [logoUrl, setLogoUrl] = useState(''); // User can provide their logo URL here
+  const [logoUrl, setLogoUrl] = useState('/dukaan-logo.png'); // Dukaan logo
   const [notification, setNotification] = useState(null);
   const [previousOrderStatuses, setPreviousOrderStatuses] = useState({});
   const [isShopkeeperMode, setIsShopkeeperMode] = useState(false);
@@ -2582,6 +2714,8 @@ function App() {
   const [showAddressManager, setShowAddressManager] = useState(false);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
+  const [deliveryMethod, setDeliveryMethod] = useState('delivery'); // 'delivery' or 'pickup'
+  const [selectedAddress, setSelectedAddress] = useState(null);
   
   // Phone Authentication
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -2740,31 +2874,8 @@ function App() {
     setPreviousOrderStatuses(currentStatuses);
   }, [orders, user, isShopkeeperMode]);
 
-  // Setup reCAPTCHA for phone auth
-  useEffect(() => {
-    // Only setup if user is not logged in and auth is initialized
-    if (!auth || user || window.recaptchaVerifier) return;
-    
-    // Add small delay to ensure DOM is ready
-    const setupRecaptcha = setTimeout(() => {
-      try {
-        const container = document.getElementById('recaptcha-container');
-        if (container && !window.recaptchaVerifier) {
-          window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
-            size: 'invisible',
-            callback: () => {
-              console.log('[Auth] reCAPTCHA verified');
-            }
-          }, auth);
-          console.log('[Auth] reCAPTCHA setup successful');
-        }
-      } catch (error) {
-        console.error('[Auth] reCAPTCHA setup error:', error);
-      }
-    }, 100);
-
-    return () => clearTimeout(setupRecaptcha);
-  }, [auth, user]);
+  // reCAPTCHA is initialized when user clicks "Send OTP" button
+  // This avoids early initialization errors
 
   // Load user profile from Firebase
   useEffect(() => {
@@ -2814,6 +2925,17 @@ function App() {
 
     try {
       const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+      
+      // Initialize reCAPTCHA if not already done
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
+          size: 'invisible',
+          callback: () => {
+            console.log('[Auth] reCAPTCHA verified');
+          }
+        }, auth);
+      }
+      
       const appVerifier = window.recaptchaVerifier;
       const confirmation = await signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier);
       setConfirmationResult(confirmation);
@@ -2821,7 +2943,12 @@ function App() {
       alert('OTP sent successfully!');
     } catch (error) {
       console.error('[Auth] OTP send error:', error);
-      alert(`Failed to send OTP: ${error.message}`);
+      // Clear and reset reCAPTCHA on error
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+      alert(`Failed to send OTP: ${error.message}. Please try again.`);
     }
   };
 
@@ -2995,20 +3122,23 @@ function App() {
 
     // Check if user has profile set up
     if (!userProfile || !userProfile.phoneNumber) {
-      alert('Please set up your profile first (Profile tab → Add phone number)');
+      alert('Please set up your profile first (Profile tab → Add your details)');
       setCurrentView('Profile');
       return;
     }
 
-    // Check if user has addresses
-    if (userAddresses.length === 0) {
-      alert('Please add a delivery address first (Profile tab → Manage Addresses)');
-      setCurrentView('Profile');
-      return;
+    // Check if delivery method requires address
+    if (deliveryMethod === 'delivery') {
+      if (userAddresses.length === 0) {
+        alert('Please add a delivery address first (Profile tab → Manage Addresses)');
+        setCurrentView('Profile');
+        return;
+      }
+      if (!selectedAddress) {
+        alert('Please select a delivery address');
+        return;
+      }
     }
-
-    // Use default address or first address
-    const defaultAddress = userAddresses.find(addr => addr.isDefault) || userAddresses[0];
 
     const items = Object.values(cartItems);
     const total = items.reduce((sum, item) => sum + (item.discountedPrice || item.price) * item.quantity, 0);
@@ -3029,10 +3159,10 @@ function App() {
       total,
       status: 'pending',
       phoneNumber: userProfile.phoneNumber,
-      deliveryAddress: defaultAddress.fullAddress,
-      deliveryInstructions: defaultAddress.deliveryInstructions || '',
-      selectedAddressId: defaultAddress.id,
-      deliveryMethod: 'delivery',
+      deliveryMethod: deliveryMethod,
+      deliveryAddress: deliveryMethod === 'delivery' ? selectedAddress.fullAddress : 'Store Pickup',
+      deliveryInstructions: deliveryMethod === 'delivery' ? (selectedAddress.deliveryInstructions || '') : '',
+      selectedAddressId: deliveryMethod === 'delivery' ? selectedAddress.id : null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -3046,7 +3176,15 @@ function App() {
       console.error('Error placing order:', error);
       alert('Failed to place order. Please try again.');
     }
-  }, [cartItems, user, userProfile, userAddresses]);
+  }, [cartItems, user, userProfile, userAddresses, deliveryMethod, selectedAddress]);
+
+  // Auto-select default address when addresses load
+  useEffect(() => {
+    if (userAddresses.length > 0 && !selectedAddress) {
+      const defaultAddr = userAddresses.find(addr => addr.isDefault) || userAddresses[0];
+      setSelectedAddress(defaultAddr);
+    }
+  }, [userAddresses]);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -3138,6 +3276,11 @@ function App() {
             setCurrentView={setCurrentView}
             onCheckout={handleCheckout}
             language={language}
+            deliveryMethod={deliveryMethod}
+            setDeliveryMethod={setDeliveryMethod}
+            userAddresses={userAddresses}
+            selectedAddress={selectedAddress}
+            setSelectedAddress={setSelectedAddress}
           />
         )}
 
