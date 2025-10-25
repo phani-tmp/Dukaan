@@ -134,14 +134,14 @@ const translations = {
   }
 };
 
-// --- CATEGORY DATA WITH BILINGUAL LABELS ---
+// --- CATEGORY DATA WITH BILINGUAL LABELS (Fallback) ---
 const categories = [
-  { id: 'groceries', nameEn: 'Groceries', nameTe: 'వీరగాణ', icon: '🏪', color: '#4CAF50', gradient: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%)' },
-  { id: 'vegetables', nameEn: 'Vegetables', nameTe: 'కూరగాయలు', icon: '🥬', color: '#8BC34A', gradient: 'linear-gradient(135deg, #8BC34A 0%, #9CCC65 100%)' },
-  { id: 'milk', nameEn: 'Milk', nameTe: 'పాలు', icon: '🥛', color: '#5DADE2', gradient: 'linear-gradient(135deg, #5DADE2 0%, #74B9E8 100%)' },
-  { id: 'snacks', nameEn: 'Snacks', nameTe: 'స్నాక్స్', icon: '🍿', color: '#FF9800', gradient: 'linear-gradient(135deg, #FF9800 0%, #FFA726 100%)' },
-  { id: 'medicines', nameEn: 'Medicines', nameTe: 'మందులు', icon: '💊', color: '#2196F3', gradient: 'linear-gradient(135deg, #2196F3 0%, #42A5F5 100%)' },
-  { id: 'electronics', nameEn: 'Electronics', nameTe: 'ఎలక్ట్రానిక్స్', icon: '📱', color: '#9C27B0', gradient: 'linear-gradient(135deg, #9C27B0 0%, #AB47BC 100%)' }
+  { id: 'groceries', nameEn: 'Groceries', nameTe: 'వీరగాణ', imageUrl: 'https://images.unsplash.com/photo-1588964895597-cfccd6e2dbf9?w=100&h=100&fit=crop', color: '#4CAF50', gradient: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%)' },
+  { id: 'vegetables', nameEn: 'Vegetables', nameTe: 'కూరగాయలు', imageUrl: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=100&h=100&fit=crop', color: '#8BC34A', gradient: 'linear-gradient(135deg, #8BC34A 0%, #9CCC65 100%)' },
+  { id: 'milk', nameEn: 'Milk', nameTe: 'పాలు', imageUrl: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=100&h=100&fit=crop', color: '#5DADE2', gradient: 'linear-gradient(135deg, #5DADE2 0%, #74B9E8 100%)' },
+  { id: 'snacks', nameEn: 'Snacks', nameTe: 'స్నాక్స్', imageUrl: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=100&h=100&fit=crop', color: '#FF9800', gradient: 'linear-gradient(135deg, #FF9800 0%, #FFA726 100%)' },
+  { id: 'medicines', nameEn: 'Medicines', nameTe: 'మందులు', imageUrl: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=100&h=100&fit=crop', color: '#2196F3', gradient: 'linear-gradient(135deg, #2196F3 0%, #42A5F5 100%)' },
+  { id: 'electronics', nameEn: 'Electronics', nameTe: 'ఎలక్ట్రానిక్స్', imageUrl: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=100&h=100&fit=crop', color: '#9C27B0', gradient: 'linear-gradient(135deg, #9C27B0 0%, #AB47BC 100%)' }
 ];
 
 // --- SHARED COMPONENTS ---
@@ -154,7 +154,7 @@ const LoadingSpinner = () => (
 );
 
 // --- APP HEADER ---
-const AppHeader = ({ searchTerm, setSearchTerm, location, language, toggleLanguage }) => {
+const AppHeader = ({ searchTerm, setSearchTerm, location, language, toggleLanguage, logoUrl }) => {
   const t = translations[language];
   
   return (
@@ -162,7 +162,11 @@ const AppHeader = ({ searchTerm, setSearchTerm, location, language, toggleLangua
       {/* Location and Language Bar */}
       <div className="location-bar">
         <div className="location-info">
-          <MapPin className="w-4 h-4" />
+          {logoUrl ? (
+            <img src={logoUrl} alt="Logo" className="app-logo" />
+          ) : (
+            <MapPin className="w-4 h-4" />
+          )}
           <span className="location-text">{location || 'Ponnur, AP'}</span>
         </div>
         <button onClick={toggleLanguage} className="language-toggle">
@@ -205,7 +209,13 @@ const CategoryGrid = ({ categoriesData, onCategoryClick, language }) => {
             className="category-card"
             style={{ background: cat.gradient }}
           >
-            <div className="category-icon">{cat.icon}</div>
+            <div className="category-icon">
+              <img 
+                src={cat.imageUrl || 'https://via.placeholder.com/50/CCCCCC/666666?text=No+Image'} 
+                alt={cat.nameEn} 
+                className="category-image" 
+              />
+            </div>
             <div className="category-labels">
               <div className="category-name-en">{cat.nameEn}</div>
               <div className="category-name-te">/ {cat.nameTe}</div>
@@ -285,13 +295,12 @@ const HomeView = ({
 }) => {
   const t = translations[language];
 
-  // When searching: show all matching products
+  // When searching: show all matching products (search by product name only)
   const searchResults = useMemo(() => {
     if (!searchTerm) return [];
     const term = searchTerm.toLowerCase();
     return products.filter(p => 
-      p.name.toLowerCase().includes(term) || 
-      (p.category && p.category.toLowerCase().includes(term))
+      p.name.toLowerCase().includes(term)
     );
   }, [products, searchTerm]);
 
@@ -377,10 +386,46 @@ const HomeView = ({
     );
   }
 
-  // LEVEL 2: Viewing subcategories of a category
+  // LEVEL 2: Viewing subcategories of a category (OR products if no subcategories)
   if (selectedCategory) {
     const category = categoriesData.find(c => c.id === selectedCategory);
     
+    // If category has NO subcategories, show products directly
+    if (categorySubcategories.length === 0) {
+      const categoryProducts = products.filter(p => p.category === selectedCategory);
+      
+      return (
+        <div className="subcategory-products-view">
+          <div className="view-header">
+            <button onClick={handleBack} className="back-button">
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <h2 className="view-title">
+              {language === 'en' ? category?.nameEn : category?.nameTe || category?.nameEn}
+            </h2>
+          </div>
+          <div className="products-grid">
+            {categoryProducts.length > 0 ? (
+              categoryProducts.map(product => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={onAddToCart}
+                  cartItems={cartItems}
+                  language={language}
+                />
+              ))
+            ) : (
+              <div className="empty-state">
+                <p>No products in this category yet.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+    
+    // If category HAS subcategories, show them
     return (
       <div className="subcategories-view">
         <div className="view-header">
@@ -392,24 +437,24 @@ const HomeView = ({
           </h2>
         </div>
         <div className="subcategory-grid">
-          {categorySubcategories.length > 0 ? (
-            categorySubcategories.map(subcategory => (
-              <button
-                key={subcategory.id}
-                onClick={() => handleSubcategoryClick(subcategory.id)}
-                className="subcategory-card"
-              >
-                <span className="subcategory-icon">{subcategory.icon || '📦'}</span>
-                <span className="subcategory-name">
-                  {language === 'en' ? subcategory.nameEn : subcategory.nameTe || subcategory.nameEn}
-                </span>
-              </button>
-            ))
-          ) : (
-            <div className="empty-state">
-              <p>No subcategories yet. Visit Shopkeeper Dashboard to add subcategories.</p>
-            </div>
-          )}
+          {categorySubcategories.map(subcategory => (
+            <button
+              key={subcategory.id}
+              onClick={() => handleSubcategoryClick(subcategory.id)}
+              className="subcategory-card"
+            >
+              <span className="subcategory-icon">
+                <img 
+                  src={subcategory.imageUrl || 'https://via.placeholder.com/48/CCCCCC/666666?text=No+Image'} 
+                  alt={subcategory.nameEn} 
+                  className="subcategory-image" 
+                />
+              </span>
+              <span className="subcategory-name">
+                {language === 'en' ? subcategory.nameEn : subcategory.nameTe || subcategory.nameEn}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
     );
@@ -872,49 +917,49 @@ const seedDefaultData = async () => {
       return;
     }
 
-    // Default categories (Zepto-style) - using deterministic IDs
+    // Default categories (Zepto-style) - using deterministic IDs with placeholder images
     const defaultCategories = [
-      { id: 'groceries', nameEn: 'Groceries', nameTe: 'వీరగాణ', icon: '🏪', color: '#4CAF50', gradient: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%)' },
-      { id: 'vegetables', nameEn: 'Vegetables', nameTe: 'కూరగాయలు', icon: '🥬', color: '#8BC34A', gradient: 'linear-gradient(135deg, #8BC34A 0%, #9CCC65 100%)' },
-      { id: 'milk', nameEn: 'Milk & Dairy', nameTe: 'పాలు', icon: '🥛', color: '#5DADE2', gradient: 'linear-gradient(135deg, #5DADE2 0%, #74B9E8 100%)' },
-      { id: 'snacks', nameEn: 'Snacks', nameTe: 'స్నాక్స్', icon: '🍿', color: '#FF9800', gradient: 'linear-gradient(135deg, #FF9800 0%, #FFA726 100%)' },
-      { id: 'medicines', nameEn: 'Medicines', nameTe: 'మందులు', icon: '💊', color: '#2196F3', gradient: 'linear-gradient(135deg, #2196F3 0%, #42A5F5 100%)' },
-      { id: 'electronics', nameEn: 'Electronics', nameTe: 'ఎలక్ట్రానిక్స్', icon: '📱', color: '#9C27B0', gradient: 'linear-gradient(135deg, #9C27B0 0%, #AB47BC 100%)' }
+      { id: 'groceries', nameEn: 'Groceries', nameTe: 'వీరగాణ', imageUrl: 'https://images.unsplash.com/photo-1588964895597-cfccd6e2dbf9?w=100&h=100&fit=crop', color: '#4CAF50', gradient: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%)' },
+      { id: 'vegetables', nameEn: 'Vegetables', nameTe: 'కూరగాయలు', imageUrl: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=100&h=100&fit=crop', color: '#8BC34A', gradient: 'linear-gradient(135deg, #8BC34A 0%, #9CCC65 100%)' },
+      { id: 'milk', nameEn: 'Milk & Dairy', nameTe: 'పాలు', imageUrl: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=100&h=100&fit=crop', color: '#5DADE2', gradient: 'linear-gradient(135deg, #5DADE2 0%, #74B9E8 100%)' },
+      { id: 'snacks', nameEn: 'Snacks', nameTe: 'స్నాక్స్', imageUrl: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=100&h=100&fit=crop', color: '#FF9800', gradient: 'linear-gradient(135deg, #FF9800 0%, #FFA726 100%)' },
+      { id: 'medicines', nameEn: 'Medicines', nameTe: 'మందులు', imageUrl: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=100&h=100&fit=crop', color: '#2196F3', gradient: 'linear-gradient(135deg, #2196F3 0%, #42A5F5 100%)' },
+      { id: 'electronics', nameEn: 'Electronics', nameTe: 'ఎలక్ట్రానిక్స్', imageUrl: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=100&h=100&fit=crop', color: '#9C27B0', gradient: 'linear-gradient(135deg, #9C27B0 0%, #AB47BC 100%)' }
     ];
 
-    // Default subcategories (Zepto-style) - using deterministic IDs
+    // Default subcategories (Zepto-style) - using deterministic IDs with placeholder images
     const defaultSubcategories = [
       // Groceries subcategories
-      { id: 'groceries-dals', nameEn: 'Dals & Pulses', nameTe: 'పప్పులు', categoryId: 'groceries', icon: '🫘' },
-      { id: 'groceries-rice', nameEn: 'Rice & Rice Products', nameTe: 'అన్నం', categoryId: 'groceries', icon: '🍚' },
-      { id: 'groceries-oils', nameEn: 'Oils & Ghee', nameTe: 'నూనెలు', categoryId: 'groceries', icon: '🛢️' },
-      { id: 'groceries-spices', nameEn: 'Spices', nameTe: 'మసాలా', categoryId: 'groceries', icon: '🌶️' },
-      { id: 'groceries-flours', nameEn: 'Flours & Atta', nameTe: 'పిండి', categoryId: 'groceries', icon: '🌾' },
+      { id: 'groceries-dals', nameEn: 'Dals & Pulses', nameTe: 'పప్పులు', categoryId: 'groceries', imageUrl: 'https://images.unsplash.com/photo-1572449102205-d51f05b2a0e0?w=100&h=100&fit=crop' },
+      { id: 'groceries-rice', nameEn: 'Rice & Rice Products', nameTe: 'అన్నం', categoryId: 'groceries', imageUrl: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=100&h=100&fit=crop' },
+      { id: 'groceries-oils', nameEn: 'Oils & Ghee', nameTe: 'నూనెలు', categoryId: 'groceries', imageUrl: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=100&h=100&fit=crop' },
+      { id: 'groceries-spices', nameEn: 'Spices', nameTe: 'మసాలా', categoryId: 'groceries', imageUrl: 'https://images.unsplash.com/photo-1596040033229-a0b0b7b98adc?w=100&h=100&fit=crop' },
+      { id: 'groceries-flours', nameEn: 'Flours & Atta', nameTe: 'పిండి', categoryId: 'groceries', imageUrl: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=100&h=100&fit=crop' },
       
       // Vegetables subcategories
-      { id: 'vegetables-leafy', nameEn: 'Leafy Vegetables', nameTe: 'ఆకు కూరలు', categoryId: 'vegetables', icon: '🥬' },
-      { id: 'vegetables-root', nameEn: 'Root Vegetables', nameTe: 'వేళ్ళు', categoryId: 'vegetables', icon: '🥕' },
-      { id: 'vegetables-seasonal', nameEn: 'Seasonal Vegetables', nameTe: 'కాల కూరలు', categoryId: 'vegetables', icon: '🥒' },
+      { id: 'vegetables-leafy', nameEn: 'Leafy Vegetables', nameTe: 'ఆకు కూరలు', categoryId: 'vegetables', imageUrl: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=100&h=100&fit=crop' },
+      { id: 'vegetables-root', nameEn: 'Root Vegetables', nameTe: 'వేళ్ళు', categoryId: 'vegetables', imageUrl: 'https://images.unsplash.com/photo-1447175008436-054170c2e979?w=100&h=100&fit=crop' },
+      { id: 'vegetables-seasonal', nameEn: 'Seasonal Vegetables', nameTe: 'కాల కూరలు', categoryId: 'vegetables', imageUrl: 'https://images.unsplash.com/photo-1566385101042-1a0aa0c1268c?w=100&h=100&fit=crop' },
       
       // Milk & Dairy subcategories
-      { id: 'milk-fresh', nameEn: 'Fresh Milk', nameTe: 'పాలు', categoryId: 'milk', icon: '🥛' },
-      { id: 'milk-curd', nameEn: 'Curd & Yogurt', nameTe: 'పెరుగు', categoryId: 'milk', icon: '🍶' },
-      { id: 'milk-butter', nameEn: 'Butter & Ghee', nameTe: 'వెన్న', categoryId: 'milk', icon: '🧈' },
-      { id: 'milk-cheese', nameEn: 'Cheese & Paneer', nameTe: 'పన్నీర్', categoryId: 'milk', icon: '🧀' },
+      { id: 'milk-fresh', nameEn: 'Fresh Milk', nameTe: 'పాలు', categoryId: 'milk', imageUrl: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=100&h=100&fit=crop' },
+      { id: 'milk-curd', nameEn: 'Curd & Yogurt', nameTe: 'పెరుగు', categoryId: 'milk', imageUrl: 'https://images.unsplash.com/photo-1571212515935-c0629c19f520?w=100&h=100&fit=crop' },
+      { id: 'milk-butter', nameEn: 'Butter & Ghee', nameTe: 'వెన్న', categoryId: 'milk', imageUrl: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=100&h=100&fit=crop' },
+      { id: 'milk-cheese', nameEn: 'Cheese & Paneer', nameTe: 'పన్నీర్', categoryId: 'milk', imageUrl: 'https://images.unsplash.com/photo-1452195100486-9cc805987862?w=100&h=100&fit=crop' },
       
       // Snacks subcategories
-      { id: 'snacks-namkeen', nameEn: 'Namkeen', nameTe: 'నమ్కీన్', categoryId: 'snacks', icon: '🥨' },
-      { id: 'snacks-biscuits', nameEn: 'Biscuits & Cookies', nameTe: 'బిస్కెట్లు', categoryId: 'snacks', icon: '🍪' },
-      { id: 'snacks-chips', nameEn: 'Chips', nameTe: 'చిప్స్', categoryId: 'snacks', icon: '🍟' },
+      { id: 'snacks-namkeen', nameEn: 'Namkeen', nameTe: 'నమ్కీన్', categoryId: 'snacks', imageUrl: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=100&h=100&fit=crop' },
+      { id: 'snacks-biscuits', nameEn: 'Biscuits & Cookies', nameTe: 'బిస్కెట్లు', categoryId: 'snacks', imageUrl: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=100&h=100&fit=crop' },
+      { id: 'snacks-chips', nameEn: 'Chips', nameTe: 'చిప్స్', categoryId: 'snacks', imageUrl: 'https://images.unsplash.com/photo-1600952841320-db92ec8b5d2a?w=100&h=100&fit=crop' },
       
       // Medicines subcategories
-      { id: 'medicines-firstaid', nameEn: 'First Aid', nameTe: 'ప్రాథమిక చికిత్స', categoryId: 'medicines', icon: '🩹' },
-      { id: 'medicines-supplements', nameEn: 'Health Supplements', nameTe: 'ఆరోగ్య', categoryId: 'medicines', icon: '💊' },
+      { id: 'medicines-firstaid', nameEn: 'First Aid', nameTe: 'ప్రాథమిక చికిత్స', categoryId: 'medicines', imageUrl: 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=100&h=100&fit=crop' },
+      { id: 'medicines-supplements', nameEn: 'Health Supplements', nameTe: 'ఆరోగ్య', categoryId: 'medicines', imageUrl: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=100&h=100&fit=crop' },
       
       // Electronics subcategories
-      { id: 'electronics-mobiles', nameEn: 'Mobiles & Accessories', nameTe: 'మొబైల్స్', categoryId: 'electronics', icon: '📱' },
-      { id: 'electronics-headphones', nameEn: 'Headphones & Earphones', nameTe: 'హెడ్‌ఫోన్లు', categoryId: 'electronics', icon: '🎧' },
-      { id: 'electronics-chargers', nameEn: 'Chargers & Cables', nameTe: 'చార్జర్లు', categoryId: 'electronics', icon: '🔌' }
+      { id: 'electronics-mobiles', nameEn: 'Mobiles & Accessories', nameTe: 'మొబైల్స్', categoryId: 'electronics', imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=100&h=100&fit=crop' },
+      { id: 'electronics-headphones', nameEn: 'Headphones & Earphones', nameTe: 'హెడ్‌ఫోన్లు', categoryId: 'electronics', imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop' },
+      { id: 'electronics-chargers', nameEn: 'Chargers & Cables', nameTe: 'చార్జర్లు', categoryId: 'electronics', imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=100&h=100&fit=crop' }
     ];
 
     // Add categories with deterministic IDs
@@ -967,7 +1012,7 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
   const [categoryFormData, setCategoryFormData] = useState({
     nameEn: '',
     nameTe: '',
-    icon: '',
+    imageUrl: '',
     color: '#4CAF50',
     gradient: ''
   });
@@ -1120,7 +1165,7 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
         alert('Category added successfully!');
       }
 
-      setCategoryFormData({ nameEn: '', nameTe: '', icon: '', color: '#4CAF50', gradient: '' });
+      setCategoryFormData({ nameEn: '', nameTe: '', imageUrl: '', color: '#4CAF50', gradient: '' });
       setShowCategoryForm(false);
       setEditingCategoryId(null);
     } catch (error) {
@@ -1170,7 +1215,7 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
         alert('Subcategory added successfully!');
       }
 
-      setSubcategoryFormData({ nameEn: '', nameTe: '', categoryId: '', icon: '' });
+      setSubcategoryFormData({ nameEn: '', nameTe: '', categoryId: '', imageUrl: '' });
       setShowSubcategoryForm(false);
       setEditingSubcategoryId(null);
     } catch (error) {
@@ -1497,7 +1542,7 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                     className={`filter-btn ${selectedCategory === cat.id ? 'active' : ''}`}
                     onClick={() => setSelectedCategory(cat.id)}
                   >
-                    {cat.emoji} {cat.nameEn} ({count})
+                    {cat.nameEn} ({count})
                   </button>
                 );
               })}
@@ -1562,9 +1607,9 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                 />
                 <input
                   type="text"
-                  placeholder="Icon (emoji)"
-                  value={categoryFormData.icon}
-                  onChange={(e) => setCategoryFormData({ ...categoryFormData, icon: e.target.value })}
+                  placeholder="Image URL (e.g., https://...)"
+                  value={categoryFormData.imageUrl}
+                  onChange={(e) => setCategoryFormData({ ...categoryFormData, imageUrl: e.target.value })}
                   required
                   className="form-input"
                 />
@@ -1591,7 +1636,11 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
               {categoriesData.map(category => (
                 <div key={category.id} className="admin-product-card">
                   <div className="category-icon-preview" style={{ background: category.gradient }}>
-                    {category.icon}
+                    <img 
+                      src={category.imageUrl || 'https://via.placeholder.com/40/CCCCCC/666666?text=No+Image'} 
+                      alt={category.nameEn} 
+                      style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '8px' }} 
+                    />
                   </div>
                   <div className="admin-product-info">
                     <h4>{category.nameEn}</h4>
@@ -1649,9 +1698,9 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                 />
                 <input
                   type="text"
-                  placeholder="Icon (emoji)"
-                  value={subcategoryFormData.icon}
-                  onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, icon: e.target.value })}
+                  placeholder="Image URL (e.g., https://...)"
+                  value={subcategoryFormData.imageUrl}
+                  onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, imageUrl: e.target.value })}
                   className="form-input"
                 />
                 <div className="form-actions">
@@ -1673,7 +1722,11 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                 return (
                   <div key={subcategory.id} className="admin-product-card">
                     <div className="subcategory-icon-preview">
-                      {subcategory.icon || '📦'}
+                      <img 
+                        src={subcategory.imageUrl || 'https://via.placeholder.com/40/CCCCCC/666666?text=No+Image'} 
+                        alt={subcategory.nameEn} 
+                        style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '8px' }} 
+                      />
                     </div>
                     <div className="admin-product-info">
                       <h4>{subcategory.nameEn}</h4>
@@ -1999,6 +2052,7 @@ function App() {
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [language, setLanguage] = useState('en');
   const [location, setLocation] = useState('Ponnur, AP');
+  const [logoUrl, setLogoUrl] = useState(''); // User can provide their logo URL here
   const [notification, setNotification] = useState(null);
   const [previousOrderStatuses, setPreviousOrderStatuses] = useState({});
   const [isShopkeeperMode, setIsShopkeeperMode] = useState(false);
@@ -2244,6 +2298,7 @@ function App() {
         location={location}
         language={language}
         toggleLanguage={toggleLanguage}
+        logoUrl={logoUrl}
       />
 
       <div className="app-content">

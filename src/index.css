@@ -71,6 +71,15 @@ body {
   opacity: 0.95;
 }
 
+.app-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  background: white;
+  border-radius: 6px;
+  padding: 2px;
+}
+
 .location-text {
   font-weight: 500;
 }
@@ -180,6 +189,13 @@ body {
 .category-icon {
   font-size: 32px;
   margin-bottom: 4px;
+}
+
+.category-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
 .category-labels {
@@ -1973,6 +1989,13 @@ body {
 
 .subcategory-icon {
   font-size: 32px;
+}
+
+.subcategory-image {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
 .subcategory-name {
