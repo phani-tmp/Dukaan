@@ -2501,3 +2501,70 @@ body {
   transform: none !important;
   box-shadow: none !important;
 }
+
+/* Order Tabs for Active/Completed */
+.order-tabs {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+  border-bottom: 2px solid var(--color-gray-200);
+  padding-bottom: 0;
+}
+
+.order-tab-btn {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-gray-600);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  bottom: -2px;
+}
+
+.order-tab-btn:hover {
+  color: var(--color-green);
+  background-color: rgba(76, 175, 80, 0.05);
+}
+
+.order-tab-btn.active {
+  color: var(--color-green);
+  border-bottom-color: var(--color-green);
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+/* Cancellation Reason Display in Customer View */
+.order-cancellation-section {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+  border: 2px solid #f44336;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.cancellation-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.cancellation-label {
+  font-weight: 700;
+  font-size: 14px;
+  color: #d32f2f;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cancellation-reason-text {
+  font-size: 15px;
+  color: #333;
+  line-height: 1.5;
+  margin: 0;
+  padding-left: 28px;
+  font-style: italic;
+}

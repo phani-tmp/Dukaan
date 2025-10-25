@@ -631,7 +631,7 @@ const CartView = ({ cartItems, onAddToCart, setCurrentView, onCheckout, language
 const OrdersView = ({ orders, setCurrentView, language }) => {
   const t = translations[language];
 
-  // Filter to show only ACTIVE orders (pending/processing)
+  // Filter to show only ACTIVE orders (not delivered, but include cancelled to show cancellation reason)
   const activeOrders = orders.filter(order => order.status !== 'delivered');
 
   if (activeOrders.length === 0) {
@@ -645,23 +645,32 @@ const OrdersView = ({ orders, setCurrentView, language }) => {
 
   const getStatusText = (status) => {
     const statusMap = {
-      pending: t.orderPlaced,
-      processing: t.processing,
-      delivered: t.delivered
+      pending: t.orderPlaced || 'Pending',
+      accepted: 'Accepted',
+      out_for_delivery: 'Out for Delivery',
+      delivered: t.delivered || 'Delivered',
+      cancelled: 'Cancelled'
     };
     return statusMap[status] || status;
   };
 
   const getStatusIcon = (status) => {
     if (status === 'delivered') return <CheckCircle className="w-5 h-5" />;
-    if (status === 'processing') return <Truck className="w-5 h-5" />;
+    if (status === 'cancelled') return <XCircle className="w-5 h-5" />;
+    if (status === 'out_for_delivery') return <Truck className="w-5 h-5" />;
+    if (status === 'accepted') return <CheckCircle className="w-5 h-5" />;
     return <Clock className="w-5 h-5" />;
   };
 
   const getStatusColor = (status) => {
-    if (status === 'delivered') return '#4CAF50';
-    if (status === 'processing') return '#2196F3';
-    return '#FF9800';
+    switch (status) {
+      case 'delivered': return '#4CAF50';
+      case 'accepted': return '#2196F3';
+      case 'out_for_delivery': return '#FF9800';
+      case 'cancelled': return '#f44336';
+      case 'pending': return '#9E9E9E';
+      default: return '#9E9E9E';
+    }
   };
 
   return (
@@ -731,6 +740,17 @@ const OrdersView = ({ orders, setCurrentView, language }) => {
                 );
               })}
             </div>
+
+            {/* Cancellation Reason (if cancelled) */}
+            {order.status === 'cancelled' && order.cancellationReason && (
+              <div className="order-cancellation-section">
+                <div className="cancellation-badge">
+                  <XCircle className="w-4 h-4 text-red-600" />
+                  <span className="cancellation-label">Cancellation Reason:</span>
+                </div>
+                <p className="cancellation-reason-text">{order.cancellationReason}</p>
+              </div>
+            )}
 
             {/* Order Footer */}
             <div className="order-footer-detailed">
@@ -1042,6 +1062,7 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
   });
   const [editingSubcategoryId, setEditingSubcategoryId] = useState(null);
   const [selectedOrderForDetails, setSelectedOrderForDetails] = useState(null);
+  const [orderTab, setOrderTab] = useState('active'); // 'active' or 'completed'
   const [showOrderDetails, setShowOrderDetails] = useState(false);
 
   const handleImageUpload = (e) => {
@@ -1289,14 +1310,28 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
 
   const getStatusColor = (status) => {
     switch(status) {
-      case 'pending': return '#FF9800';
-      case 'processing': return '#2196F3';
+      case 'pending': return '#9E9E9E';
+      case 'accepted': return '#2196F3';
+      case 'out_for_delivery': return '#FF9800';
       case 'delivered': return '#4CAF50';
+      case 'cancelled': return '#f44336';
       default: return '#9E9E9E';
     }
   };
 
-  const sortedOrders = [...allOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  // Filter orders based on tab selection
+  const activeStatuses = ['pending', 'accepted', 'out_for_delivery'];
+  const completedStatuses = ['delivered', 'cancelled'];
+  
+  const filteredOrders = allOrders.filter(order => {
+    if (orderTab === 'active') {
+      return activeStatuses.includes(order.status);
+    } else {
+      return completedStatuses.includes(order.status);
+    }
+  });
+  
+  const sortedOrders = [...filteredOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -1368,8 +1403,26 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
         {activeTab === 'orders' && (
           <div className="orders-section">
             <div className="section-header">
-              <h3 className="section-subtitle">{t.incomingOrders}</h3>
-              <span className="count-badge">{sortedOrders.length}</span>
+              <h3 className="section-subtitle">Orders Management</h3>
+              <span className="count-badge">{allOrders.length}</span>
+            </div>
+            
+            {/* Order Tabs for Active/Completed */}
+            <div className="order-tabs">
+              <button 
+                className={`order-tab-btn ${orderTab === 'active' ? 'active' : ''}`}
+                onClick={() => setOrderTab('active')}
+              >
+                Active Orders ({activeStatuses.reduce((count, status) => 
+                  count + allOrders.filter(o => o.status === status).length, 0)})
+              </button>
+              <button 
+                className={`order-tab-btn ${orderTab === 'completed' ? 'active' : ''}`}
+                onClick={() => setOrderTab('completed')}
+              >
+                Completed Orders ({completedStatuses.reduce((count, status) => 
+                  count + allOrders.filter(o => o.status === status).length, 0)})
+              </button>
             </div>
             {sortedOrders.length === 0 ? (
               <div className="empty-state">
@@ -1442,13 +1495,12 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                             value={order.status}
                             onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
                             className="status-dropdown"
-                            disabled={order.status === 'cancelled' || order.status === 'completed'}
+                            disabled={order.status === 'cancelled' || order.status === 'delivered'}
                           >
                             <option value="pending">Pending</option>
                             <option value="accepted">Accepted</option>
-                            <option value="ready">Ready</option>
                             <option value="out_for_delivery">Out for Delivery</option>
-                            <option value="completed">Completed</option>
+                            <option value="delivered">Delivered</option>
                             <option value="cancelled">Cancelled</option>
                           </select>
                         </div>
@@ -1462,7 +1514,7 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                             View Details
                           </button>
                           
-                          {order.status !== 'cancelled' && order.status !== 'completed' && (
+                          {order.status !== 'cancelled' && order.status !== 'delivered' && (
                             <button 
                               onClick={() => handleCancelOrder(order.id)}
                               className="cancel-order-btn"
