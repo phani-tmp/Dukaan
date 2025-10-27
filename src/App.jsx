@@ -2923,18 +2923,31 @@ function App() {
       return;
     }
 
+    if (!auth) {
+      alert('Authentication not initialized. Please refresh the page.');
+      return;
+    }
+
     try {
       const fullPhoneNumber = `${countryCode}${phoneNumber}`;
       
-      // Initialize reCAPTCHA if not already done
-      if (!window.recaptchaVerifier) {
-        window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
-          size: 'invisible',
-          callback: () => {
-            console.log('[Auth] reCAPTCHA verified');
-          }
-        }, auth);
+      // Clear any existing verifier
+      if (window.recaptchaVerifier) {
+        try {
+          window.recaptchaVerifier.clear();
+        } catch (e) {
+          console.log('[Auth] Error clearing old verifier:', e);
+        }
+        window.recaptchaVerifier = null;
       }
+      
+      // Create new reCAPTCHA verifier with proper auth instance
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'invisible',
+        callback: () => {
+          console.log('[Auth] reCAPTCHA verified');
+        }
+      });
       
       const appVerifier = window.recaptchaVerifier;
       const confirmation = await signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier);
@@ -2945,7 +2958,11 @@ function App() {
       console.error('[Auth] OTP send error:', error);
       // Clear and reset reCAPTCHA on error
       if (window.recaptchaVerifier) {
-        window.recaptchaVerifier.clear();
+        try {
+          window.recaptchaVerifier.clear();
+        } catch (e) {
+          console.log('[Auth] Error clearing verifier:', e);
+        }
         window.recaptchaVerifier = null;
       }
       alert(`Failed to send OTP: ${error.message}. Please try again.`);
