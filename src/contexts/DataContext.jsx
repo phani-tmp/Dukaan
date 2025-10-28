@@ -27,6 +27,14 @@ export const DataProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+  }, [user]);
+
+  useEffect(() => {
     if (!user) return;
 
     const categoriesQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'categories'));
