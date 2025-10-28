@@ -41,7 +41,7 @@ const CheckoutConfirmationModal = ({
 
         <div className="modal-body">
           <div className="checkout-section">
-            <h3 className="section-title">Choose Delivery Method</h3>
+            <h3 className="checkout-section-title">Choose Delivery Method</h3>
             <div className="delivery-options">
               <button 
                 className={`delivery-option-btn ${deliveryMethod === 'delivery' ? 'active' : ''}`}
@@ -62,7 +62,7 @@ const CheckoutConfirmationModal = ({
 
           {deliveryMethod === 'delivery' && (
             <div className="checkout-section">
-              <h3 className="section-title">Delivery Address</h3>
+              <h3 className="checkout-section-title">Delivery Address</h3>
               {userAddresses.length === 0 ? (
                 <div className="no-address-msg">
                   <p>No saved addresses.</p>
@@ -116,7 +116,7 @@ const CheckoutConfirmationModal = ({
 
           <div className="checkout-section">
             <div className="order-summary">
-              <h3 className="section-title">Order Summary</h3>
+              <h3 className="checkout-section-title">Order Summary</h3>
               <div className="summary-items">
                 {cartItems.map(item => (
                   <div key={item.id} className="summary-item">
