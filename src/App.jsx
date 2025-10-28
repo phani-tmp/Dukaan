@@ -36,13 +36,19 @@ function App() {
     setPhoneNumber,
     countryCode,
     setCountryCode,
+    password,
+    setPassword,
     otp,
     setOtp,
     authStep,
+    isNewUser,
     showProfileSetup,
     setShowProfileSetup,
+    checkUserExists,
     handleSendOTP,
     handleVerifyOTP,
+    handlePasswordLogin,
+    handleCompleteRegistration,
     handleLogout,
     handleSaveProfile
   } = useAuth();
@@ -168,15 +174,21 @@ function App() {
     return (
       <>
         <PhoneLoginUI
-          countryCode={countryCode}
           phoneNumber={phoneNumber}
-          otp={otp}
-          authStep={authStep}
-          onCountryCodeChange={setCountryCode}
           onPhoneChange={setPhoneNumber}
+          countryCode={countryCode}
+          onCountryCodeChange={setCountryCode}
+          password={password}
+          onPasswordChange={setPassword}
+          otp={otp}
           onOtpChange={setOtp}
+          authStep={authStep}
+          isNewUser={isNewUser}
+          onCheckUser={checkUserExists}
           onSendOTP={handleSendOTP}
           onVerifyOTP={handleVerifyOTP}
+          onPasswordLogin={handlePasswordLogin}
+          onCompleteRegistration={handleCompleteRegistration}
         />
         {notification && (
           <ToastNotification

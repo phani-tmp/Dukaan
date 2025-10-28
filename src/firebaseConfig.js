@@ -1,12 +1,23 @@
 export const firebaseConfig = {
-    apiKey: "AIzaSyCw8Ibqe60R_gJ5KJCGSYin2csgU7XKAjA",
-    authDomain: "dukaan-8888e.firebaseapp.com",
-    projectId: "dukaan-8888e",
-    storageBucket: "dukaan-8888e.firebasestorage.app",
-    messagingSenderId: "106477312173",
-    appId: "1:106477312173:web:d53f0c4af86b7f604d0e24",
-    measurementId: "G-KRZWJMB791" // Optional, for Analytics
+    // ACTUAL API KEY
+    apiKey: "AIzaSyAWRYzgUdSBHcBLKJoVFs0M-r2bI7AYD1s",
+    // ACTUAL AUTH DOMAIN 
+    authDomain: "dukaan-476221.firebaseapp.com",
+    // ACTUAL PROJECT ID
+    projectId: "dukaan-476221",
+    // ACTUAL STORAGE BUCKET
+    storageBucket: "dukaan-476221.firebasestorage.app",
+    // ACTUAL MESSAGING SENDER ID
+    messagingSenderId: "344365593313",
+    // ACTUAL APP ID
+    appId: "1:344365593313:web:6846271963a55723bcbda0",
+    // ACTUAL MEASUREMENT ID (for Analytics)
+    measurementId: "G-PBQPEPK818"
 };
 
-// Unique ID for data separation in Firestore
+// --- APP ID FOR NAMESPACING ---
+// NOTE: For data storage, the running environment automatically provides the __app_id 
+// and __firebase_config globals, which take precedence. 
+// This localAppId is typically only used for non-deployed local testing.
+
 export const localAppId = "dukaan-local-dev";

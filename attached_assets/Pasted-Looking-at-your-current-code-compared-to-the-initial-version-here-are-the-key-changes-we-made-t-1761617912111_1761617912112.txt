@@ -1,0 +1,121 @@
+Looking at your current code compared to the initial version, here are the **key changes** we made to fix the Firebase authentication issue:
+
+## 🔧 **Critical Firebase Authentication Fixes:**
+
+### 1. **Simplified Firebase Initialization**
+```javascript
+// BEFORE: Complex initialization with App Check
+try {
+  app = initializeApp(fireConfig);
+  initializeAppCheck(app, {
+    provider: new ReCaptchaEnterpriseProvider(appId),
+    isTokenAutoRefreshEnabled: true
+  });
+  auth = getAuth(app);
+  db = getFirestore(app);
+} catch (error) {
+  console.error("Firebase Initialization Error:", error);
+}
+
+// AFTER: Simple initialization without App Check
+try {
+  console.log('🔧 [Firebase Debug] Starting initialization...');
+  app = initializeApp(firebaseConfig);
+  console.log('✅ [Firebase Debug] App initialized');
+  auth = getAuth(app);
+  db = getFirestore(app);
+  console.log('✅ [Firebase Debug] Auth & Firestore ready');
+} catch (error) {
+  console.error('❌ [Firebase Debug] Initialization FAILED:', error);
+}
+```
+
+### 2. **Enhanced OTP Send Function with Better Error Handling**
+```javascript
+// Added comprehensive error handling and debugging
+const handleSendOTP = async () => {
+  console.log('📱 [OTP Debug] Starting OTP process...');
+  console.log('📱 [OTP Debug] Auth available:', !!auth);
+  
+  if (!auth) {
+    console.error('❌ [OTP Debug] NO AUTH INSTANCE!');
+    return;
+  }
+  
+  // Added loading states and better validation
+  setAuthLoading(true);
+  
+  // Enhanced reCAPTCHA configuration
+  window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+    size: 'normal', // Changed from 'invisible' to 'normal'
+    callback: (response) => {
+      console.log('[Auth] reCAPTCHA verified:', response);
+    },
+    'expired-callback': () => {
+      console.log('[Auth] reCAPTCHA expired');
+    }
+  });
+};
+```
+
+### 3. **Domain Configuration Fix**
+- **Problem**: `localhost:5001` not accepted in Firebase authorized domains
+- **Solution**: Use `127.0.0.1` instead of `localhost:5001`
+
+### 4. **Enhanced Phone Number Validation**
+```javascript
+// Added strict phone number validation
+onPhoneChange={(e) => {
+  // Allow only numbers and limit to 10 digits
+  const numbers = e.target.value.replace(/\D/g, '').slice(0, 10);
+  onPhoneChange(numbers);
+}}
+```
+
+### 5. **Better Loading States in UI**
+```javascript
+// Added loading states to prevent multiple submissions
+<button
+  onClick={onSendOTP}
+  className={`login-btn ${isLoading ? 'loading' : ''}`}
+  disabled={isLoading || phoneNumber.length !== 10}
+>
+  {isLoading ? (
+    <>
+      <div className="spinner"></div>
+      Sending...
+    </>
+  ) : (
+    <>
+      <Phone className="w-5 h-5" />
+      Send OTP
+    </>
+  )}
+</button>
+```
+
+### 6. **Improved Error Messages**
+```javascript
+// Specific error handling for different Firebase auth errors
+let errorMessage = 'Failed to send OTP. ';
+switch (error.code) {
+  case 'auth/invalid-phone-number':
+    errorMessage += 'Invalid phone number format.';
+    break;
+  case 'auth/too-many-requests':
+    errorMessage += 'Too many attempts. Please try again later.';
+    break;
+  default:
+    errorMessage += error.message;
+}
+```
+
+## 🎯 **Summary of Key Changes:**
+1. **Removed App Check** - Was causing initialization issues
+2. **Better reCAPTCHA setup** - Using 'normal' instead of 'invisible'
+3. **Enhanced debugging** - Console logs for troubleshooting
+4. **Improved error handling** - Specific error messages
+5. **Loading states** - Prevent multiple submissions
+6. **Domain fix** - Using `127.0.0.1` instead of `localhost:5001`
+
+These changes specifically addressed the `auth/invalid-app-credential` error you were experiencing by simplifying the Firebase setup and improving the authentication flow.
