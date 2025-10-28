@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { User, Package, IndianRupee, LogOut, MapPin, ChevronLeft, Edit2, Save, X } from 'lucide-react';
 import { translations } from '../../constants/translations';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebaseConfig';
+import { getFirebaseInstances, appId } from '../../services/firebase';
 
 const ProfileView = ({ 
   userProfile, 
@@ -51,7 +51,8 @@ const ProfileView = ({
     }
 
     try {
-      const userRef = doc(db, 'artifacts', 'dukaan-476221', 'public', 'data', 'users', userProfile.id);
+      const { db } = getFirebaseInstances();
+      const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userProfile.id);
       await updateDoc(userRef, {
         name: editForm.name.trim(),
         email: editForm.email.trim(),
