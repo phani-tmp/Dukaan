@@ -1,6 +1,8 @@
-import React from 'react';
-import { User, Package, IndianRupee, LogOut, MapPin, ChevronLeft } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, Package, IndianRupee, LogOut, MapPin, ChevronLeft, Edit2, Save, X } from 'lucide-react';
 import { translations } from '../../constants/translations';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebaseConfig';
 
 const ProfileView = ({ 
   userProfile, 
@@ -12,9 +14,58 @@ const ProfileView = ({
   onManageAddresses 
 }) => {
   const t = translations[language];
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: userProfile?.name || '',
+    email: userProfile?.email || ''
+  });
 
   const totalOrders = orders.length;
   const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
+
+  const handleEditClick = () => {
+    setEditForm({
+      name: userProfile?.name || '',
+      email: userProfile?.email || ''
+    });
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditForm({
+      name: userProfile?.name || '',
+      email: userProfile?.email || ''
+    });
+  };
+
+  const handleSaveProfile = async () => {
+    if (!editForm.name.trim()) {
+      alert('Please enter your name');
+      return;
+    }
+
+    if (!userProfile || !userProfile.id) {
+      alert('User profile not found');
+      return;
+    }
+
+    try {
+      const userRef = doc(db, 'artifacts', 'dukaan-476221', 'public', 'data', 'users', userProfile.id);
+      await updateDoc(userRef, {
+        name: editForm.name.trim(),
+        email: editForm.email.trim(),
+        updatedAt: new Date().toISOString()
+      });
+      
+      setIsEditing(false);
+      alert('Profile updated successfully! Please refresh to see changes.');
+      window.location.reload(); // Refresh to get updated profile data
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile. Please try again.');
+    }
+  };
 
   return (
     <div className="profile-view">
@@ -25,10 +76,45 @@ const ProfileView = ({
           <User className="w-12 h-12" />
         </div>
         {userProfile ? (
-          <div>
-            <p className="profile-name">{userProfile.name}</p>
-            <p className="profile-phone">{userProfile.phoneNumber}</p>
-          </div>
+          isEditing ? (
+            <div className="profile-edit-form">
+              <input
+                type="text"
+                value={editForm.name}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                placeholder="Enter your name"
+                className="profile-edit-input"
+              />
+              <input
+                type="email"
+                value={editForm.email}
+                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                placeholder="Enter your email (optional)"
+                className="profile-edit-input"
+              />
+              <div className="profile-edit-actions">
+                <button onClick={handleSaveProfile} className="profile-save-btn">
+                  <Save className="w-4 h-4" />
+                  Save
+                </button>
+                <button onClick={handleCancelEdit} className="profile-cancel-btn">
+                  <X className="w-4 h-4" />
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="profile-details">
+              <div className="profile-info-text">
+                <p className="profile-name">{userProfile.name}</p>
+                <p className="profile-phone">{userProfile.phoneNumber}</p>
+                {userProfile.email && <p className="profile-email">{userProfile.email}</p>}
+              </div>
+              <button onClick={handleEditClick} className="profile-edit-btn">
+                <Edit2 className="w-4 h-4" />
+              </button>
+            </div>
+          )
         ) : (
           <p className="profile-id">Loading profile...</p>
         )}
@@ -45,8 +131,8 @@ const ProfileView = ({
         <div className="stat-card">
           <IndianRupee className="w-6 h-6 text-green-600" />
           <div>
-            <p className="stat-value">₹{totalSpent.toFixed(0)}</p>
-            <p className="stat-label">{t.totalSpent}</p>
+            <p className="stat-value">₹{Math.round(totalSpent * 0.15)}</p>
+            <p className="stat-label">Money Saved</p>
           </div>
         </div>
       </div>

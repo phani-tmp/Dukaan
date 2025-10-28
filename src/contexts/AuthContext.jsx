@@ -7,7 +7,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection } from 'firebase/firestore';
 import { getFirebaseInstances, appId } from '../services/firebase';
 
 const AuthContext = createContext(null);
@@ -212,6 +212,7 @@ export const AuthProvider = ({ children }) => {
         name: profileData.name,
         phoneNumber: `${countryCode}${phoneNumber}`,
         password: profileData.password, // In production, this should be hashed!
+        email: profileData.email || '',
         createdAt: new Date().toISOString()
       });
 
@@ -221,6 +222,21 @@ export const AuthProvider = ({ children }) => {
         uid: user.uid,
         phoneNumber: `${countryCode}${phoneNumber}`
       });
+
+      // Save initial address if provided
+      if (profileData.address && profileData.address.street) {
+        const addressRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'addresses'));
+        await setDoc(addressRef, {
+          userId: user.uid,
+          label: 'Home',
+          street: profileData.address.street,
+          city: profileData.address.city,
+          state: profileData.address.state,
+          pincode: profileData.address.pincode,
+          isDefault: true,
+          createdAt: new Date().toISOString()
+        });
+      }
       
       setShowProfileSetup(false);
       setAuthStep('phone');

@@ -748,6 +748,67 @@ body {
   flex-shrink: 0;
 }
 
+/* Order delivery info section */
+.order-delivery-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-top: 1px solid var(--color-gray-200);
+  border-bottom: 1px solid var(--color-gray-200);
+  gap: 12px;
+}
+
+.delivery-method-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  flex: 1;
+}
+
+.delivery-method-badge svg {
+  color: #4CAF50;
+  flex-shrink: 0;
+}
+
+.change-delivery-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+  border: 2px solid #4CAF50;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4CAF50;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.change-delivery-btn:hover {
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+}
+
+.change-delivery-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
 .order-footer-detailed {
   background: #F7F7F7;
   padding: 12px 16px;
@@ -2738,6 +2799,102 @@ body {
   color: #4CAF50;
 }
 
+/* Registration form inputs */
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  color: #999;
+  width: 20px;
+  height: 20px;
+  z-index: 1;
+}
+
+.text-input,
+.password-input {
+  width: 100%;
+  padding: 14px 14px 14px 44px;
+  border: 2px solid #E0E0E0;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.text-input:focus,
+.password-input:focus {
+  border-color: #4CAF50;
+}
+
+.registration-divider {
+  text-align: center;
+  position: relative;
+  margin: 8px 0;
+}
+
+.registration-divider span {
+  background: white;
+  padding: 0 12px;
+  color: #999;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 1;
+}
+
+.registration-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #E0E0E0;
+  z-index: 0;
+}
+
+.registration-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #E0E0E0;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.registration-input:focus {
+  border-color: #4CAF50;
+}
+
+.registration-row {
+  display: flex;
+  gap: 12px;
+}
+
+.registration-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #E0E0E0;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.3s;
+  background: white;
+  cursor: pointer;
+}
+
+.registration-select:focus {
+  border-color: #4CAF50;
+}
+
 /* ===== PROFILE SETUP & ADDRESS MODALS ===== */
 .profile-setup-form,
 .address-form {
@@ -2991,6 +3148,18 @@ body {
 }
 
 /* ===== PROFILE VIEW UPDATES ===== */
+.profile-details {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.profile-info-text {
+  flex: 1;
+  text-align: left;
+}
+
 .profile-name {
   font-size: 18px;
   font-weight: 600;
@@ -3002,6 +3171,95 @@ body {
   font-size: 14px;
   color: #666;
   margin: 0;
+}
+
+.profile-email {
+  font-size: 14px;
+  color: #666;
+  margin: 4px 0 0 0;
+  font-style: italic;
+}
+
+.profile-edit-btn {
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.profile-edit-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.profile-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.profile-edit-input {
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.profile-edit-input:focus {
+  border-color: #4CAF50;
+}
+
+.profile-edit-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.profile-save-btn,
+.profile-cancel-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.profile-save-btn {
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  border: none;
+  color: white;
+}
+
+.profile-save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.profile-cancel-btn {
+  background: white;
+  border: 2px solid #e0e0e0;
+  color: #666;
+}
+
+.profile-cancel-btn:hover {
+  border-color: #999;
+  color: #333;
 }
 
 /* ===== DELIVERY METHOD SELECTION ===== */

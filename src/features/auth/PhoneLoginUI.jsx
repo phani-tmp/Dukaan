@@ -21,12 +21,18 @@ const PhoneLoginUI = ({
   const [registrationData, setRegistrationData] = useState({
     name: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    address: {
+      street: '',
+      city: '',
+      state: 'Andhra Pradesh',
+      pincode: ''
+    }
   });
 
   const handleRegistrationSubmit = () => {
     if (!registrationData.name || !registrationData.password) {
-      alert('Please fill in all fields');
+      alert('Please fill in all required fields');
       return;
     }
     if (registrationData.password !== registrationData.confirmPassword) {
@@ -35,6 +41,14 @@ const PhoneLoginUI = ({
     }
     if (registrationData.password.length < 6) {
       alert('Password must be at least 6 characters');
+      return;
+    }
+    if (!registrationData.address.street || !registrationData.address.city || !registrationData.address.pincode) {
+      alert('Please enter your address details');
+      return;
+    }
+    if (registrationData.address.pincode.length !== 6) {
+      alert('Please enter a valid 6-digit pincode');
       return;
     }
     
@@ -169,7 +183,7 @@ const PhoneLoginUI = ({
               <User className="input-icon" />
               <input
                 type="text"
-                placeholder="Your Full Name"
+                placeholder="Your Full Name *"
                 value={registrationData.name}
                 onChange={(e) => setRegistrationData({...registrationData, name: e.target.value})}
                 className="text-input"
@@ -180,7 +194,7 @@ const PhoneLoginUI = ({
               <Lock className="input-icon" />
               <input
                 type="password"
-                placeholder="Create Password (min 6 characters)"
+                placeholder="Create Password (min 6 characters) *"
                 value={registrationData.password}
                 onChange={(e) => setRegistrationData({...registrationData, password: e.target.value})}
                 className="password-input"
@@ -191,12 +205,71 @@ const PhoneLoginUI = ({
               <Lock className="input-icon" />
               <input
                 type="password"
-                placeholder="Confirm Password"
+                placeholder="Confirm Password *"
                 value={registrationData.confirmPassword}
                 onChange={(e) => setRegistrationData({...registrationData, confirmPassword: e.target.value})}
                 className="password-input"
               />
             </div>
+
+            <div className="registration-divider">
+              <span>Your Address</span>
+            </div>
+
+            <input
+              type="text"
+              placeholder="Street / Area / Village *"
+              value={registrationData.address.street}
+              onChange={(e) => setRegistrationData({
+                ...registrationData,
+                address: {...registrationData.address, street: e.target.value}
+              })}
+              className="registration-input"
+            />
+
+            <div className="registration-row">
+              <input
+                type="text"
+                placeholder="City *"
+                value={registrationData.address.city}
+                onChange={(e) => setRegistrationData({
+                  ...registrationData,
+                  address: {...registrationData.address, city: e.target.value}
+                })}
+                className="registration-input"
+                style={{flex: 1}}
+              />
+              <input
+                type="text"
+                placeholder="Pincode *"
+                value={registrationData.address.pincode}
+                onChange={(e) => {
+                  const numbers = e.target.value.replace(/\D/g, '').slice(0, 6);
+                  setRegistrationData({
+                    ...registrationData,
+                    address: {...registrationData.address, pincode: numbers}
+                  });
+                }}
+                className="registration-input"
+                style={{flex: 1}}
+                maxLength="6"
+              />
+            </div>
+
+            <select
+              value={registrationData.address.state}
+              onChange={(e) => setRegistrationData({
+                ...registrationData,
+                address: {...registrationData.address, state: e.target.value}
+              })}
+              className="registration-select"
+            >
+              <option value="Andhra Pradesh">Andhra Pradesh</option>
+              <option value="Telangana">Telangana</option>
+              <option value="Tamil Nadu">Tamil Nadu</option>
+              <option value="Karnataka">Karnataka</option>
+              <option value="Other">Other</option>
+            </select>
             
             <button 
               onClick={handleRegistrationSubmit} 
