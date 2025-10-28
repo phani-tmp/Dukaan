@@ -384,14 +384,29 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
       case 'pending': return '#9E9E9E';
       case 'accepted': return '#2196F3';
       case 'out_for_delivery': return '#FF9800';
+      case 'ready_for_pickup': return '#9C27B0';
       case 'delivered': return '#4CAF50';
+      case 'completed': return '#4CAF50';
       case 'cancelled': return '#f44336';
       default: return '#9E9E9E';
     }
   };
 
-  const activeStatuses = ['pending', 'accepted', 'out_for_delivery'];
-  const completedStatuses = ['delivered', 'cancelled'];
+  const getStatusLabel = (status) => {
+    switch(status) {
+      case 'pending': return 'PENDING';
+      case 'accepted': return 'ACCEPTED';
+      case 'out_for_delivery': return 'OUT FOR DELIVERY';
+      case 'ready_for_pickup': return 'READY FOR PICKUP';
+      case 'delivered': return 'DELIVERED';
+      case 'completed': return 'COMPLETED';
+      case 'cancelled': return 'CANCELLED';
+      default: return status.toUpperCase();
+    }
+  };
+
+  const activeStatuses = ['pending', 'accepted', 'out_for_delivery', 'ready_for_pickup'];
+  const completedStatuses = ['delivered', 'cancelled', 'completed'];
   
   const filteredOrders = allOrders.filter(order => {
     if (orderTab === 'active') {
@@ -529,7 +544,7 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                         )}
                       </div>
                       <div className="order-status-badge-new" style={{ backgroundColor: getStatusColor(order.status) }}>
-                        {order.status.toUpperCase()}
+                        {getStatusLabel(order.status)}
                       </div>
                     </div>
                     
@@ -571,12 +586,21 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                             value={order.status}
                             onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
                             className="status-dropdown"
-                            disabled={order.status === 'cancelled' || order.status === 'delivered'}
+                            disabled={order.status === 'cancelled' || order.status === 'delivered' || order.status === 'completed'}
                           >
                             <option value="pending">Pending</option>
                             <option value="accepted">Accepted</option>
-                            <option value="out_for_delivery">Out for Delivery</option>
-                            <option value="delivered">Delivered</option>
+                            {order.deliveryMethod === 'pickup' ? (
+                              <>
+                                <option value="ready_for_pickup">Ready for Pickup</option>
+                                <option value="completed">Completed</option>
+                              </>
+                            ) : (
+                              <>
+                                <option value="out_for_delivery">Out for Delivery</option>
+                                <option value="delivered">Delivered</option>
+                              </>
+                            )}
                             <option value="cancelled">Cancelled</option>
                           </select>
                         </div>
@@ -590,7 +614,7 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                             View Details
                           </button>
                           
-                          {order.status !== 'cancelled' && order.status !== 'delivered' && (
+                          {order.status !== 'cancelled' && order.status !== 'delivered' && order.status !== 'completed' && (
                             <button 
                               onClick={() => handleCancelOrder(order.id)}
                               className="cancel-order-btn"

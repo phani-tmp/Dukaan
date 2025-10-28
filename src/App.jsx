@@ -12,6 +12,7 @@ import ToastNotification from './components/shared/ToastNotification';
 import AppHeader from './components/shared/AppHeader';
 import BottomNavigation from './components/shared/BottomNavigation';
 import OrderDetailsModal from './components/shared/OrderDetailsModal';
+import CheckoutConfirmationModal from './components/shared/CheckoutConfirmationModal';
 
 import HomeView from './features/customer/HomeView';
 import CartView from './features/customer/CartView';
@@ -59,7 +60,8 @@ function App() {
     subcategoriesData,
     orders,
     allOrders,
-    loading: dataLoading
+    loading: dataLoading,
+    handleChangeDeliveryMethod
   } = useData();
 
   const {
@@ -96,6 +98,7 @@ function App() {
   const [previousOrderStatuses, setPreviousOrderStatuses] = useState({});
   const [isShopkeeperMode, setIsShopkeeperMode] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
 
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'en' ? 'te' : 'en');
@@ -150,6 +153,22 @@ function App() {
       setSelectedAddress(defaultAddr);
     }
   }, [userAddresses, selectedAddress, deliveryMethod]);
+
+  const handleConfirmCheckout = (checkoutDeliveryMethod) => {
+    setDeliveryMethod(checkoutDeliveryMethod);
+    
+    if (checkoutDeliveryMethod === 'delivery') {
+      if (!selectedAddress && userAddresses.length > 0) {
+        const defaultAddr = userAddresses.find(addr => addr.isDefault) || userAddresses[0];
+        setSelectedAddress(defaultAddr);
+      }
+    } else {
+      setSelectedAddress(null);
+    }
+    
+    setShowCheckoutModal(false);
+    handleCheckout(userAddresses, setCurrentView);
+  };
 
   const loading = authLoading || dataLoading;
 
@@ -235,13 +254,8 @@ function App() {
             cartItems={cartItems}
             onAddToCart={handleAddToCart}
             setCurrentView={setCurrentView}
-            onCheckout={() => handleCheckout(userAddresses, setCurrentView)}
+            onCheckout={() => setShowCheckoutModal(true)}
             language={language}
-            deliveryMethod={deliveryMethod}
-            setDeliveryMethod={setDeliveryMethod}
-            userAddresses={userAddresses}
-            selectedAddress={selectedAddress}
-            setSelectedAddress={setSelectedAddress}
           />
         )}
 
@@ -251,6 +265,9 @@ function App() {
             setCurrentView={setCurrentView}
             language={language}
             onSelectOrder={setSelectedOrder}
+            onChangeDeliveryMethod={handleChangeDeliveryMethod}
+            userAddresses={userAddresses}
+            onManageAddresses={() => setShowAddressManager(true)}
           />
         )}
 
@@ -334,6 +351,23 @@ function App() {
             setEditingAddress(null);
           }}
           editingAddress={editingAddress}
+        />
+      )}
+
+      {showCheckoutModal && (
+        <CheckoutConfirmationModal
+          isOpen={showCheckoutModal}
+          onClose={() => setShowCheckoutModal(false)}
+          onConfirm={handleConfirmCheckout}
+          cartItems={Object.values(cartItems)}
+          userAddresses={userAddresses}
+          selectedAddress={selectedAddress}
+          onAddressSelect={setSelectedAddress}
+          onManageAddresses={() => {
+            setShowCheckoutModal(false);
+            setShowAddressManager(true);
+          }}
+          language={language}
         />
       )}
     </div>

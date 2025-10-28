@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { collection, query, onSnapshot, where } from 'firebase/firestore';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { collection, query, onSnapshot, where, doc, updateDoc } from 'firebase/firestore';
 import { getFirebaseInstances, appId } from '../services/firebase';
 import { categories as defaultCategories } from '../constants/categories';
 import { useAuth } from './AuthContext';
@@ -117,6 +117,37 @@ export const DataProvider = ({ children }) => {
     return () => unsubscribe();
   }, [user, db]);
 
+  const handleChangeDeliveryMethod = useCallback(async (orderId, newDeliveryMethod, selectedAddress = null) => {
+    try {
+      const orderRef = doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId);
+      
+      const updateData = {
+        deliveryMethod: newDeliveryMethod,
+        updatedAt: new Date().toISOString()
+      };
+      
+      if (newDeliveryMethod === 'pickup') {
+        updateData.deliveryAddress = 'Store Pickup';
+        updateData.deliveryInstructions = '';
+        updateData.selectedAddressId = null;
+      } else {
+        if (!selectedAddress) {
+          alert('Please select a delivery address');
+          return;
+        }
+        updateData.deliveryAddress = selectedAddress.fullAddress || `${selectedAddress.street}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.pincode}`;
+        updateData.deliveryInstructions = selectedAddress.deliveryInstructions || '';
+        updateData.selectedAddressId = selectedAddress.id;
+      }
+      
+      await updateDoc(orderRef, updateData);
+      alert(`Order type changed to ${newDeliveryMethod === 'pickup' ? 'Store Pickup' : 'Home Delivery'} successfully!`);
+    } catch (error) {
+      console.error('Error changing delivery method:', error);
+      alert('Failed to change order type. Please try again.');
+    }
+  }, [db]);
+
   const value = {
     products,
     categoriesData,
@@ -124,7 +155,8 @@ export const DataProvider = ({ children }) => {
     orders,
     allOrders,
     allUsers,
-    loading
+    loading,
+    handleChangeDeliveryMethod
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

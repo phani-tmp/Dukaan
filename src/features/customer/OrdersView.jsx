@@ -1,11 +1,16 @@
-import React from 'react';
-import { Package, IndianRupee, CheckCircle, Clock, Truck, XCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Package, IndianRupee, CheckCircle, Clock, Truck, XCircle, ShoppingBag, RefreshCw } from 'lucide-react';
 import { translations } from '../../constants/translations';
+import ChangeOrderTypeModal from '../../components/shared/ChangeOrderTypeModal';
 
-const OrdersView = ({ orders, language, setSelectedOrder }) => {
+const OrdersView = ({ orders, language, setSelectedOrder, onChangeDeliveryMethod, userAddresses, onManageAddresses }) => {
   const t = translations[language];
+  const [changeOrderModalOpen, setChangeOrderModalOpen] = useState(false);
+  const [selectedOrderForChange, setSelectedOrderForChange] = useState(null);
 
-  const activeOrders = orders.filter(order => order.status !== 'delivered');
+  const activeOrders = orders.filter(order => 
+    order.status !== 'delivered' && order.status !== 'completed' && order.status !== 'cancelled'
+  );
 
   if (activeOrders.length === 0) {
     return (
@@ -21,16 +26,19 @@ const OrdersView = ({ orders, language, setSelectedOrder }) => {
       pending: t.orderPlaced || 'Pending',
       accepted: 'Accepted',
       out_for_delivery: 'Out for Delivery',
+      ready_for_pickup: 'Ready for Pickup',
       delivered: t.delivered || 'Delivered',
+      completed: 'Completed',
       cancelled: 'Cancelled'
     };
     return statusMap[status] || status;
   };
 
   const getStatusIcon = (status) => {
-    if (status === 'delivered') return <CheckCircle className="w-5 h-5" />;
+    if (status === 'delivered' || status === 'completed') return <CheckCircle className="w-5 h-5" />;
     if (status === 'cancelled') return <XCircle className="w-5 h-5" />;
     if (status === 'out_for_delivery') return <Truck className="w-5 h-5" />;
+    if (status === 'ready_for_pickup') return <ShoppingBag className="w-5 h-5" />;
     if (status === 'accepted') return <CheckCircle className="w-5 h-5" />;
     return <Clock className="w-5 h-5" />;
   };
@@ -38,11 +46,26 @@ const OrdersView = ({ orders, language, setSelectedOrder }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'delivered': return '#4CAF50';
+      case 'completed': return '#4CAF50';
       case 'accepted': return '#2196F3';
       case 'out_for_delivery': return '#FF9800';
+      case 'ready_for_pickup': return '#9C27B0';
       case 'cancelled': return '#f44336';
       case 'pending': return '#9E9E9E';
       default: return '#9E9E9E';
+    }
+  };
+
+  const handleOpenChangeModal = (order) => {
+    setSelectedOrderForChange(order);
+    setChangeOrderModalOpen(true);
+  };
+
+  const handleConfirmChange = (newMethod, selectedAddress) => {
+    if (selectedOrderForChange) {
+      onChangeDeliveryMethod(selectedOrderForChange.id, newMethod, selectedAddress);
+      setChangeOrderModalOpen(false);
+      setSelectedOrderForChange(null);
     }
   };
 
@@ -121,6 +144,31 @@ const OrdersView = ({ orders, language, setSelectedOrder }) => {
               </div>
             )}
 
+            <div className="order-delivery-info">
+              <div className="delivery-method-badge">
+                {order.deliveryMethod === 'delivery' ? (
+                  <>
+                    <Truck className="w-4 h-4" />
+                    <span>Home Delivery</span>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="w-4 h-4" />
+                    <span>Store Pickup</span>
+                  </>
+                )}
+              </div>
+              {(order.status === 'pending' || order.status === 'accepted') && onChangeDeliveryMethod && (
+                <button 
+                  onClick={() => handleOpenChangeModal(order)}
+                  className="change-delivery-btn"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Change Order Type
+                </button>
+              )}
+            </div>
+
             <div className="order-footer-detailed">
               <div className="order-total-row">
                 <span className="order-total-label">Order Total</span>
@@ -133,6 +181,20 @@ const OrdersView = ({ orders, language, setSelectedOrder }) => {
           </div>
         ))}
       </div>
+
+      {changeOrderModalOpen && selectedOrderForChange && (
+        <ChangeOrderTypeModal
+          isOpen={changeOrderModalOpen}
+          onClose={() => {
+            setChangeOrderModalOpen(false);
+            setSelectedOrderForChange(null);
+          }}
+          onConfirm={handleConfirmChange}
+          currentMethod={selectedOrderForChange.deliveryMethod}
+          userAddresses={userAddresses || []}
+          onManageAddresses={onManageAddresses}
+        />
+      )}
     </div>
   );
 };
