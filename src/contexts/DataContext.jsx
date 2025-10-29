@@ -40,11 +40,7 @@ export const DataProvider = ({ children }) => {
     const categoriesQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'categories'));
     const unsubscribe = onSnapshot(categoriesQuery, (snapshot) => {
       const categoriesDataFromDB = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      if (categoriesDataFromDB.length === 0) {
-        setCategoriesData(defaultCategories);
-      } else {
-        setCategoriesData(categoriesDataFromDB);
-      }
+      setCategoriesData(categoriesDataFromDB);
     });
 
     return () => unsubscribe();

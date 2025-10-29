@@ -882,17 +882,33 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
 
         {activeTab === 'categories' && (
           <div className="categories-section">
+            {categoriesData.length === 0 && (
+              <div style={{ 
+                padding: '24px', 
+                background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)', 
+                borderRadius: '12px', 
+                marginBottom: '20px',
+                border: '2px dashed #FF9800',
+                textAlign: 'center'
+              }}>
+                <h3 style={{ color: '#E65100', marginBottom: '12px', fontSize: '18px' }}>
+                  📦 No Categories Found in Database
+                </h3>
+                <p style={{ color: '#757575', marginBottom: '16px', fontSize: '14px' }}>
+                  Click below to add Zepto-style default categories (Groceries, Vegetables, Milk, Snacks, Medicines, Electronics)
+                </p>
+                <button onClick={seedDefaultData} className="add-product-btn" style={{ background: '#FF9800', fontSize: '16px', padding: '12px 24px' }}>
+                  <Settings className="w-5 h-5" />
+                  Seed Default Categories
+                </button>
+              </div>
+            )}
+            
             <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
               <button onClick={() => setShowCategoryForm(!showCategoryForm)} className="add-product-btn">
                 <PlusCircle className="w-5 h-5" />
                 Add Category
               </button>
-              {categoriesData.length === 0 && (
-                <button onClick={seedDefaultData} className="add-product-btn" style={{ background: '#FF9800' }}>
-                  <Settings className="w-5 h-5" />
-                  Seed Default Data (Zepto-style)
-                </button>
-              )}
             </div>
 
             {showCategoryForm && (
