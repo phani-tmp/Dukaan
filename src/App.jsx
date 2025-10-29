@@ -27,6 +27,7 @@ import AddressManager from './features/address/AddressManager';
 import AddressForm from './features/address/AddressForm';
 
 import ShopkeeperDashboard from './features/shopkeeper/ShopkeeperDashboard';
+import RiderDashboard from './features/rider/RiderDashboard';
 
 function App() {
   const {
@@ -97,6 +98,7 @@ function App() {
   const [notification, setNotification] = useState(null);
   const [previousOrderStatuses, setPreviousOrderStatuses] = useState({});
   const [isShopkeeperMode, setIsShopkeeperMode] = useState(false);
+  const [isRiderMode, setIsRiderMode] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
 
@@ -108,11 +110,12 @@ function App() {
     const params = new URLSearchParams(window.location.search);
     const mode = params.get('mode');
     setIsShopkeeperMode(mode === 'shopkeeper');
-    console.log('[Mode] Shopkeeper mode:', mode === 'shopkeeper', 'URL:', window.location.search);
+    setIsRiderMode(mode === 'rider');
+    console.log('[Mode] Shopkeeper mode:', mode === 'shopkeeper', 'Rider mode:', mode === 'rider', 'URL:', window.location.search);
   }, []);
 
   useEffect(() => {
-    if (!user || isShopkeeperMode || orders.length === 0) return;
+    if (!user || isShopkeeperMode || isRiderMode || orders.length === 0) return;
 
     const currentStatuses = {};
     orders.forEach(order => {
@@ -145,7 +148,7 @@ function App() {
     });
 
     setPreviousOrderStatuses(currentStatuses);
-  }, [orders, isShopkeeperMode, user]);
+  }, [orders, isShopkeeperMode, isRiderMode, user]);
 
   useEffect(() => {
     if (userAddresses.length > 0 && !selectedAddress && deliveryMethod === 'delivery') {
@@ -185,6 +188,16 @@ function App() {
         onExit={() => window.location.href = '/'}
         categoriesData={categoriesData}
         subcategoriesData={subcategoriesData}
+      />
+    );
+  }
+
+  if (isRiderMode) {
+    return (
+      <RiderDashboard
+        allOrders={allOrders}
+        language={language}
+        onExit={() => window.location.href = '/'}
       />
     );
   }

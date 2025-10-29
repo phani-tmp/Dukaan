@@ -121,13 +121,13 @@ const OrdersView = ({ orders, language, setSelectedOrder, onChangeDeliveryMethod
                         <span className="order-item-quantity">Qty: {item.quantity}</span>
                         <span className="order-item-price">
                           <IndianRupee className="w-3 h-3" />
-                          {item.price.toFixed(0)} each
+                          {(item.discountedPrice || item.price).toFixed(0)} each
                         </span>
                       </div>
                     </div>
                     <div className="order-item-total">
                       <IndianRupee className="w-4 h-4" />
-                      {(item.price * item.quantity).toFixed(0)}
+                      {((item.discountedPrice || item.price) * item.quantity).toFixed(0)}
                     </div>
                   </div>
                 );

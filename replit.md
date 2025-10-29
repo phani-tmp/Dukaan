@@ -1,7 +1,7 @@
 # DUKAAN - Quick Commerce Application (ఘుకాన్)
 
 ## Overview
-Dukaan is a modern quick commerce application built with React, Vite, and Firebase, inspired by Zepto. It provides a seamless direct-to-consumer shopping experience for various products like groceries, medicines, and electronics. The application features a three-level category hierarchy, comprehensive order management with flexible workflows (pickup vs. delivery), and bilingual support (English/Telugu). It aims to deliver a production-ready, scalable solution for quick commerce with a professional and intuitive user experience. Recent enhancements include a robust password-based authentication system, a streamlined checkout process with a confirmation modal, and the ability for customers to change order types post-placement.
+Dukaan is a modern quick commerce application built with React, Vite, and Firebase, inspired by Zepto. It provides a seamless direct-to-consumer shopping experience for various products like groceries, medicines, and electronics. The application features a three-level category hierarchy, comprehensive order management with flexible workflows (pickup vs. delivery), and bilingual support (English/Telugu). It aims to deliver a production-ready, scalable solution for quick commerce with a professional and intuitive user experience. Recent enhancements include a robust password-based authentication system, a streamlined checkout process with a confirmation modal, the ability for customers to change order types post-placement, improved UI/UX for order type changes, image upload capabilities for categories/subcategories, fixed price calculation consistency, and a dedicated rider dashboard for delivery management.
 
 ## User Preferences
 I prefer the agent to be meticulous and thorough, avoiding the introduction of new bugs or regressions. When making changes, prioritize robust, production-quality code. For any significant architectural decisions or feature implementations, please ask for confirmation before proceeding. Ensure that the design philosophy adheres to a professional, emoji-free aesthetic with real product imagery. I value clear and concise explanations for complex technical concepts. Do not make changes to the `App.jsx` file without explicit instruction.
@@ -19,20 +19,32 @@ The application features a modern, mobile-first design with a professional, emoj
 - **Image Handling**: Supports direct image upload (Base64) and URL-based images.
 - **Search**: Production-ready search functionality filtering products by name.
 - **State Management**: React's Context API for centralized state (AuthContext, DataContext, CartContext, AddressContext).
-- **Code Structure**: Feature-oriented component-based architecture for maintainability and scalability, separating concerns into `components/shared`, `features/customer`, `features/auth`, `features/address`, `features/shopkeeper`, `features/admin`, `contexts`, `services`, `constants`, and `utils`.
+- **Code Structure**: Feature-oriented component-based architecture for maintainability and scalability, separating concerns into `components/shared`, `features/customer`, `features/auth`, `features/address`, `features/shopkeeper`, `features/rider`, `features/admin`, `contexts`, `services`, `constants`, and `utils`.
 
 ### Feature Specifications
 - **Authentication**: Phone authentication with OTP for new users and password-based login for returning users, integrated with reCAPTCHA. Includes user profile management (name, email, phone).
 - **Address Management**: CRUD operations for addresses with labels (Home, Work, Other), default address selection, and delivery instructions.
 - **Three-Level Category Hierarchy**: Home (main categories) -> Subcategories -> Products, with back navigation.
-- **Dual Interface Architecture**: Separated customer app and shopkeeper dashboard (`?mode=shopkeeper`).
+- **Triple Interface Architecture**: Separated customer app, shopkeeper dashboard (`?mode=shopkeeper`), and rider dashboard (`?mode=rider`).
 - **Comprehensive Order Management**:
     - Simplified 4-status workflow: Pending → Accepted → (Ready for Pickup / Out for Delivery) → (Completed / Delivered).
     - Customer ability to change delivery method for pending/accepted orders.
     - Shopkeeper dashboard with active/completed order tabs, product images, quantity badges, customer contact info, and status dropdowns.
     - Order cancellation with reason tracking.
     - Detailed order view modal.
-- **Product Management**: CRUD for products, categories, subcategories (shopkeeper dashboard), including "out of stock" toggling and "popular" marking.
+- **Product Management**: CRUD for products, categories, subcategories (shopkeeper dashboard), including "out of stock" toggling, "popular" marking, and dual image input (URL or file upload with preview) for all product types.
+- **Rider Dashboard**: Dedicated interface for delivery riders (`?mode=rider`) with:
+    - Order categorization (Ready to Pickup, Out for Delivery, Delivered)
+    - Customer contact information and delivery addresses
+    - Google Maps integration for navigation
+    - One-tap status updates (Pick Up, Mark as Delivered)
+    - Real-time delivery statistics
+- **Enhanced Order Type Modal**: Professional UI for changing delivery method with:
+    - Address display using correct Firestore schema (fullAddress)
+    - Beautiful gradient backgrounds and selection states
+    - Improved card layouts and button styling
+    - Seamless address selection experience
+- **Price Calculation Consistency**: Fixed discrepancy between customer OrdersView and shopkeeper dashboard - both now correctly use discounted prices when available.
 - **User Profile**: Enhanced section with order history, user statistics, and admin panel access.
 - **Real-time Notifications**: Toast notifications for order status updates.
 
