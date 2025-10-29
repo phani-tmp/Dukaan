@@ -320,37 +320,44 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
   const handleSubmitCategory = async (e) => {
     e.preventDefault();
     try {
+      const categoryId = categoryFormData.nameEn.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      
       const categoryData = {
-        ...categoryFormData,
+        nameEn: categoryFormData.nameEn,
+        nameTe: categoryFormData.nameTe,
+        imageUrl: categoryFormData.imageUrl,
+        color: categoryFormData.color,
         gradient: categoryFormData.gradient || `linear-gradient(135deg, ${categoryFormData.color} 0%, ${categoryFormData.color}dd 100%)`,
         createdAt: new Date().toISOString()
       };
 
       if (editingCategoryId) {
-        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'categories', editingCategoryId), categoryData);
+        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'categories', editingCategoryId), categoryData, { merge: true });
         alert('Category updated successfully!');
       } else {
-        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'categories'), categoryData);
+        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'categories', categoryId), categoryData);
         alert('Category added successfully!');
       }
 
       setCategoryFormData({ nameEn: '', nameTe: '', imageUrl: '', color: '#4CAF50', gradient: '' });
       setShowCategoryForm(false);
       setEditingCategoryId(null);
+      setCategoryImagePreview(null);
     } catch (error) {
       console.error('Error saving category:', error);
-      alert('Failed to save category');
+      alert(`Failed to save category: ${error.message}`);
     }
   };
 
   const handleEditCategory = (category) => {
     setCategoryFormData({
-      nameEn: category.nameEn,
+      nameEn: category.nameEn || '',
       nameTe: category.nameTe || '',
-      icon: category.icon || '',
+      imageUrl: category.imageUrl || '',
       color: category.color || '#4CAF50',
       gradient: category.gradient || ''
     });
+    setCategoryImagePreview(category.imageUrl || null);
     setEditingCategoryId(category.id);
     setShowCategoryForm(true);
   };
@@ -370,25 +377,31 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
   const handleSubmitSubcategory = async (e) => {
     e.preventDefault();
     try {
+      const subcategoryId = `${subcategoryFormData.categoryId}-${subcategoryFormData.nameEn.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
+      
       const subcategoryData = {
-        ...subcategoryFormData,
+        nameEn: subcategoryFormData.nameEn,
+        nameTe: subcategoryFormData.nameTe,
+        categoryId: subcategoryFormData.categoryId,
+        imageUrl: subcategoryFormData.imageUrl,
         createdAt: new Date().toISOString()
       };
 
       if (editingSubcategoryId) {
-        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'subcategories', editingSubcategoryId), subcategoryData);
+        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'subcategories', editingSubcategoryId), subcategoryData, { merge: true });
         alert('Subcategory updated successfully!');
       } else {
-        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'subcategories'), subcategoryData);
+        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'subcategories', subcategoryId), subcategoryData);
         alert('Subcategory added successfully!');
       }
 
       setSubcategoryFormData({ nameEn: '', nameTe: '', categoryId: '', imageUrl: '' });
       setShowSubcategoryForm(false);
       setEditingSubcategoryId(null);
+      setSubcategoryImagePreview(null);
     } catch (error) {
       console.error('Error saving subcategory:', error);
-      alert('Failed to save subcategory');
+      alert(`Failed to save subcategory: ${error.message}`);
     }
   };
 
@@ -908,8 +921,8 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                     onTranscript={({ english, telugu }) => {
                       setCategoryFormData({
                         ...categoryFormData,
-                        nameEn: english,
-                        nameTe: telugu
+                        nameEn: english || '',
+                        nameTe: telugu || ''
                       });
                     }}
                   />
@@ -1036,8 +1049,8 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                     onTranscript={({ english, telugu }) => {
                       setSubcategoryFormData({
                         ...subcategoryFormData,
-                        nameEn: english,
-                        nameTe: telugu
+                        nameEn: english || '',
+                        nameTe: telugu || ''
                       });
                     }}
                   />

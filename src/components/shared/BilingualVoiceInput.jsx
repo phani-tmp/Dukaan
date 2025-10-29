@@ -33,16 +33,16 @@ const BilingualVoiceInput = ({ onTranscript, className = '' }) => {
         console.log('[BilingualVoiceInput] Translated EN:', englishText, 'TE:', teluguText);
         
         onTranscript({
-          english: englishText,
-          telugu: teluguText,
-          original: transcript
+          english: englishText || '',
+          telugu: teluguText || '',
+          original: transcript || ''
         });
       } catch (error) {
         console.error('[BilingualVoiceInput] Translation error:', error);
         onTranscript({
-          english: transcript,
-          telugu: transcript,
-          original: transcript
+          english: transcript || '',
+          telugu: transcript || '',
+          original: transcript || ''
         });
       }
     };
