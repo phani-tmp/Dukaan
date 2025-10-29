@@ -144,3 +144,52 @@ The application features a modern, mobile-first design with a professional, emoj
 - Gemini-powered delivery route optimization
 - Daily sales insights in Telugu for shopkeepers
 - Token usage optimization if catalog grows significantly
+
+## Mobile App Deployment (October 29, 2025)
+
+### Capacitor Integration
+- **Platform**: Android (iOS support available but not configured)
+- **Package ID**: `com.dukaan.quickcommerce`
+- **Build Tool**: Capacitor 7.4.4
+- **Single App Architecture**: One app serves all three interfaces (customer, rider, shopkeeper)
+- **Web Compatibility**: Web version continues working unchanged at port 5000
+
+### Mobile Features
+- All web features work on mobile (voice shopping, Firebase auth, orders, etc.)
+- Native device permissions: Camera, Microphone, Location, Storage
+- Offline support through Firebase caching
+- Google Maps integration for delivery tracking
+- Voice recognition using device microphone
+
+### Deployment Configuration
+- **Build Directory**: `dist/` (created by Vite)
+- **Android Project**: `android/` folder with native Android code
+- **Configuration**: `capacitor.config.ts`
+- **Build Scripts**: `npm run cap:sync`, `npm run cap:android`, `npm run cap:build`
+- **Permissions**: Internet, Camera, Microphone, Location, Storage (all optional except Internet)
+
+### Testing Options
+1. **Android Studio Emulator**: For development testing
+2. **Physical Android Device**: USB debugging for real-world testing
+3. **Both Web and Mobile**: Can test simultaneously without conflicts
+
+### Play Store Release Process
+1. Build production APK with signed keystore
+2. Create Play Console account ($25 one-time fee)
+3. Upload APK and configure store listing
+4. Submit for Google review (1-3 days)
+5. App goes live after approval
+
+### Important Notes
+- **Single Codebase**: All React code changes apply to both web and mobile
+- **No Separate Apps**: Riders and shopkeepers use the same app with mode switching
+- **Firebase Mobile Config**: Optional `google-services.json` for enhanced features
+- **Icon Customization**: Default Capacitor icons; can be replaced with custom Dukaan logo
+
+### Documentation
+Complete deployment guide available in `MOBILE_DEPLOYMENT.md` with:
+- Step-by-step testing instructions
+- Firebase mobile configuration
+- App icon customization
+- Play Store submission guide
+- Troubleshooting tips

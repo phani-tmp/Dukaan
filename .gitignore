@@ -23,6 +23,18 @@ dist-ssr
 *.sln
 *.sw?
 
+# Capacitor
+android/app/build/
+android/app/release/
+android/.gradle/
+android/build/
+android/local.properties
+android/.idea/
+android/google-services.json
+ios/App/build/
+ios/App/Pods/
+.DS_Store
+
 # Environment variables
 .env
 .env.local
