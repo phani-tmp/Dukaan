@@ -1,0 +1,85 @@
+favicon.ico:1  Failed to load resource: the server responded with a status of 404 (Not Found)Understand this error
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?VER=8&database=projects%2Fdukaan-96e35%2Fdatabases%2F(default)&gsessionid=6J0pPNX09s5X111tlxlqXGmIHayhoC_Jliput8dn-Nk&SID=cGcf0vYKsNzFCLQe8Aq4_Q&RID=34028&TYPE=terminate&zx=18eoylk678m8:1  Failed to load resource: the server responded with a status of 400 ()Understand this error
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?VER=8&database=projects%2Fdukaan-96e35%2Fdatabases%2F(default)&gsessionid=oowq4Z78nHKMQEKnmGwbrAFO0MadybQjm0YYD3TcjzI&SID=3IZNMyWx0YSLy0vRa8_RSA&RID=35376&TYPE=terminate&zx=alt8o9ucxvc1:1  Failed to load resource: the server responded with a status of 400 ()Understand this error
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?VER=8&database=projects%2Fdukaan-96e35%2Fdatabases%2F(default)&gsessionid=FXYRVgyuTe_Bmmizjnsm-hjbDLk29JhdeWYLu2tAu6g&SID=diOgjrIbcMnu6MGcIWMhNA&RID=54599&TYPE=terminate&zx=emau7wfk53lf:1  Failed to load resource: the server responded with a status of 400 ()Understand this error
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?VER=8&database=projects%2Fdukaan-96e35%2Fdatabases%2F(default)&gsessionid=VMu7guV_FdiEsiGyYkxryUmfpw8TOERr4hqlwDTHMFA&SID=jH02S8MrdLuzMqG1g3Msrg&RID=49674&TYPE=terminate&zx=yspdezq7gkpg:1  Failed to load resource: the server responded with a status of 400 ()Understand this error
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=MR3AzmejAr8h4__q57VR0zqRc2jxVrE6-E0I83RRd74&VER=8&database=projects%2Fdukaan-96e35%2Fdatabases%2F(default)&RID=rpc&SID=s4BKZ_QEzqtzNgdwZr951A&AID=0&CI=0&TYPE=xmlhttp&zx=t5t7jmcnh22k&t=1:1  Failed to load resource: the server responded with a status of 400 ()Understand this error
+logger.ts:117 [2025-10-29T08:16:15.510Z]  @firebase/firestore: Firestore (11.0.2): WebChannelConnection RPC 'Write' stream 0x14ad6289 transport errored: jd
+defaultLogHandler @ logger.ts:117Understand this warning
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?VER=8&database=projects%2Fdukaan-96e35%2Fdatabases%2F(default)&gsessionid=gtaPlm49Al9g3nw-RppiYoC5DfzE2Wr6GmgUeBttpl4&SID=l8W6_uBYZNzwnIQi7QEDhg&RID=53770&TYPE=terminate&zx=4d1cph4z3ylw:1  Failed to load resource: the server responded with a status of 400 ()Understand this error
+firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=HNHEA-wpGeCbZ8P94XP4rPnA4oR90QO4qQ1wseeOzCI&VER=8&database=projects%2Fdukaan-96e35%2Fdatabases%2F(default)&RID=rpc&SID=IGZ6GYbgapt_urt_DxQhyQ&AID=0&CI=0&TYPE=xmlhttp&zx=i78v7e96u819&t=1:1  Failed to load resource: the server responded with a status of 400 ()Understand this error
+logger.ts:117 [2025-10-29T08:16:22.967Z]  @firebase/firestore: Firestore (11.0.2): WebChannelConnection RPC 'Write' stream 0x14ad628b transport errored: jd
+defaultLogHandler @ logger.ts:117Understand this warning
+webchannel_connection.ts:265  GET https://firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?gsessionid=DimQ45W8xYKg9MgL2vzCK-ZYeIfjcFM-5LTu0CRVLR0&VER=8&database=projects%2Fdukaan-96e35%2Fdatabases%2F(default)&RID=rpc&SID=fUA_ITRWPqxF0C5HOWTagw&AID=0&CI=0&TYPE=xmlhttp&zx=7lo5nwhkix3m&t=1 400 (Bad Request)
+e.send @ webchannel_blob_es2018.js:52
+e.ea @ webchannel_blob_es2018.js:60
+Jb @ webchannel_blob_es2018.js:26
+fd @ webchannel_blob_es2018.js:76
+e.Fa @ webchannel_blob_es2018.js:75
+Da @ webchannel_blob_es2018.js:14
+Promise.then
+g @ webchannel_blob_es2018.js:14
+ec @ webchannel_blob_es2018.js:75
+Rb @ webchannel_blob_es2018.js:39
+M.Y @ webchannel_blob_es2018.js:33
+M.ca @ webchannel_blob_es2018.js:31
+ab @ webchannel_blob_es2018.js:25
+F @ webchannel_blob_es2018.js:23
+Wc @ webchannel_blob_es2018.js:62
+e.bb @ webchannel_blob_es2018.js:63
+e.Ea @ webchannel_blob_es2018.js:63
+Lc @ webchannel_blob_es2018.js:57
+e.Pa @ webchannel_blob_es2018.js:56
+Promise.then
+Nc @ webchannel_blob_es2018.js:56
+e.Sa @ webchannel_blob_es2018.js:55
+Promise.then
+e.send @ webchannel_blob_es2018.js:52
+e.ea @ webchannel_blob_es2018.js:60
+Jb @ webchannel_blob_es2018.js:30
+Hb @ webchannel_blob_es2018.js:29
+e.Ga @ webchannel_blob_es2018.js:72
+Da @ webchannel_blob_es2018.js:14
+Promise.then
+g @ webchannel_blob_es2018.js:14
+fc @ webchannel_blob_es2018.js:73
+e.connect @ webchannel_blob_es2018.js:71
+Y.m @ webchannel_blob_es2018.js:82
+Eo @ webchannel_connection.ts:265
+send @ stream_bridge.ts:94
+c_ @ persistent_stream.ts:330
+w_ @ persistent_stream.ts:877
+__PRIVATE_onWriteStreamOpen @ remote_store.ts:765
+(anonymous) @ persistent_stream.ts:533
+(anonymous) @ persistent_stream.ts:599
+(anonymous) @ async_queue_impl.ts:138
+(anonymous) @ async_queue_impl.ts:330
+Promise.then
+yu @ async_queue_impl.ts:189
+enqueue @ async_queue_impl.ts:136
+enqueueAndForget @ async_queue_impl.ts:97
+(anonymous) @ persistent_stream.ts:597
+(anonymous) @ persistent_stream.ts:518
+bo @ webchannel_connection.ts:50
+(anonymous) @ dom.ts:22
+setTimeout
+qo @ dom.ts:19
+d_ @ persistent_stream.ts:810
+I_ @ persistent_stream.ts:505
+(anonymous) @ persistent_stream.ts:482
+Promise.then
+auth @ persistent_stream.ts:477
+start @ persistent_stream.ts:274
+start @ persistent_stream.ts:801
+(anonymous) @ persistent_stream.ts:51
+(anonymous) @ backoff.ts:145
+(anonymous) @ async_queue.ts:200
+(anonymous) @ async_queue_impl.ts:138
+(anonymous) @ async_queue_impl.ts:330
+Promise.then
+yu @ async_queue_impl.ts:189
+enqueue @ async_queue_impl.ts:136
+enqueueAndForget @ async_queue_impl.ts:97
+handleDelayElapsed @ async_queue.ts:194
+(anonymous) @ async_queue.ts:168Understand this error
+logger.ts:117 [2025-10-29T08:16:30.772Z]  @firebase/firestore: Firestore (11.0.2): WebChannelConnection RPC 'Write' stream 0x14ad628c transport errored: jd {type: 'c', target: Y, g: Y, defaultPrevented: false, status: 1}

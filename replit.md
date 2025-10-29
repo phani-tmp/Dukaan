@@ -75,6 +75,13 @@ The application features a modern, mobile-first design with a professional, emoj
     - **Security Note**: Current implementation exposes API key client-side (prototyping only); production requires server-side proxy
 - **User Profile**: Enhanced section with order history, user statistics, and admin panel access.
 - **Real-time Notifications**: Toast notifications for order status updates.
+- **Customizable Branding** (October 29, 2025):
+  - Logo upload capability in Shopkeeper Dashboard Settings tab
+  - Supports both URL-based and file upload (Base64 encoded)
+  - Logo stored in Firebase settings collection
+  - Automatically displays custom logo in app header across all interfaces
+  - Default Dukaan logo with circular green design showcasing commerce cycle
+  - Custom favicon with "D" branding for professional browser tab appearance
 
 ### System Design Choices
 - **Authentication**: Hybrid authentication (OTP for verification, password for convenience) for a village-friendly approach.
