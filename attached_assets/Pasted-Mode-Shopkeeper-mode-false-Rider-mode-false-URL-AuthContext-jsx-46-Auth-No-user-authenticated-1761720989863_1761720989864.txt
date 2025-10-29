@@ -1,0 +1,53 @@
+Mode] Shopkeeper mode: false Rider mode: false URL: 
+AuthContext.jsx:46 [Auth] No user authenticated
+firebase_auth.js?v=0fb458f6:6485 Failed to initialize reCAPTCHA Enterprise config. Triggering the reCAPTCHA v2 verification.
+AuthContext.jsx:118 [Auth] reCAPTCHA verified
+AuthContext.jsx:42 [Auth] User authenticated: wJRlx328vobHSYOY3o9RSSDrqu02
+AuthContext.jsx:155 [Auth] OTP verified for user: wJRlx328vobHSYOY3o9RSSDrqu02
+react-dom_client.js?v=1d970575:4146 React has detected a change in the order of Hooks called by App. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://react.dev/link/rules-of-hooks
+
+   Previous render            Next render
+   ------------------------------------------------------
+1. useContext                 useContext
+2. useContext                 useContext
+3. useContext                 useContext
+4. useContext                 useContext
+5. useState                   useState
+6. useState                   useState
+7. useState                   useState
+8. useState                   useState
+9. useState                   useState
+10. useState                  useState
+11. useState                  useState
+12. useState                  useState
+13. useState                  useState
+14. useState                  useState
+15. useState                  useState
+16. useState                  useState
+17. useState                  useState
+18. useState                  useState
+19. useEffect                 useEffect
+20. useEffect                 useEffect
+21. useEffect                 useEffect
+22. undefined                 useEffect
+   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+updateHookTypesDev @ react-dom_client.js?v=1d970575:4146Understand this error
+react-dom_client.js?v=1d970575:4344 Uncaught Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (react-dom_client.js?v=1d970575:4344:19)
+    at updateEffectImpl (react-dom_client.js?v=1d970575:4971:20)
+    at Object.useEffect (react-dom_client.js?v=1d970575:16740:11)
+    at exports.useEffect (chunk-BQYK6RGN.js?v=16290d03:897:27)
+    at App (App.jsx:245:3)
+    at Object.react_stack_bottom_frame (react-dom_client.js?v=1d970575:17424:20)
+    at renderWithHooks (react-dom_client.js?v=1d970575:4206:24)
+    at updateFunctionComponent (react-dom_client.js?v=1d970575:6619:21)
+    at beginWork (react-dom_client.js?v=1d970575:7654:20)
+    at runWithFiberInDEV (react-dom_client.js?v=1d970575:1485:72)Understand this error
+react-dom_client.js?v=1d970575:6229 An error occurred in the <App> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+defaultOnUncaughtError @ react-dom_client.js?v=1d970575:6229Understand this warning
+(index):1 Uncaught (in promise) Timeout

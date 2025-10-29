@@ -116,6 +116,12 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (searchTerm) {
+      setVoiceSearchResults(null);
+    }
+  }, [searchTerm]);
+
+  useEffect(() => {
     if (!user || isShopkeeperMode || isRiderMode || orders.length === 0) return;
 
     const currentStatuses = {};
@@ -241,12 +247,6 @@ function App() {
     setSelectedCategory(null);
     setSelectedSubcategory(null);
   };
-
-  useEffect(() => {
-    if (searchTerm) {
-      setVoiceSearchResults(null);
-    }
-  }, [searchTerm]);
 
   return (
     <div className="app-container-modern">
