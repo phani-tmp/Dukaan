@@ -1,7 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { ChevronLeft, Star, Plus, Minus, IndianRupee } from 'lucide-react';
 import { translations } from '../../constants/translations';
-import VoiceSearch from '../../components/shared/VoiceSearch';
 
 const CategoryGrid = ({ categoriesData, onCategoryClick, language }) => {
   const t = translations[language];
@@ -128,10 +127,16 @@ const HomeView = ({
   language,
   categoriesData,
   subcategoriesData,
-  voiceSearchResults,
-  setVoiceSearchResults
+  voiceSearchResults = null,
+  setVoiceSearchResults = () => {}
 }) => {
   const t = translations[language];
+  
+  console.log('[HomeView] Rendering with:', { 
+    productsCount: products?.length, 
+    categoriesCount: categoriesData?.length,
+    voiceSearchResults: voiceSearchResults?.length 
+  });
 
   const searchResults = useMemo(() => {
     if (voiceSearchResults) return voiceSearchResults;
