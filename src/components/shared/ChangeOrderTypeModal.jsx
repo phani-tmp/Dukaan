@@ -110,8 +110,10 @@ const ChangeOrderTypeModal = ({
                             <span className="default-badge">Default</span>
                           )}
                         </div>
-                        <p className="address-line">{address.street}</p>
-                        <p className="address-line">{address.city}, {address.state} {address.pincode}</p>
+                        <p className="address-text">{address.fullAddress}</p>
+                        {address.deliveryInstructions && (
+                          <p className="address-instructions-small">Note: {address.deliveryInstructions}</p>
+                        )}
                       </div>
                     </div>
                   ))}

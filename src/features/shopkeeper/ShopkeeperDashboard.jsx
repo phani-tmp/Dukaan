@@ -54,15 +54,17 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
     gradient: ''
   });
   const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [categoryImagePreview, setCategoryImagePreview] = useState(null);
   
   const [showSubcategoryForm, setShowSubcategoryForm] = useState(false);
   const [subcategoryFormData, setSubcategoryFormData] = useState({
     nameEn: '',
     nameTe: '',
     categoryId: '',
-    icon: ''
+    imageUrl: ''
   });
   const [editingSubcategoryId, setEditingSubcategoryId] = useState(null);
+  const [subcategoryImagePreview, setSubcategoryImagePreview] = useState(null);
   const [selectedOrderForDetails, setSelectedOrderForDetails] = useState(null);
   const [orderTab, setOrderTab] = useState('active');
   const [showOrderDetails, setShowOrderDetails] = useState(false);
@@ -150,6 +152,38 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
       reader.onloadend = () => {
         setFormData({ ...formData, imageUrl: reader.result });
         setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCategoryImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 500000) {
+        alert('Image size should be less than 500KB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCategoryFormData({ ...categoryFormData, imageUrl: reader.result });
+        setCategoryImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubcategoryImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 500000) {
+        alert('Image size should be less than 500KB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSubcategoryFormData({ ...subcategoryFormData, imageUrl: reader.result });
+        setSubcategoryImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -839,14 +873,36 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                   onChange={(e) => setCategoryFormData({ ...categoryFormData, nameTe: e.target.value })}
                   className="form-input"
                 />
-                <input
-                  type="text"
-                  placeholder="Image URL (e.g., https://...)"
-                  value={categoryFormData.imageUrl}
-                  onChange={(e) => setCategoryFormData({ ...categoryFormData, imageUrl: e.target.value })}
-                  required
-                  className="form-input"
-                />
+                
+                <div className="image-upload-section">
+                  <label className="upload-label">
+                    <Upload className="w-5 h-5" />
+                    Upload Image (Max 500KB)
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCategoryImageUpload}
+                      className="file-input-hidden"
+                    />
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Or paste image URL"
+                    value={categoryFormData.imageUrl}
+                    onChange={(e) => setCategoryFormData({ ...categoryFormData, imageUrl: e.target.value })}
+                    className="form-input"
+                  />
+                  {(categoryImagePreview || categoryFormData.imageUrl) && (
+                    <div className="image-preview-container">
+                      <img 
+                        src={categoryImagePreview || categoryFormData.imageUrl} 
+                        alt="Category preview" 
+                        className="image-preview"
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <input
                   type="color"
                   value={categoryFormData.color}
@@ -858,7 +914,7 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                     <Save className="w-4 h-4" />
                     Save
                   </button>
-                  <button type="button" onClick={() => { setShowCategoryForm(false); setEditingCategoryId(null); }} className="cancel-btn">
+                  <button type="button" onClick={() => { setShowCategoryForm(false); setEditingCategoryId(null); setCategoryImagePreview(null); }} className="cancel-btn">
                     Cancel
                   </button>
                 </div>
@@ -930,19 +986,42 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                   onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, nameTe: e.target.value })}
                   className="form-input"
                 />
-                <input
-                  type="text"
-                  placeholder="Image URL (e.g., https://...)"
-                  value={subcategoryFormData.imageUrl}
-                  onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, imageUrl: e.target.value })}
-                  className="form-input"
-                />
+                
+                <div className="image-upload-section">
+                  <label className="upload-label">
+                    <Upload className="w-5 h-5" />
+                    Upload Image (Max 500KB)
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleSubcategoryImageUpload}
+                      className="file-input-hidden"
+                    />
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Or paste image URL"
+                    value={subcategoryFormData.imageUrl}
+                    onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, imageUrl: e.target.value })}
+                    className="form-input"
+                  />
+                  {(subcategoryImagePreview || subcategoryFormData.imageUrl) && (
+                    <div className="image-preview-container">
+                      <img 
+                        src={subcategoryImagePreview || subcategoryFormData.imageUrl} 
+                        alt="Subcategory preview" 
+                        className="image-preview"
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <div className="form-actions">
                   <button type="submit" className="save-btn">
                     <Save className="w-4 h-4" />
                     Save
                   </button>
-                  <button type="button" onClick={() => { setShowSubcategoryForm(false); setEditingSubcategoryId(null); }} className="cancel-btn">
+                  <button type="button" onClick={() => { setShowSubcategoryForm(false); setEditingSubcategoryId(null); setSubcategoryImagePreview(null); }} className="cancel-btn">
                     Cancel
                   </button>
                 </div>
