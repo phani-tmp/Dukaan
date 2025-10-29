@@ -5,6 +5,7 @@ import { translations } from '../../constants/translations';
 import UsersManagement from './UsersManagement';
 import OrderDetailsModal from '../../components/shared/OrderDetailsModal';
 import VoiceInput from '../../components/shared/VoiceInput';
+import BilingualVoiceInput from '../../components/shared/BilingualVoiceInput';
 import {
   Search,
   MapPin,
@@ -883,31 +884,34 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
 
             {showCategoryForm && (
               <form onSubmit={handleSubmitCategory} className="product-form">
-                <div className="input-with-voice">
-                  <input
-                    type="text"
-                    placeholder="Category Name (English)"
-                    value={categoryFormData.nameEn}
-                    onChange={(e) => setCategoryFormData({ ...categoryFormData, nameEn: e.target.value })}
-                    required
-                    className="form-input"
-                  />
-                  <VoiceInput
-                    onTranscript={(text) => setCategoryFormData({ ...categoryFormData, nameEn: text })}
-                    language="en"
-                  />
-                </div>
-                <div className="input-with-voice">
-                  <input
-                    type="text"
-                    placeholder="Category Name (Telugu)"
-                    value={categoryFormData.nameTe}
-                    onChange={(e) => setCategoryFormData({ ...categoryFormData, nameTe: e.target.value })}
-                    className="form-input"
-                  />
-                  <VoiceInput
-                    onTranscript={(text) => setCategoryFormData({ ...categoryFormData, nameTe: text })}
-                    language="te"
+                <div className="bilingual-input-group">
+                  <div className="input-with-voice">
+                    <input
+                      type="text"
+                      placeholder="Category Name (English)"
+                      value={categoryFormData.nameEn}
+                      onChange={(e) => setCategoryFormData({ ...categoryFormData, nameEn: e.target.value })}
+                      required
+                      className="form-input"
+                    />
+                  </div>
+                  <div className="input-with-voice">
+                    <input
+                      type="text"
+                      placeholder="Category Name (Telugu)"
+                      value={categoryFormData.nameTe}
+                      onChange={(e) => setCategoryFormData({ ...categoryFormData, nameTe: e.target.value })}
+                      className="form-input"
+                    />
+                  </div>
+                  <BilingualVoiceInput
+                    onTranscript={({ english, telugu }) => {
+                      setCategoryFormData({
+                        ...categoryFormData,
+                        nameEn: english,
+                        nameTe: telugu
+                      });
+                    }}
                   />
                 </div>
                 
@@ -1008,31 +1012,34 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                     <option key={cat.id} value={cat.id}>{cat.nameEn}</option>
                   ))}
                 </select>
-                <div className="input-with-voice">
-                  <input
-                    type="text"
-                    placeholder="Subcategory Name (English)"
-                    value={subcategoryFormData.nameEn}
-                    onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, nameEn: e.target.value })}
-                    required
-                    className="form-input"
-                  />
-                  <VoiceInput
-                    onTranscript={(text) => setSubcategoryFormData({ ...subcategoryFormData, nameEn: text })}
-                    language="en"
-                  />
-                </div>
-                <div className="input-with-voice">
-                  <input
-                    type="text"
-                    placeholder="Subcategory Name (Telugu)"
-                    value={subcategoryFormData.nameTe}
-                    onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, nameTe: e.target.value })}
-                    className="form-input"
-                  />
-                  <VoiceInput
-                    onTranscript={(text) => setSubcategoryFormData({ ...subcategoryFormData, nameTe: text })}
-                    language="te"
+                <div className="bilingual-input-group">
+                  <div className="input-with-voice">
+                    <input
+                      type="text"
+                      placeholder="Subcategory Name (English)"
+                      value={subcategoryFormData.nameEn}
+                      onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, nameEn: e.target.value })}
+                      required
+                      className="form-input"
+                    />
+                  </div>
+                  <div className="input-with-voice">
+                    <input
+                      type="text"
+                      placeholder="Subcategory Name (Telugu)"
+                      value={subcategoryFormData.nameTe}
+                      onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, nameTe: e.target.value })}
+                      className="form-input"
+                    />
+                  </div>
+                  <BilingualVoiceInput
+                    onTranscript={({ english, telugu }) => {
+                      setSubcategoryFormData({
+                        ...subcategoryFormData,
+                        nameEn: english,
+                        nameTe: telugu
+                      });
+                    }}
                   />
                 </div>
                 

@@ -331,6 +331,11 @@ function App() {
         setCurrentView={setCurrentView}
         cartItems={cartItems}
         language={language}
+        onHomeClick={() => {
+          setVoiceSearchResults(null);
+          setSelectedCategory(null);
+          setSelectedSubcategory(null);
+        }}
       />
 
       {notification && (

@@ -76,16 +76,15 @@ The application features a modern, mobile-first design with a professional, emoj
 
 ### How It Works
 1. **Customer Experience**:
-   - Click floating green mic button (bottom-right)
+   - Click mic button in search bar (header)
    - Speak naturally in Telugu, English, or Hindi (e.g., "2 కిలో ఉల్లిపాయ ఇవ్వండి" or "I need milk")
    - AI translates and matches products from entire catalog
-   - Products automatically added to cart or shown as search results
+   - All product variants shown (no auto-add, user selects which to add)
    
 2. **Technical Flow**:
    - Voice → Web Speech API → Text
    - Text → Gemini AI (full product catalog sent) → Product matching
-   - High-confidence matches (>0.7) → Auto-add to cart
-   - Lower confidence → Show as search results
+   - All matched products displayed as search results
    - Chat assistant with complete product awareness
 
 3. **Technical Implementation**:
@@ -93,12 +92,19 @@ The application features a modern, mobile-first design with a professional, emoj
    - **API Call Structure**: `genAI.models.generateContent({ model, contents })`
    - **Response Access**: `result.text` (property getter, not method)
    - **Product Context**: Entire catalog sent to all AI functions (no truncation)
-   - **Five AI Functions**: translateToProductName, extractProductFromVoice, detectLanguage, semanticProductSearch, chatAssistant
+   - **Six AI Functions**: translateToProductName, extractProductFromVoice, detectLanguage, semanticProductSearch, chatAssistant, translateText
 
-4. **Shopkeeper Feature** (Pending):
-   - Voice product entry: "3 లీటర్ గోవు పాలు 50 రూపాయలు"
-   - AI extracts: name, price, quantity, unit, category
-   - Auto-fills product form
+4. **Shopkeeper Bilingual Voice Input** (October 29, 2025):
+   - **Single Mic Button**: One mic for both English and Telugu fields
+   - **Auto-Translation**: Speak once, both fields filled automatically via Gemini
+   - **Smart Detection**: Detects language and translates bidirectionally
+   - **Applied to**: Category and subcategory forms
+   - **BilingualVoiceInput Component**: Centralized voice input with translation
+
+### Recent Fixes (October 29, 2025)
+- **Navigation Issue**: Home button now properly clears voice search results
+- **Dual Mic Problem**: Replaced separate English/Telugu mic buttons with single auto-translating mic
+- **User Experience**: Shopkeepers speak once in any language, both fields populate automatically
 
 ### Future Enhancements
 - Server-side API proxy for production security (CRITICAL for production)

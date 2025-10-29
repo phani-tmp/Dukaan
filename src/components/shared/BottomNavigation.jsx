@@ -2,9 +2,16 @@ import React from 'react';
 import { Home, Package, ShoppingCart, User } from 'lucide-react';
 import { translations } from '../../constants/translations';
 
-const BottomNavigation = ({ currentView, setCurrentView, cartItems, language }) => {
+const BottomNavigation = ({ currentView, setCurrentView, cartItems, language, onHomeClick }) => {
   const t = translations[language];
   const totalItems = Object.values(cartItems).reduce((sum, item) => sum + item.quantity, 0);
+
+  const handleNavClick = (view) => {
+    if (view === 'Home' && onHomeClick) {
+      onHomeClick();
+    }
+    setCurrentView(view);
+  };
 
   const navItems = [
     { name: t.home, icon: Home, view: 'Home' },
@@ -18,7 +25,7 @@ const BottomNavigation = ({ currentView, setCurrentView, cartItems, language }) 
       {navItems.map(item => (
         <button
           key={item.view}
-          onClick={() => setCurrentView(item.view)}
+          onClick={() => handleNavClick(item.view)}
           className={`nav-item ${currentView === item.view ? 'nav-item-active' : ''}`}
         >
           <div className="nav-icon-wrapper">

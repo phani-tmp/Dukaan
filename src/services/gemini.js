@@ -231,3 +231,32 @@ Your response:`;
     return 'Sorry, I had trouble understanding that. Can you try again?';
   }
 }
+
+export async function translateText(text, targetLanguage) {
+  try {
+    const prompt = `Translate this text to ${targetLanguage}: "${text}"
+
+Rules:
+- If it's a product name, translate it appropriately (e.g., "Milk" → "పాలు", "Onion" → "ఉల్లిపాయ")
+- If it's a category name, translate it (e.g., "Vegetables" → "కూరగాయలు")
+- Keep the translation natural and commonly used in Indian commerce
+- Return ONLY the translated text, no explanations
+
+Translation:`;
+
+    const result = await genAI.models.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: prompt }]
+        }
+      ]
+    });
+    
+    return (result.text || text).trim();
+  } catch (error) {
+    console.error('[Gemini] Translation error:', error);
+    return text;
+  }
+}
