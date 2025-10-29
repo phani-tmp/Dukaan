@@ -1,10 +1,10 @@
-import { GoogleGenerativeAI } from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
 
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
+const genAI = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
 
 export async function translateToProductName(userInput, productContext) {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    const model = genAI.models;
 
     const prompt = `You are a product name translator for a quick commerce app in India.
 
@@ -35,9 +35,11 @@ Return a JSON array with this structure:
 If no products match, return an empty array [].
 Only return valid JSON, no explanations.`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const result = await model.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: prompt
+    });
+    const text = result.text;
     
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
@@ -53,7 +55,7 @@ Only return valid JSON, no explanations.`;
 
 export async function extractProductFromVoice(audioText, productContext) {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    const model = genAI.models;
 
     const prompt = `You are helping a shopkeeper add products to their inventory via voice input.
 
@@ -79,9 +81,11 @@ Return JSON in this exact format:
 If information is missing or unclear, use null for that field.
 Only return valid JSON, no explanations.`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const result = await model.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: audioText
+    });
+    const text = result.text;
     
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
@@ -97,7 +101,7 @@ Only return valid JSON, no explanations.`;
 
 export async function detectLanguage(text) {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    const model = genAI.models;
 
     const prompt = `Detect the language of this text: "${text}"
 
@@ -105,9 +109,11 @@ Return only one of these language codes: "en" (English), "te" (Telugu), "hi" (Hi
 
 Only return the language code, nothing else.`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text_response = response.text().trim().toLowerCase();
+    const result = await model.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: text
+    });
+    const text_response = result.text.trim().toLowerCase();
     
     if (text_response.includes('te')) return 'te';
     if (text_response.includes('hi')) return 'hi';
@@ -121,7 +127,7 @@ Only return the language code, nothing else.`;
 
 export async function semanticProductSearch(query, products) {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    const model = genAI.models;
 
     const productList = products.map(p => ({
       id: p.id,
@@ -149,9 +155,11 @@ Return a JSON array of matching product IDs ordered by relevance:
 Return up to 10 most relevant matches.
 Only return valid JSON array, no explanations.`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const result = await model.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: prompt
+    });
+    const text = result.text;
     
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
@@ -168,7 +176,7 @@ Only return valid JSON array, no explanations.`;
 
 export async function chatAssistant(message, conversationHistory, products, cartItems) {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    const model = genAI.models;
 
     const systemContext = `You are a helpful shopping assistant for DUKAAN (దుకాణ్), a quick commerce app.
 
@@ -194,11 +202,12 @@ User: ${message}
 
 Your response:`;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const result = await model.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: prompt
+    });
     
-    return text.trim();
+    return result.text.trim();
   } catch (error) {
     console.error('[Gemini] Chat error:', error);
     return 'Sorry, I had trouble understanding that. Can you try again?';

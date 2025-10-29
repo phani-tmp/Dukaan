@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ChevronLeft, Star, Plus, Minus, IndianRupee } from 'lucide-react';
 import { translations } from '../../constants/translations';
+import VoiceAssistant from '../../components/shared/VoiceAssistant';
 
 const CategoryGrid = ({ categoriesData, onCategoryClick, language }) => {
   const t = translations[language];
@@ -96,6 +97,24 @@ const ProductCard = ({ product, onAddToCart, cartItems, language }) => {
   );
 };
 
+const QuickCategoriesBar = ({ categoriesData, selectedCategory, onCategoryClick, language }) => {
+  const topCategories = categoriesData.slice(0, 6);
+  
+  return (
+    <div className="quick-categories-bar">
+      {topCategories.map(cat => (
+        <button
+          key={cat.id}
+          onClick={() => onCategoryClick(cat.id)}
+          className={`quick-category-chip ${selectedCategory === cat.id ? 'active' : ''}`}
+        >
+          {language === 'en' ? cat.nameEn : cat.nameTe}
+        </button>
+      ))}
+    </div>
+  );
+};
+
 const HomeView = ({ 
   products, 
   onAddToCart, 
@@ -111,20 +130,28 @@ const HomeView = ({
   subcategoriesData
 }) => {
   const t = translations[language];
+  const [voiceSearchResults, setVoiceSearchResults] = useState(null);
 
   const searchResults = useMemo(() => {
+    if (voiceSearchResults) return voiceSearchResults;
     if (!searchTerm) return [];
     const term = searchTerm.toLowerCase();
     return products.filter(p => 
       p.name.toLowerCase().includes(term)
     );
-  }, [products, searchTerm]);
+  }, [products, searchTerm, voiceSearchResults]);
 
   const popularProducts = useMemo(() => {
     return products.filter(p => p.isPopular === true);
   }, [products]);
 
-  const isSearching = searchTerm.trim().length > 0;
+  const isSearching = searchTerm.trim().length > 0 || voiceSearchResults !== null;
+
+  const handleVoiceProductsFound = (foundProducts) => {
+    setVoiceSearchResults(foundProducts);
+    if (selectedCategory) setSelectedCategory(null);
+    if (selectedSubcategory) setSelectedSubcategory(null);
+  };
 
   const categorySubcategories = useMemo(() => {
     if (!selectedCategory) return [];
@@ -264,6 +291,15 @@ const HomeView = ({
 
   return (
     <div className="home-view">
+      {!isSearching && !selectedCategory && (
+        <QuickCategoriesBar
+          categoriesData={categoriesData}
+          selectedCategory={selectedCategory}
+          onCategoryClick={handleCategoryClick}
+          language={language}
+        />
+      )}
+      
       {!isSearching && (
         <CategoryGrid 
           categoriesData={categoriesData}
@@ -274,7 +310,9 @@ const HomeView = ({
 
       {isSearching ? (
         <div className="search-results-section">
-          <h2 className="section-title">Search Results ({searchResults.length})</h2>
+          <h2 className="section-title">
+            {voiceSearchResults ? 'Voice Search Results' : 'Search Results'} ({searchResults.length})
+          </h2>
           {searchResults.length > 0 ? (
             <div className="products-grid">
               {searchResults.map(product => (
@@ -315,6 +353,15 @@ const HomeView = ({
           )}
         </div>
       )}
+
+      <VoiceAssistant
+        products={products}
+        cartItems={Object.values(cartItems)}
+        onAddToCart={onAddToCart}
+        onProductsFound={handleVoiceProductsFound}
+        language={language}
+        translations={t}
+      />
     </div>
   );
 };
