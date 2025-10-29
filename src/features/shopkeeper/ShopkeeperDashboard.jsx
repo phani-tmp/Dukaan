@@ -26,7 +26,7 @@ import {
   ShoppingBag
 } from 'lucide-react';
 
-const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categoriesData, subcategoriesData }) => {
+const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit, categoriesData, subcategoriesData }) => {
   const { db } = getFirebaseInstances();
   const t = translations[language];
   const [activeTab, setActiveTab] = useState('orders');
@@ -70,6 +70,7 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
   const [selectedOrderForDetails, setSelectedOrderForDetails] = useState(null);
   const [orderTab, setOrderTab] = useState('active');
   const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [riderSortBy, setRiderSortBy] = useState('orders');
 
   const categories = [
     { id: 'groceries', nameEn: 'Groceries', nameTe: 'వీరగాణ', imageUrl: 'https://images.unsplash.com/photo-1588964895597-cfccd6e2dbf9?w=100&h=100&fit=crop', color: '#4CAF50', gradient: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%)' },
@@ -538,6 +539,13 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
           <User className="w-5 h-5" />
           Users
         </button>
+        <button 
+          className={`tab-button ${activeTab === 'riders' ? 'active' : ''}`}
+          onClick={() => setActiveTab('riders')}
+        >
+          <User className="w-5 h-5" />
+          Riders
+        </button>
       </div>
 
       <div className="shopkeeper-content">
@@ -653,6 +661,49 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                             <option value="cancelled">Cancelled</option>
                           </select>
                         </div>
+
+                        {order.deliveryMethod === 'delivery' && (order.status === 'ready_for_pickup' || order.status === 'accepted' || order.status === 'out_for_delivery' || order.status === 'delivered') && (
+                          <div className="rider-assignment-section" style={{ marginTop: '12px' }}>
+                            <label className="status-dropdown-label" style={{ fontSize: '13px' }}>
+                              {order.riderName ? `Rider: ${order.riderName}` : 'Assign Rider:'}
+                            </label>
+                            {order.status !== 'delivered' ? (
+                              <select 
+                                value={order.riderId || ''}
+                                onChange={async (e) => {
+                                  const selectedRider = allRiders.find(r => r.id === e.target.value);
+                                  if (selectedRider) {
+                                    try {
+                                      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', order.id), {
+                                        riderId: selectedRider.id,
+                                        riderName: selectedRider.name,
+                                        riderPhone: selectedRider.phone,
+                                        updatedAt: new Date().toISOString()
+                                      });
+                                      alert(`Rider ${selectedRider.name} assigned successfully!`);
+                                    } catch (error) {
+                                      console.error('Error assigning rider:', error);
+                                      alert('Failed to assign rider');
+                                    }
+                                  }
+                                }}
+                                className="status-dropdown"
+                                style={{ fontSize: '13px', padding: '6px 8px' }}
+                              >
+                                <option value="">Select Rider</option>
+                                {allRiders && allRiders.map(rider => (
+                                  <option key={rider.id} value={rider.id}>
+                                    {rider.name} - {rider.phone}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <span style={{ fontSize: '13px', color: '#4CAF50', fontWeight: '600' }}>
+                                {order.riderPhone && `📞 ${order.riderPhone}`}
+                              </span>
+                            )}
+                          </div>
+                        )}
                         
                         <div className="order-action-buttons">
                           <button 
@@ -1183,6 +1234,77 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
 
         {activeTab === 'users' && (
           <UsersManagement />
+        )}
+
+        {activeTab === 'riders' && (
+          <div className="riders-section">
+            <div className="section-header">
+              <h3 className="section-subtitle">Riders Management ({allRiders?.length || 0})</h3>
+              <select
+                value={riderSortBy}
+                onChange={(e) => setRiderSortBy(e.target.value)}
+                className="form-input"
+                style={{ width: 'auto', padding: '8px 12px' }}
+              >
+                <option value="orders">Sort by Orders</option>
+                <option value="name">Sort by Name</option>
+              </select>
+            </div>
+
+            {!allRiders || allRiders.length === 0 ? (
+              <div className="empty-state">
+                <User className="w-16 h-16 text-gray-400" />
+                <p>No riders registered yet</p>
+                <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
+                  Riders can register at: ?mode=rider
+                </p>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', marginTop: '20px' }}>
+                {allRiders
+                  .map(rider => ({
+                    ...rider,
+                    totalOrders: allOrders.filter(o => o.riderId === rider.id).length,
+                    activeOrders: allOrders.filter(o => o.riderId === rider.id && o.status === 'out_for_delivery').length,
+                    completedOrders: allOrders.filter(o => o.riderId === rider.id && o.status === 'delivered').length
+                  }))
+                  .sort((a, b) => {
+                    if (riderSortBy === 'orders') return b.totalOrders - a.totalOrders;
+                    return a.name.localeCompare(b.name);
+                  })
+                  .map(rider => (
+                    <div key={rider.id} style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #f0f0f0' }}>
+                        <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '20px', fontWeight: '700' }}>
+                          {rider.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#333', marginBottom: '4px' }}>{rider.name}</h4>
+                          <a href={`tel:${rider.phone}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '14px', color: '#2196F3', textDecoration: 'none' }}>
+                            <Phone className="w-4 h-4" />
+                            {rider.phone}
+                          </a>
+                        </div>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: '24px', fontWeight: '700', color: '#333' }}>{rider.totalOrders}</div>
+                          <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>Total Orders</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: '24px', fontWeight: '700', color: '#FF9800' }}>{rider.activeOrders}</div>
+                          <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>Active</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: '24px', fontWeight: '700', color: '#4CAF50' }}>{rider.completedOrders}</div>
+                          <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>Completed</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
 

@@ -4,6 +4,7 @@ import { useAuth } from './contexts/AuthContext';
 import { useData } from './contexts/DataContext';
 import { useCart } from './contexts/CartContext';
 import { useAddress } from './contexts/AddressContext';
+import { useRider } from './contexts/RiderContext';
 
 import { translations } from './constants/translations';
 
@@ -28,6 +29,7 @@ import AddressForm from './features/address/AddressForm';
 
 import ShopkeeperDashboard from './features/shopkeeper/ShopkeeperDashboard';
 import RiderDashboard from './features/rider/RiderDashboard';
+import RiderLogin from './features/rider/RiderLogin';
 
 function App() {
   const {
@@ -56,11 +58,20 @@ function App() {
   } = useAuth();
 
   const {
+    rider,
+    loading: riderLoading,
+    loginRider,
+    logoutRider,
+    registerRider
+  } = useRider();
+
+  const {
     products,
     categoriesData,
     subcategoriesData,
     orders,
     allOrders,
+    allRiders,
     loading: dataLoading,
     handleChangeDeliveryMethod
   } = useData();
@@ -191,6 +202,7 @@ function App() {
       <ShopkeeperDashboard
         products={products}
         allOrders={allOrders}
+        allRiders={allRiders}
         language={language}
         onExit={() => window.location.href = '/'}
         categoriesData={categoriesData}
@@ -200,11 +212,28 @@ function App() {
   }
 
   if (isRiderMode) {
+    if (riderLoading) {
+      return <LoadingSpinner />;
+    }
+    
+    if (!rider) {
+      return (
+        <RiderLogin
+          onLogin={loginRider}
+          onRegister={registerRider}
+        />
+      );
+    }
+    
     return (
       <RiderDashboard
+        rider={rider}
         allOrders={allOrders}
         language={language}
-        onExit={() => window.location.href = '/'}
+        onExit={() => {
+          logoutRider();
+          window.location.href = '/';
+        }}
       />
     );
   }

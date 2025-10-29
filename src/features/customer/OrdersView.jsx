@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Package, IndianRupee, CheckCircle, Clock, Truck, XCircle, ShoppingBag, RefreshCw } from 'lucide-react';
+import { Package, IndianRupee, CheckCircle, Clock, Truck, XCircle, ShoppingBag, RefreshCw, Phone } from 'lucide-react';
 import { translations } from '../../constants/translations';
 import ChangeOrderTypeModal from '../../components/shared/ChangeOrderTypeModal';
 
@@ -168,6 +168,37 @@ const OrdersView = ({ orders, language, setSelectedOrder, onChangeDeliveryMethod
                 </button>
               )}
             </div>
+
+            {order.riderPhone && (order.status === 'out_for_delivery' || order.status === 'delivered') && (
+              <div style={{
+                background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                marginTop: '12px',
+                border: '1px solid #2196F3'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <Truck style={{ color: '#1976D2', width: '18px', height: '18px' }} />
+                  <span style={{ fontWeight: '600', color: '#1565C0', fontSize: '14px' }}>
+                    Delivery Partner
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Phone style={{ color: '#1976D2', width: '16px', height: '16px' }} />
+                  <a 
+                    href={`tel:${order.riderPhone}`}
+                    style={{
+                      color: '#0D47A1',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    {order.riderName || 'Delivery Partner'}: {order.riderPhone}
+                  </a>
+                </div>
+              </div>
+            )}
 
             <div className="order-footer-detailed">
               <div className="order-total-row">

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { collection, query, onSnapshot, where, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, where, doc, updateDoc, onAuthStateChanged } from 'firebase/firestore';
 import { getFirebaseInstances, appId } from '../services/firebase';
 import { categories as defaultCategories } from '../constants/categories';
 import { useAuth } from './AuthContext';
@@ -16,7 +16,8 @@ export const useData = () => {
 
 export const DataProvider = ({ children }) => {
   const { user } = useAuth();
-  const { db } = getFirebaseInstances();
+  const { db, auth } = getFirebaseInstances();
+  const [authUser, setAuthUser] = useState(null);
   
   const [products, setProducts] = useState([]);
   const [categoriesData, setCategoriesData] = useState([]);
@@ -24,18 +25,27 @@ export const DataProvider = ({ children }) => {
   const [orders, setOrders] = useState([]);
   const [allOrders, setAllOrders] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const [allRiders, setAllRiders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
+    if (!auth) return;
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setAuthUser(firebaseUser);
+    });
+    return () => unsubscribe();
+  }, [auth]);
+
+  useEffect(() => {
+    if (!user && !authUser) {
       setLoading(false);
       return;
     }
     setLoading(true);
-  }, [user]);
+  }, [user, authUser]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user && !authUser) return;
 
     const categoriesQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'categories'));
     const unsubscribe = onSnapshot(categoriesQuery, (snapshot) => {
@@ -44,10 +54,10 @@ export const DataProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, [user, db]);
+  }, [user, authUser, db]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user && !authUser) return;
 
     const subcategoriesQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'subcategories'));
     const unsubscribe = onSnapshot(subcategoriesQuery, (snapshot) => {
@@ -56,10 +66,10 @@ export const DataProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, [user, db]);
+  }, [user, authUser, db]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user && !authUser) return;
 
     const productsQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'products'));
     const unsubscribe = onSnapshot(productsQuery, (snapshot) => {
@@ -69,7 +79,7 @@ export const DataProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, [user, db]);
+  }, [user, authUser, db]);
 
   useEffect(() => {
     if (!user) return;
@@ -89,7 +99,7 @@ export const DataProvider = ({ children }) => {
   }, [user, db]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user && !authUser) return;
 
     const allOrdersQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'orders'));
     const unsubscribe = onSnapshot(allOrdersQuery, (snapshot) => {
@@ -99,10 +109,10 @@ export const DataProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, [user, db]);
+  }, [user, authUser, db]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user && !authUser) return;
 
     const usersQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'users'));
     const unsubscribe = onSnapshot(usersQuery, (snapshot) => {
@@ -111,7 +121,19 @@ export const DataProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, [user, db]);
+  }, [user, authUser, db]);
+
+  useEffect(() => {
+    if (!user && !authUser) return;
+
+    const ridersQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'riders'));
+    const unsubscribe = onSnapshot(ridersQuery, (snapshot) => {
+      const ridersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setAllRiders(ridersData);
+    });
+
+    return () => unsubscribe();
+  }, [user, authUser, db]);
 
   const handleChangeDeliveryMethod = useCallback(async (orderId, newDeliveryMethod, selectedAddress = null) => {
     try {
@@ -151,6 +173,7 @@ export const DataProvider = ({ children }) => {
     orders,
     allOrders,
     allUsers,
+    allRiders,
     loading,
     handleChangeDeliveryMethod
   };

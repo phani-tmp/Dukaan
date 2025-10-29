@@ -14,20 +14,26 @@ import {
   Navigation
 } from 'lucide-react';
 
-const RiderDashboard = ({ allOrders, language, onExit }) => {
+const RiderDashboard = ({ rider, allOrders, language, onExit }) => {
   const { db } = getFirebaseInstances();
   const t = translations[language];
   const [activeTab, setActiveTab] = useState('pending');
 
-  // Filter only delivery orders (not pickup)
-  const deliveryOrders = allOrders.filter(order => order.deliveryMethod === 'delivery');
+  // Filter only delivery orders assigned to this rider (SECURITY: only show assigned orders)
+  const assignedOrders = allOrders.filter(order => 
+    order.deliveryMethod === 'delivery' && order.riderId === rider.id
+  );
 
   // Categorize orders for rider
-  const pendingOrders = deliveryOrders.filter(order => 
+  const pendingOrders = assignedOrders.filter(order => 
     order.status === 'ready_for_pickup' || order.status === 'accepted'
   );
-  const activeDeliveries = deliveryOrders.filter(order => order.status === 'out_for_delivery');
-  const completedOrders = deliveryOrders.filter(order => order.status === 'delivered');
+  const activeDeliveries = assignedOrders.filter(order => 
+    order.status === 'out_for_delivery'
+  );
+  const completedOrders = assignedOrders.filter(order => 
+    order.status === 'delivered'
+  );
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
@@ -43,9 +49,22 @@ const RiderDashboard = ({ allOrders, language, onExit }) => {
     }
   };
 
-  const handlePickupOrder = (orderId) => {
+  const handlePickupOrder = async (orderId) => {
     if (window.confirm('Mark this order as picked up and out for delivery?')) {
-      handleUpdateStatus(orderId, 'out_for_delivery');
+      try {
+        const orderRef = doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId);
+        await updateDoc(orderRef, {
+          status: 'out_for_delivery',
+          riderId: rider.id,
+          riderName: rider.name,
+          riderPhone: rider.phone,
+          updatedAt: new Date().toISOString()
+        });
+        alert('Order picked up! Now out for delivery.');
+      } catch (error) {
+        console.error('Error picking up order:', error);
+        alert('Failed to pick up order. Please try again.');
+      }
     }
   };
 
@@ -70,10 +89,15 @@ const RiderDashboard = ({ allOrders, language, onExit }) => {
           <ChevronLeft className="w-5 h-5" />
           Exit Rider Mode
         </button>
-        <h1 className="rider-title">
-          <Truck className="w-6 h-6" />
-          Rider Dashboard
-        </h1>
+        <div>
+          <h1 className="rider-title">
+            <Truck className="w-6 h-6" />
+            Rider Dashboard
+          </h1>
+          <p style={{ color: '#666', fontSize: '14px', marginTop: '4px' }}>
+            Welcome, {rider.name}!
+          </p>
+        </div>
       </div>
 
       <div className="rider-stats">

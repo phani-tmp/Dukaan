@@ -6,6 +6,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { DataProvider } from './contexts/DataContext'
 import { CartProvider } from './contexts/CartContext'
 import { AddressProvider } from './contexts/AddressContext'
+import { RiderProvider } from './contexts/RiderContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -13,7 +14,9 @@ createRoot(document.getElementById('root')).render(
       <DataProvider>
         <CartProvider>
           <AddressProvider>
-            <App />
+            <RiderProvider>
+              <App />
+            </RiderProvider>
           </AddressProvider>
         </CartProvider>
       </DataProvider>
