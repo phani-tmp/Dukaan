@@ -231,7 +231,9 @@ const HomeView = ({
     const category = categoriesData.find(c => c.id === selectedCategory);
     
     if (categorySubcategories.length === 0) {
-      const categoryProducts = products.filter(p => p.category === selectedCategory);
+      const categoryProducts = products
+        .filter(p => p.category === selectedCategory)
+        .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
       
       return (
         <div className="subcategory-products-view">
