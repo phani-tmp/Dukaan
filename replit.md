@@ -45,6 +45,15 @@ The application features a modern, mobile-first design with a professional, emoj
     - Improved card layouts and button styling
     - Seamless address selection experience
 - **Price Calculation Consistency**: Fixed discrepancy between customer OrdersView and shopkeeper dashboard - both now correctly use discounted prices when available.
+- **Voice Shopping with Gemini AI** (October 29, 2025):
+    - Integrated Google Gemini 2.0 Flash (`@google/genai` v1.27.0) for AI-powered shopping
+    - Voice Assistant component with floating mic button and chat interface
+    - Multi-language voice recognition (Telugu/English/Hindi/Hinglish) using Web Speech API
+    - Semantic product search with AI understanding of synonyms and local languages
+    - Shopping chat assistant for conversational product discovery
+    - Bilingual product synonym database (50+ products with translations)
+    - Quick Categories swipe bar for fast navigation
+    - **Security Note**: Current implementation exposes API key client-side (prototyping only); production requires server-side proxy
 - **User Profile**: Enhanced section with order history, user statistics, and admin panel access.
 - **Real-time Notifications**: Toast notifications for order status updates.
 
@@ -56,6 +65,35 @@ The application features a modern, mobile-first design with a professional, emoj
 
 ## External Dependencies
 - **Firebase**: Utilized for Firestore (database), Authentication (phone and anonymous sign-in), and potentially Firebase Storage for image hosting.
+- **Google Gemini AI**: Used for voice-powered shopping, semantic search, and language translation (`@google/genai` package).
+- **Web Speech API**: Browser-native speech recognition for voice input.
 - **Unsplash**: Source for real product images.
 - **placeholder.com**: Used for fallback images.
 - **lucide-react**: For vector icons.
+
+## Voice Shopping Implementation Notes
+
+### How It Works
+1. **Customer Experience**:
+   - Click floating green mic button (bottom-right)
+   - Speak naturally in Telugu, English, or Hindi (e.g., "2 కిలో ఉల్లిపాయ ఇవ్వండి" or "I need milk")
+   - AI translates and matches products from database
+   - Products automatically added to cart or shown as search results
+   
+2. **Technical Flow**:
+   - Voice → Web Speech API → Text
+   - Text → Gemini AI → Product matching with bilingual synonym database
+   - High-confidence matches (>0.7) → Auto-add to cart
+   - Lower confidence → Show as search results
+
+3. **Shopkeeper Feature** (Pending):
+   - Voice product entry: "3 లీటర్ గోవు పాలు 50 రూపాయలు"
+   - AI extracts: name, price, quantity, unit, category
+   - Auto-fills product form
+
+### Future Enhancements
+- Server-side API proxy for production security
+- Offline voice command caching
+- Voice-based order tracking updates
+- Gemini-powered delivery route optimization
+- Daily sales insights in Telugu for shopkeepers

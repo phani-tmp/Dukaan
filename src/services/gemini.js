@@ -4,12 +4,12 @@ const genAI = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '
 
 export async function translateToProductName(userInput, productContext) {
   try {
-    const model = genAI.models;
-
+    const productList = productContext.map(p => `${p.id}: ${p.name} (${p.teluguName}, ${p.hindiName})`).join('\n');
+    
     const prompt = `You are a product name translator for a quick commerce app in India.
 
-Available products in database:
-${JSON.stringify(productContext, null, 2)}
+Available products (format: id: name (telugu, hindi)):
+${productList}
 
 User input: "${userInput}"
 
@@ -35,11 +35,17 @@ Return a JSON array with this structure:
 If no products match, return an empty array [].
 Only return valid JSON, no explanations.`;
 
-    const result = await model.generateContent({
+    const result = await genAI.models.generateContent({
       model: 'gemini-2.0-flash-exp',
-      contents: prompt
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: prompt }]
+        }
+      ]
     });
-    const text = result.text;
+    
+    const text = result.text || '';
     
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
@@ -55,8 +61,6 @@ Only return valid JSON, no explanations.`;
 
 export async function extractProductFromVoice(audioText, productContext) {
   try {
-    const model = genAI.models;
-
     const prompt = `You are helping a shopkeeper add products to their inventory via voice input.
 
 User said: "${audioText}"
@@ -81,11 +85,17 @@ Return JSON in this exact format:
 If information is missing or unclear, use null for that field.
 Only return valid JSON, no explanations.`;
 
-    const result = await model.generateContent({
+    const result = await genAI.models.generateContent({
       model: 'gemini-2.0-flash-exp',
-      contents: audioText
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: prompt }]
+        }
+      ]
     });
-    const text = result.text;
+    
+    const text = result.text || '';
     
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
@@ -101,19 +111,23 @@ Only return valid JSON, no explanations.`;
 
 export async function detectLanguage(text) {
   try {
-    const model = genAI.models;
-
     const prompt = `Detect the language of this text: "${text}"
 
 Return only one of these language codes: "en" (English), "te" (Telugu), "hi" (Hindi), or "mix" (mixed/Hinglish).
 
 Only return the language code, nothing else.`;
 
-    const result = await model.generateContent({
+    const result = await genAI.models.generateContent({
       model: 'gemini-2.0-flash-exp',
-      contents: text
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: prompt }]
+        }
+      ]
     });
-    const text_response = result.text.trim().toLowerCase();
+    
+    const text_response = (result.text || '').trim().toLowerCase();
     
     if (text_response.includes('te')) return 'te';
     if (text_response.includes('hi')) return 'hi';
@@ -127,21 +141,14 @@ Only return the language code, nothing else.`;
 
 export async function semanticProductSearch(query, products) {
   try {
-    const model = genAI.models;
-
-    const productList = products.map(p => ({
-      id: p.id,
-      name: p.name,
-      category: p.category,
-      subcategory: p.subcategory
-    }));
+    const productList = products.map(p => `${p.id}: ${p.name} (${p.category})`).join('\n');
 
     const prompt = `You are a smart product search assistant for a quick commerce app.
 
 User query: "${query}"
 
-Available products:
-${JSON.stringify(productList, null, 2)}
+Available products (format: id: name (category)):
+${productList}
 
 Find products that match the user's intent. Consider:
 - Synonyms (e.g., "vegetables" includes tomato, onion, etc.)
@@ -155,11 +162,17 @@ Return a JSON array of matching product IDs ordered by relevance:
 Return up to 10 most relevant matches.
 Only return valid JSON array, no explanations.`;
 
-    const result = await model.generateContent({
+    const result = await genAI.models.generateContent({
       model: 'gemini-2.0-flash-exp',
-      contents: prompt
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: prompt }]
+        }
+      ]
     });
-    const text = result.text;
+    
+    const text = result.text || '';
     
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
@@ -176,12 +189,12 @@ Only return valid JSON array, no explanations.`;
 
 export async function chatAssistant(message, conversationHistory, products, cartItems) {
   try {
-    const model = genAI.models;
-
+    const productList = products.map(p => `- ${p.name} (₹${p.discountedPrice || p.price})`).join('\n');
+    
     const systemContext = `You are a helpful shopping assistant for DUKAAN (దుకాణ్), a quick commerce app.
 
 Available products:
-${products.slice(0, 50).map(p => `- ${p.name} (₹${p.discountedPrice || p.price})`).join('\n')}
+${productList}
 
 Current cart: ${cartItems.length > 0 ? cartItems.map(i => `${i.name} x${i.quantity}`).join(', ') : 'Empty'}
 
@@ -197,17 +210,22 @@ Keep responses short (2-3 sentences max).`;
     const prompt = `${systemContext}
 
 Conversation:
-${conversationHistory.map(h => `${h.role}: ${h.message}`).join('\n')}
+${conversationHistory.slice(-5).map(h => `${h.role}: ${h.message}`).join('\n')}
 User: ${message}
 
 Your response:`;
 
-    const result = await model.generateContent({
+    const result = await genAI.models.generateContent({
       model: 'gemini-2.0-flash-exp',
-      contents: prompt
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: prompt }]
+        }
+      ]
     });
     
-    return result.text.trim();
+    return (result.text || '').trim();
   } catch (error) {
     console.error('[Gemini] Chat error:', error);
     return 'Sorry, I had trouble understanding that. Can you try again?';
