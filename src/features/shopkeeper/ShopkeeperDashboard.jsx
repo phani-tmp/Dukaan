@@ -24,7 +24,9 @@ import {
   Phone,
   Eye,
   XCircle,
-  ShoppingBag
+  ShoppingBag,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 
 const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit, categoriesData, subcategoriesData, logoUrl, onLogoChange }) => {
@@ -252,6 +254,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
         price: parseFloat(formData.price),
         discountedPrice: formData.discountedPrice ? parseFloat(formData.discountedPrice) : null,
         isPopular: formData.isPopular || false,
+        sortOrder: editingId ? undefined : products.length,
         createdAt: new Date().toISOString()
       };
 
@@ -323,6 +326,53 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
     }
   };
 
+  const reorderItems = async (collection, items, fromIndex, toIndex) => {
+    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0 || fromIndex >= items.length || toIndex >= items.length) {
+      return;
+    }
+
+    try {
+      const batch = [];
+      const reorderedItems = [...items];
+      const [movedItem] = reorderedItems.splice(fromIndex, 1);
+      reorderedItems.splice(toIndex, 0, movedItem);
+
+      reorderedItems.forEach((item, index) => {
+        batch.push(
+          setDoc(doc(db, 'artifacts', appId, 'public', 'data', collection, item.id), {
+            sortOrder: index
+          }, { merge: true })
+        );
+      });
+
+      await Promise.all(batch);
+    } catch (error) {
+      console.error('Error reordering items:', error);
+      alert('Failed to reorder items');
+    }
+  };
+
+  const moveCategory = async (categoryId, direction) => {
+    const sortedCategories = [...categoriesData].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+    const currentIndex = sortedCategories.findIndex(c => c.id === categoryId);
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    await reorderItems('categories', sortedCategories, currentIndex, newIndex);
+  };
+
+  const moveSubcategory = async (subcategoryId, direction) => {
+    const sortedSubcategories = [...subcategoriesData].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+    const currentIndex = sortedSubcategories.findIndex(s => s.id === subcategoryId);
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    await reorderItems('subcategories', sortedSubcategories, currentIndex, newIndex);
+  };
+
+  const moveProduct = async (productId, direction) => {
+    const sortedProducts = [...products].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+    const currentIndex = sortedProducts.findIndex(p => p.id === productId);
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    await reorderItems('products', sortedProducts, currentIndex, newIndex);
+  };
+
   const handleSubmitCategory = async (e) => {
     e.preventDefault();
     try {
@@ -334,6 +384,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
         imageUrl: categoryFormData.imageUrl,
         color: categoryFormData.color,
         gradient: categoryFormData.gradient || `linear-gradient(135deg, ${categoryFormData.color} 0%, ${categoryFormData.color}dd 100%)`,
+        sortOrder: editingCategoryId ? undefined : categoriesData.length,
         createdAt: new Date().toISOString()
       };
 
@@ -390,6 +441,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
         nameTe: subcategoryFormData.nameTe,
         categoryId: subcategoryFormData.categoryId,
         imageUrl: subcategoryFormData.imageUrl,
+        sortOrder: editingSubcategoryId ? undefined : subcategoriesData.length,
         createdAt: new Date().toISOString()
       };
 
@@ -1056,7 +1108,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
 
             <div className="products-admin-list">
               <h3 className="section-subtitle">Manage Categories ({categoriesData.length})</h3>
-              {categoriesData.map(category => (
+              {[...categoriesData].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map((category, index, arr) => (
                 <div key={category.id} className="admin-product-card">
                   <div className="category-icon-preview" style={{ background: category.gradient }}>
                     <img 
@@ -1071,6 +1123,24 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     <p className="admin-price">{category.color}</p>
                   </div>
                   <div className="admin-product-actions">
+                    <button 
+                      onClick={() => moveCategory(category.id, 'up')} 
+                      className="edit-btn"
+                      disabled={index === 0}
+                      title="Move up"
+                      style={{ opacity: index === 0 ? 0.3 : 1 }}
+                    >
+                      <ChevronUp className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => moveCategory(category.id, 'down')} 
+                      className="edit-btn"
+                      disabled={index === arr.length - 1}
+                      title="Move down"
+                      style={{ opacity: index === arr.length - 1 ? 0.3 : 1 }}
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
                     <button onClick={() => handleEditCategory(category)} className="edit-btn">
                       <Edit className="w-4 h-4" />
                     </button>
@@ -1178,7 +1248,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
 
             <div className="products-admin-list">
               <h3 className="section-subtitle">Manage Subcategories ({subcategoriesData.length})</h3>
-              {subcategoriesData.map(subcategory => {
+              {[...subcategoriesData].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map((subcategory, index, arr) => {
                 const parentCategory = categoriesData.find(c => c.id === subcategory.categoryId);
                 return (
                   <div key={subcategory.id} className="admin-product-card">
@@ -1195,6 +1265,24 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                       <p className="admin-price">Parent: {parentCategory?.nameEn || 'N/A'}</p>
                     </div>
                     <div className="admin-product-actions">
+                      <button 
+                        onClick={() => moveSubcategory(subcategory.id, 'up')} 
+                        className="edit-btn"
+                        disabled={index === 0}
+                        title="Move up"
+                        style={{ opacity: index === 0 ? 0.3 : 1 }}
+                      >
+                        <ChevronUp className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => moveSubcategory(subcategory.id, 'down')} 
+                        className="edit-btn"
+                        disabled={index === arr.length - 1}
+                        title="Move down"
+                        style={{ opacity: index === arr.length - 1 ? 0.3 : 1 }}
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
                       <button onClick={() => handleEditSubcategory(subcategory)} className="edit-btn">
                         <Edit className="w-4 h-4" />
                       </button>
@@ -1221,7 +1309,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
             </p>
 
             <div className="products-admin-list">
-              {products.map(product => (
+              {[...products].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map((product, index, arr) => (
                 <div key={product.id} className="admin-product-card">
                   <img src={product.imageUrl || 'https://via.placeholder.com/60'} alt={product.name} className="admin-product-img" />
                   <div className="admin-product-info">
@@ -1230,6 +1318,24 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     <p className="admin-price">₹{product.discountedPrice || product.price}</p>
                   </div>
                   <div className="admin-product-actions">
+                    <button 
+                      onClick={() => moveProduct(product.id, 'up')} 
+                      className="edit-btn"
+                      disabled={index === 0}
+                      title="Move up"
+                      style={{ opacity: index === 0 ? 0.3 : 1 }}
+                    >
+                      <ChevronUp className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => moveProduct(product.id, 'down')} 
+                      className="edit-btn"
+                      disabled={index === arr.length - 1}
+                      title="Move down"
+                      style={{ opacity: index === arr.length - 1 ? 0.3 : 1 }}
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
                     <button 
                       onClick={() => togglePopularStatus(product.id, product.isPopular)}
                       className={`popular-toggle-btn ${product.isPopular ? 'is-popular' : ''}`}

@@ -4,11 +4,12 @@ import { translations } from '../../constants/translations';
 
 const CategoryGrid = ({ categoriesData, onCategoryClick, language }) => {
   const t = translations[language];
+  const sortedCategories = [...categoriesData].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
 
   return (
     <div className="category-section">
       <div className="category-grid">
-        {categoriesData.map(cat => (
+        {sortedCategories.map(cat => (
           <button
             key={cat.id}
             onClick={() => onCategoryClick(cat.id)}
@@ -97,7 +98,8 @@ const ProductCard = ({ product, onAddToCart, cartItems, language }) => {
 };
 
 const QuickCategoriesBar = ({ categoriesData, selectedCategory, onCategoryClick, language }) => {
-  const topCategories = categoriesData.slice(0, 6);
+  const sortedCategories = [...categoriesData].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  const topCategories = sortedCategories.slice(0, 6);
   
   return (
     <div className="quick-categories-bar">
@@ -148,7 +150,9 @@ const HomeView = ({
   }, [products, searchTerm, voiceSearchResults]);
 
   const popularProducts = useMemo(() => {
-    return products.filter(p => p.isPopular === true);
+    return products
+      .filter(p => p.isPopular === true)
+      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   }, [products]);
 
   const isSearching = searchTerm.trim().length > 0 || voiceSearchResults !== null;
@@ -156,15 +160,19 @@ const HomeView = ({
 
   const categorySubcategories = useMemo(() => {
     if (!selectedCategory) return [];
-    return subcategoriesData.filter(sc => sc.categoryId === selectedCategory);
+    return subcategoriesData
+      .filter(sc => sc.categoryId === selectedCategory)
+      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   }, [subcategoriesData, selectedCategory]);
 
   const subcategoryProducts = useMemo(() => {
     if (!selectedSubcategory) return [];
-    return products.filter(p => 
-      p.subcategoryId === selectedSubcategory ||
-      (!p.subcategoryId && selectedCategory && subcategoriesData.find(sc => sc.id === selectedSubcategory)?.categoryId === p.category)
-    );
+    return products
+      .filter(p => 
+        p.subcategoryId === selectedSubcategory ||
+        (!p.subcategoryId && selectedCategory && subcategoriesData.find(sc => sc.id === selectedSubcategory)?.categoryId === p.category)
+      )
+      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   }, [products, selectedSubcategory, selectedCategory, subcategoriesData]);
 
   const handleCategoryClick = (categoryId) => {
