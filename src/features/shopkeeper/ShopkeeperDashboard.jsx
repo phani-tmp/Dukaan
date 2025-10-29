@@ -26,11 +26,13 @@ import {
   ShoppingBag
 } from 'lucide-react';
 
-const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit, categoriesData, subcategoriesData }) => {
+const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit, categoriesData, subcategoriesData, logoUrl, onLogoChange }) => {
   const { db } = getFirebaseInstances();
   const t = translations[language];
   const [activeTab, setActiveTab] = useState('orders');
   const [showForm, setShowForm] = useState(false);
+  const [logoFormData, setLogoFormData] = useState('');
+  const [logoPreview, setLogoPreview] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -545,6 +547,13 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
         >
           <User className="w-5 h-5" />
           Riders
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'settings' ? 'active' : ''}`}
+          onClick={() => setActiveTab('settings')}
+        >
+          <Settings className="w-5 h-5" />
+          Settings
         </button>
       </div>
 
@@ -1273,7 +1282,29 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     return a.name.localeCompare(b.name);
                   })
                   .map(rider => (
-                    <div key={rider.id} style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0' }}>
+                    <div key={rider.id} style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', border: '1px solid #e0e0e0', position: 'relative' }}>
+                      <button
+                        onClick={async () => {
+                          if (rider.activeOrders > 0) {
+                            alert(`Cannot delete rider ${rider.name}. They have ${rider.activeOrders} active delivery in progress.`);
+                            return;
+                          }
+                          if (window.confirm(`Are you sure you want to delete rider ${rider.name}? This action cannot be undone.`)) {
+                            try {
+                              await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'riders', rider.id));
+                              alert(`Rider ${rider.name} deleted successfully!`);
+                            } catch (error) {
+                              console.error('Error deleting rider:', error);
+                              alert('Failed to delete rider');
+                            }
+                          }
+                        }}
+                        className="delete-btn"
+                        style={{ position: 'absolute', top: '12px', right: '12px', padding: '6px', borderRadius: '6px', background: '#fff', border: '1px solid #e0e0e0' }}
+                        title="Delete Rider"
+                      >
+                        <Trash2 className="w-4 h-4" style={{ color: '#f44336' }} />
+                      </button>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #f0f0f0' }}>
                         <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '20px', fontWeight: '700' }}>
                           {rider.name.charAt(0).toUpperCase()}
@@ -1304,6 +1335,102 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                   ))}
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className="settings-section">
+            <h3 className="section-subtitle">App Settings</h3>
+            
+            <div style={{ background: 'white', borderRadius: '12px', padding: '24px', marginTop: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Upload className="w-5 h-5" />
+                App Logo
+              </h4>
+              
+              {logoUrl && (
+                <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ padding: '12px', background: '#f5f5f5', borderRadius: '8px' }}>
+                    <img src={logoUrl} alt="Current Logo" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '14px', color: '#666' }}>Current Logo</p>
+                    <p style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>Displayed in app header</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="form-group">
+                <label className="form-label">Logo Image URL or Upload</label>
+                <input
+                  type="text"
+                  placeholder="Enter image URL or upload below"
+                  value={logoFormData}
+                  onChange={(e) => {
+                    setLogoFormData(e.target.value);
+                    setLogoPreview(e.target.value);
+                  }}
+                  className="form-input"
+                  style={{ marginBottom: '12px' }}
+                />
+                
+                <div style={{ marginTop: '12px' }}>
+                  <label className="form-label">Or upload logo:</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          setLogoFormData(reader.result);
+                          setLogoPreview(reader.result);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="form-input"
+                  />
+                </div>
+
+                {logoPreview && (
+                  <div style={{ marginTop: '16px', padding: '16px', background: '#f5f5f5', borderRadius: '8px' }}>
+                    <p style={{ fontSize: '13px', color: '#666', marginBottom: '8px' }}>Preview:</p>
+                    <img src={logoPreview} alt="Logo Preview" style={{ width: '80px', height: '80px', objectFit: 'contain', background: 'white', padding: '8px', borderRadius: '8px' }} />
+                  </div>
+                )}
+
+                <button
+                  onClick={async () => {
+                    if (!logoFormData) {
+                      alert('Please enter a logo URL or upload an image');
+                      return;
+                    }
+                    try {
+                      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app'), {
+                        logoUrl: logoFormData,
+                        updatedAt: new Date().toISOString()
+                      });
+                      if (onLogoChange) {
+                        onLogoChange(logoFormData);
+                      }
+                      alert('Logo updated successfully!');
+                      setLogoFormData('');
+                      setLogoPreview(null);
+                    } catch (error) {
+                      console.error('Error updating logo:', error);
+                      alert('Failed to update logo');
+                    }
+                  }}
+                  className="save-btn"
+                  style={{ marginTop: '16px' }}
+                >
+                  <Save className="w-4 h-4" />
+                  Save Logo
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

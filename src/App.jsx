@@ -106,7 +106,7 @@ function App() {
   const [voiceSearchResults, setVoiceSearchResults] = useState(null);
   const [language, setLanguage] = useState('en');
   const [location, setLocation] = useState('Ponnur, AP');
-  const [logoUrl, setLogoUrl] = useState('/dukaan-logo.png');
+  const [logoUrl, setLogoUrl] = useState('');
   const [notification, setNotification] = useState(null);
   const [previousOrderStatuses, setPreviousOrderStatuses] = useState({});
   const [isShopkeeperMode, setIsShopkeeperMode] = useState(false);
@@ -124,6 +124,26 @@ function App() {
     setIsShopkeeperMode(mode === 'shopkeeper');
     setIsRiderMode(mode === 'rider');
     console.log('[Mode] Shopkeeper mode:', mode === 'shopkeeper', 'Rider mode:', mode === 'rider', 'URL:', window.location.search);
+  }, []);
+
+  useEffect(() => {
+    const loadLogo = async () => {
+      try {
+        const { db } = await import('./services/firebase').then(module => ({
+          db: module.getFirebaseInstances().db
+        }));
+        const { doc, getDoc } = await import('firebase/firestore');
+        const { appId } = await import('./services/firebase');
+        
+        const logoDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app'));
+        if (logoDoc.exists() && logoDoc.data().logoUrl) {
+          setLogoUrl(logoDoc.data().logoUrl);
+        }
+      } catch (error) {
+        console.log('Logo not found, using default');
+      }
+    };
+    loadLogo();
   }, []);
 
   useEffect(() => {
@@ -207,6 +227,8 @@ function App() {
         onExit={() => window.location.href = '/'}
         categoriesData={categoriesData}
         subcategoriesData={subcategoriesData}
+        logoUrl={logoUrl}
+        onLogoChange={setLogoUrl}
       />
     );
   }
