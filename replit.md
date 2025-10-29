@@ -71,29 +71,38 @@ The application features a modern, mobile-first design with a professional, emoj
 - **placeholder.com**: Used for fallback images.
 - **lucide-react**: For vector icons.
 
-## Voice Shopping Implementation Notes
+## Voice Shopping Implementation Notes (October 29, 2025)
 
 ### How It Works
 1. **Customer Experience**:
    - Click floating green mic button (bottom-right)
    - Speak naturally in Telugu, English, or Hindi (e.g., "2 కిలో ఉల్లిపాయ ఇవ్వండి" or "I need milk")
-   - AI translates and matches products from database
+   - AI translates and matches products from entire catalog
    - Products automatically added to cart or shown as search results
    
 2. **Technical Flow**:
    - Voice → Web Speech API → Text
-   - Text → Gemini AI → Product matching with bilingual synonym database
+   - Text → Gemini AI (full product catalog sent) → Product matching
    - High-confidence matches (>0.7) → Auto-add to cart
    - Lower confidence → Show as search results
+   - Chat assistant with complete product awareness
 
-3. **Shopkeeper Feature** (Pending):
+3. **Technical Implementation**:
+   - **Gemini SDK**: Uses `@google/genai` v1.27.0 with correct API patterns
+   - **API Call Structure**: `genAI.models.generateContent({ model, contents })`
+   - **Response Access**: `result.text` (property getter, not method)
+   - **Product Context**: Entire catalog sent to all AI functions (no truncation)
+   - **Five AI Functions**: translateToProductName, extractProductFromVoice, detectLanguage, semanticProductSearch, chatAssistant
+
+4. **Shopkeeper Feature** (Pending):
    - Voice product entry: "3 లీటర్ గోవు పాలు 50 రూపాయలు"
    - AI extracts: name, price, quantity, unit, category
    - Auto-fills product form
 
 ### Future Enhancements
-- Server-side API proxy for production security
+- Server-side API proxy for production security (CRITICAL for production)
 - Offline voice command caching
 - Voice-based order tracking updates
 - Gemini-powered delivery route optimization
 - Daily sales insights in Telugu for shopkeepers
+- Token usage optimization if catalog grows significantly
