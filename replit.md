@@ -47,12 +47,13 @@ The application features a modern, mobile-first design with a professional, emoj
 - **Price Calculation Consistency**: Fixed discrepancy between customer OrdersView and shopkeeper dashboard - both now correctly use discounted prices when available.
 - **Voice Shopping with Gemini AI** (October 29, 2025):
     - Integrated Google Gemini 2.0 Flash (`@google/genai` v1.27.0) for AI-powered shopping
-    - Voice Assistant component with floating mic button and chat interface
+    - Voice search integrated into header search bar (mic button) - mobile-first design
+    - Shows ALL product variants (never auto-adds) - allows users to choose from options
     - Multi-language voice recognition (Telugu/English/Hindi/Hinglish) using Web Speech API
     - Semantic product search with AI understanding of synonyms and local languages
-    - Shopping chat assistant for conversational product discovery
     - Bilingual product synonym database (50+ products with translations)
     - Quick Categories swipe bar for fast navigation
+    - **Shopkeeper Voice Input**: Voice-to-text for product/category/subcategory forms with language-aware recognition
     - **Security Note**: Current implementation exposes API key client-side (prototyping only); production requires server-side proxy
 - **User Profile**: Enhanced section with order history, user statistics, and admin panel access.
 - **Real-time Notifications**: Toast notifications for order status updates.
