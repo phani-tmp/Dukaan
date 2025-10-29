@@ -92,6 +92,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
+  const [voiceSearchResults, setVoiceSearchResults] = useState(null);
   const [language, setLanguage] = useState('en');
   const [location, setLocation] = useState('Ponnur, AP');
   const [logoUrl, setLogoUrl] = useState('/dukaan-logo.png');
@@ -233,6 +234,20 @@ function App() {
     );
   }
 
+  const handleVoiceSearch = (foundProducts, voiceQuery) => {
+    setVoiceSearchResults(foundProducts);
+    setSearchTerm('');
+    setCurrentView('Home');
+    setSelectedCategory(null);
+    setSelectedSubcategory(null);
+  };
+
+  useEffect(() => {
+    if (searchTerm) {
+      setVoiceSearchResults(null);
+    }
+  }, [searchTerm]);
+
   return (
     <div className="app-container-modern">
       <AppHeader 
@@ -242,6 +257,8 @@ function App() {
         language={language}
         toggleLanguage={toggleLanguage}
         logoUrl={logoUrl}
+        products={products}
+        onVoiceSearch={handleVoiceSearch}
       />
 
       <div className="app-content">
@@ -259,6 +276,8 @@ function App() {
             language={language}
             categoriesData={categoriesData}
             subcategoriesData={subcategoriesData}
+            voiceSearchResults={voiceSearchResults}
+            setVoiceSearchResults={setVoiceSearchResults}
           />
         )}
 

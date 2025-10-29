@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ChevronLeft, Star, Plus, Minus, IndianRupee } from 'lucide-react';
 import { translations } from '../../constants/translations';
-import VoiceAssistant from '../../components/shared/VoiceAssistant';
+import VoiceSearch from '../../components/shared/VoiceSearch';
 
 const CategoryGrid = ({ categoriesData, onCategoryClick, language }) => {
   const t = translations[language];
@@ -127,10 +127,11 @@ const HomeView = ({
   searchTerm, 
   language,
   categoriesData,
-  subcategoriesData
+  subcategoriesData,
+  voiceSearchResults,
+  setVoiceSearchResults
 }) => {
   const t = translations[language];
-  const [voiceSearchResults, setVoiceSearchResults] = useState(null);
 
   const searchResults = useMemo(() => {
     if (voiceSearchResults) return voiceSearchResults;
@@ -147,11 +148,6 @@ const HomeView = ({
 
   const isSearching = searchTerm.trim().length > 0 || voiceSearchResults !== null;
 
-  const handleVoiceProductsFound = (foundProducts) => {
-    setVoiceSearchResults(foundProducts);
-    if (selectedCategory) setSelectedCategory(null);
-    if (selectedSubcategory) setSelectedSubcategory(null);
-  };
 
   const categorySubcategories = useMemo(() => {
     if (!selectedCategory) return [];
@@ -354,14 +350,6 @@ const HomeView = ({
         </div>
       )}
 
-      <VoiceAssistant
-        products={products}
-        cartItems={Object.values(cartItems)}
-        onAddToCart={onAddToCart}
-        onProductsFound={handleVoiceProductsFound}
-        language={language}
-        translations={t}
-      />
     </div>
   );
 };

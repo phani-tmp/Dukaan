@@ -1,8 +1,9 @@
 import React from 'react';
-import { Search, MapPin, Mic } from 'lucide-react';
+import { Search, MapPin } from 'lucide-react';
 import { translations } from '../../constants/translations';
+import VoiceSearch from './VoiceSearch';
 
-const AppHeader = ({ searchTerm, setSearchTerm, location, language, toggleLanguage, logoUrl }) => {
+const AppHeader = ({ searchTerm, setSearchTerm, location, language, toggleLanguage, logoUrl, products, onVoiceSearch }) => {
   const t = translations[language];
   
   return (
@@ -32,9 +33,13 @@ const AppHeader = ({ searchTerm, setSearchTerm, location, language, toggleLangua
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
         />
-        <button className="voice-button">
-          <Mic className="w-5 h-5" />
-        </button>
+        {products && onVoiceSearch && (
+          <VoiceSearch
+            products={products}
+            onProductsFound={onVoiceSearch}
+            language={language}
+          />
+        )}
       </div>
     </div>
   );

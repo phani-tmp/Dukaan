@@ -4,6 +4,7 @@ import { getFirebaseInstances, appId } from '../../services/firebase';
 import { translations } from '../../constants/translations';
 import UsersManagement from './UsersManagement';
 import OrderDetailsModal from '../../components/shared/OrderDetailsModal';
+import VoiceInput from '../../components/shared/VoiceInput';
 import {
   Search,
   MapPin,
@@ -676,37 +677,61 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
 
             {showForm && (
               <form onSubmit={handleSubmitProduct} className="product-form">
-                <input
-                  type="text"
-                  placeholder={t.productName}
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                  className="form-input"
-                />
-                <input
-                  type="number"
-                  placeholder={t.productPrice}
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  required
-                  className="form-input"
-                />
-                <input
-                  type="number"
-                  placeholder="Discounted Price (Optional)"
-                  value={formData.discountedPrice}
-                  onChange={(e) => setFormData({ ...formData, discountedPrice: e.target.value })}
-                  className="form-input"
-                />
-                <input
-                  type="text"
-                  placeholder={t.productWeight}
-                  value={formData.weight}
-                  onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                  required
-                  className="form-input"
-                />
+                <div className="input-with-voice">
+                  <input
+                    type="text"
+                    placeholder={t.productName}
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    className="form-input"
+                  />
+                  <VoiceInput
+                    onTranscript={(text) => setFormData({ ...formData, name: text })}
+                    language={language}
+                  />
+                </div>
+                <div className="input-with-voice">
+                  <input
+                    type="number"
+                    placeholder={t.productPrice}
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    required
+                    className="form-input"
+                  />
+                  <VoiceInput
+                    onTranscript={(text) => setFormData({ ...formData, price: text.replace(/[^0-9]/g, '') })}
+                    language={language}
+                  />
+                </div>
+                <div className="input-with-voice">
+                  <input
+                    type="number"
+                    placeholder="Discounted Price (Optional)"
+                    value={formData.discountedPrice}
+                    onChange={(e) => setFormData({ ...formData, discountedPrice: e.target.value })}
+                    className="form-input"
+                  />
+                  <VoiceInput
+                    onTranscript={(text) => setFormData({ ...formData, discountedPrice: text.replace(/[^0-9]/g, '') })}
+                    language={language}
+                  />
+                </div>
+                <div className="input-with-voice">
+                  <input
+                    type="text"
+                    placeholder={t.productWeight}
+                    value={formData.weight}
+                    onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                    required
+                    className="form-input"
+                  />
+                  <VoiceInput
+                    onTranscript={(text) => setFormData({ ...formData, weight: text })}
+                    language={language}
+                  />
+                </div>
                 
                 <div className="image-upload-section">
                   <label className="upload-label">
@@ -858,21 +883,33 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
 
             {showCategoryForm && (
               <form onSubmit={handleSubmitCategory} className="product-form">
-                <input
-                  type="text"
-                  placeholder="Category Name (English)"
-                  value={categoryFormData.nameEn}
-                  onChange={(e) => setCategoryFormData({ ...categoryFormData, nameEn: e.target.value })}
-                  required
-                  className="form-input"
-                />
-                <input
-                  type="text"
-                  placeholder="Category Name (Telugu)"
-                  value={categoryFormData.nameTe}
-                  onChange={(e) => setCategoryFormData({ ...categoryFormData, nameTe: e.target.value })}
-                  className="form-input"
-                />
+                <div className="input-with-voice">
+                  <input
+                    type="text"
+                    placeholder="Category Name (English)"
+                    value={categoryFormData.nameEn}
+                    onChange={(e) => setCategoryFormData({ ...categoryFormData, nameEn: e.target.value })}
+                    required
+                    className="form-input"
+                  />
+                  <VoiceInput
+                    onTranscript={(text) => setCategoryFormData({ ...categoryFormData, nameEn: text })}
+                    language="en"
+                  />
+                </div>
+                <div className="input-with-voice">
+                  <input
+                    type="text"
+                    placeholder="Category Name (Telugu)"
+                    value={categoryFormData.nameTe}
+                    onChange={(e) => setCategoryFormData({ ...categoryFormData, nameTe: e.target.value })}
+                    className="form-input"
+                  />
+                  <VoiceInput
+                    onTranscript={(text) => setCategoryFormData({ ...categoryFormData, nameTe: text })}
+                    language="te"
+                  />
+                </div>
                 
                 <div className="image-upload-section">
                   <label className="upload-label">
@@ -971,21 +1008,33 @@ const ShopkeeperDashboard = ({ products, allOrders, language, onExit, categories
                     <option key={cat.id} value={cat.id}>{cat.nameEn}</option>
                   ))}
                 </select>
-                <input
-                  type="text"
-                  placeholder="Subcategory Name (English)"
-                  value={subcategoryFormData.nameEn}
-                  onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, nameEn: e.target.value })}
-                  required
-                  className="form-input"
-                />
-                <input
-                  type="text"
-                  placeholder="Subcategory Name (Telugu)"
-                  value={subcategoryFormData.nameTe}
-                  onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, nameTe: e.target.value })}
-                  className="form-input"
-                />
+                <div className="input-with-voice">
+                  <input
+                    type="text"
+                    placeholder="Subcategory Name (English)"
+                    value={subcategoryFormData.nameEn}
+                    onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, nameEn: e.target.value })}
+                    required
+                    className="form-input"
+                  />
+                  <VoiceInput
+                    onTranscript={(text) => setSubcategoryFormData({ ...subcategoryFormData, nameEn: text })}
+                    language="en"
+                  />
+                </div>
+                <div className="input-with-voice">
+                  <input
+                    type="text"
+                    placeholder="Subcategory Name (Telugu)"
+                    value={subcategoryFormData.nameTe}
+                    onChange={(e) => setSubcategoryFormData({ ...subcategoryFormData, nameTe: e.target.value })}
+                    className="form-input"
+                  />
+                  <VoiceInput
+                    onTranscript={(text) => setSubcategoryFormData({ ...subcategoryFormData, nameTe: text })}
+                    language="te"
+                  />
+                </div>
                 
                 <div className="image-upload-section">
                   <label className="upload-label">
