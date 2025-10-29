@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { collection, doc, updateDoc, addDoc, deleteDoc, setDoc, getDocs } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getFirebaseInstances, appId } from '../../services/firebase';
 import { translations } from '../../constants/translations';
 import UsersManagement from './UsersManagement';
@@ -27,12 +28,14 @@ import {
 } from 'lucide-react';
 
 const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit, categoriesData, subcategoriesData, logoUrl, onLogoChange }) => {
-  const { db } = getFirebaseInstances();
+  const { db, storage } = getFirebaseInstances();
   const t = translations[language];
   const [activeTab, setActiveTab] = useState('orders');
   const [showForm, setShowForm] = useState(false);
   const [logoFormData, setLogoFormData] = useState('');
   const [logoPreview, setLogoPreview] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -1379,12 +1382,12 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={async (e) => {
+                    onChange={(e) => {
                       const file = e.target.files[0];
                       if (file) {
+                        setLogoFile(file);
                         const reader = new FileReader();
                         reader.onload = () => {
-                          setLogoFormData(reader.result);
                           setLogoPreview(reader.result);
                         };
                         reader.readAsDataURL(file);
@@ -1403,31 +1406,48 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
 
                 <button
                   onClick={async () => {
-                    if (!logoFormData) {
+                    if (!logoFormData && !logoFile) {
                       alert('Please enter a logo URL or upload an image');
                       return;
                     }
+                    
+                    setIsUploadingLogo(true);
                     try {
+                      let finalLogoUrl = logoFormData;
+                      
+                      if (logoFile) {
+                        const timestamp = Date.now();
+                        const storageRef = ref(storage, `logos/${timestamp}_${logoFile.name}`);
+                        await uploadBytes(storageRef, logoFile);
+                        finalLogoUrl = await getDownloadURL(storageRef);
+                      }
+                      
                       await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app'), {
-                        logoUrl: logoFormData,
+                        logoUrl: finalLogoUrl,
                         updatedAt: new Date().toISOString()
                       });
+                      
                       if (onLogoChange) {
-                        onLogoChange(logoFormData);
+                        onLogoChange(finalLogoUrl);
                       }
+                      
                       alert('Logo updated successfully!');
                       setLogoFormData('');
                       setLogoPreview(null);
+                      setLogoFile(null);
                     } catch (error) {
                       console.error('Error updating logo:', error);
-                      alert('Failed to update logo');
+                      alert('Failed to update logo: ' + error.message);
+                    } finally {
+                      setIsUploadingLogo(false);
                     }
                   }}
                   className="save-btn"
                   style={{ marginTop: '16px' }}
+                  disabled={isUploadingLogo}
                 >
                   <Save className="w-4 h-4" />
-                  Save Logo
+                  {isUploadingLogo ? 'Uploading...' : 'Save Logo'}
                 </button>
               </div>
             </div>
