@@ -82,6 +82,12 @@ The application features a modern, mobile-first design with a professional, emoj
   - Automatically displays custom logo in app header across all interfaces
   - Default Dukaan logo with circular green design showcasing commerce cycle
   - Custom favicon with "D" branding for professional browser tab appearance
+- **Flexible Item Ordering** (October 29, 2025):
+  - Shopkeeper-controlled ordering of categories, subcategories, and products
+  - Up/down arrow buttons in dashboard for easy reordering (mobile-friendly)
+  - sortOrder field in Firestore for all three entity types
+  - Customer-facing views automatically display items in shopkeeper-defined order
+  - Batch Firebase updates for efficient reordering operations
 
 ### System Design Choices
 - **Authentication**: Hybrid authentication (OTP for verification, password for convenience) for a village-friendly approach.
