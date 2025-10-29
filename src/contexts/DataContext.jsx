@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { collection, query, onSnapshot, where, doc, updateDoc, onAuthStateChanged } from 'firebase/firestore';
+import { collection, query, onSnapshot, where, doc, updateDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import { getFirebaseInstances, appId } from '../services/firebase';
 import { categories as defaultCategories } from '../constants/categories';
 import { useAuth } from './AuthContext';
