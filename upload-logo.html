@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Dukaan Logo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+        .logo-preview {
+            width: 200px;
+            height: 200px;
+            border: 2px dashed #cbd5e0;
+            border-radius: 10px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .logo-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .success {
+            background: #48bb78;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        .instructions {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📦 Upload Dukaan Logo</h1>
+        
+        <div class="instructions">
+            <strong>Instructions:</strong><br>
+            1. Your logo file is located in: <code>attached_assets/Screenshot 2025-10-29 at 4.08.24 AM_1761725309233.png</code><br>
+            2. Manually drag and drop that file below, or click to select it<br>
+            3. Click "Upload to Firebase" to save it
+        </div>
+
+        <input type="file" id="logoInput" accept="image/*" style="margin: 20px 0;">
+        
+        <div class="logo-preview" id="preview">
+            <span style="color: #a0aec0;">No image selected</span>
+        </div>
+
+        <button onclick="uploadLogo()">Upload to Firebase</button>
+
+        <div class="success" id="successMessage">
+            ✅ Logo uploaded successfully! Reload your app to see the changes.
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
+        import { getFirestore, doc, setDoc } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC66mPj73x7Hqgpo0jO4sO-RShJiJFUoHg",
+            authDomain: "dukaan-96e35.firebaseapp.com",
+            projectId: "dukaan-96e35",
+            storageBucket: "dukaan-96e35.firebasestorage.app",
+            messagingSenderId: "63864552046",
+            appId: "1:63864552046:web:c98b77df97c66f0f8a0c97",
+            measurementId: "G-GHCQWXQ0WJ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.db = db;
+
+        const logoInput = document.getElementById('logoInput');
+        const preview = document.getElementById('preview');
+
+        logoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    preview.innerHTML = `<img src="${event.target.result}" alt="Logo Preview">`;
+                    window.logoData = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        window.uploadLogo = async function() {
+            if (!window.logoData) {
+                alert('Please select an image first!');
+                return;
+            }
+
+            try {
+                const settingsRef = doc(db, 'settings', 'app');
+                await setDoc(settingsRef, { logoUrl: window.logoData }, { merge: true });
+                
+                document.getElementById('successMessage').style.display = 'block';
+                console.log('Logo uploaded successfully!');
+            } catch (error) {
+                console.error('Error uploading logo:', error);
+                alert('Error uploading logo: ' + error.message);
+            }
+        };
+    </script>
+</body>
+</html>
