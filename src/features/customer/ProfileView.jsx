@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Package, IndianRupee, LogOut, MapPin, ChevronLeft, Edit2, Save, X } from 'lucide-react';
+import { User, Package, IndianRupee, LogOut, MapPin, ChevronLeft, Edit2, Save, X, Store, Bike } from 'lucide-react';
 import { translations } from '../../constants/translations';
 import { doc, updateDoc } from 'firebase/firestore';
 import { getFirebaseInstances, appId } from '../../services/firebase';
@@ -156,6 +156,29 @@ const ProfileView = ({
         >
           <Package className="w-5 h-5" />
           <span>View Order History ({totalOrders})</span>
+          <ChevronLeft className="w-5 h-5" style={{ transform: 'rotate(180deg)' }} />
+        </button>
+      </div>
+
+      <div className="profile-section">
+        <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: '#666' }}>
+          Switch Mode
+        </h3>
+        <button 
+          className="order-history-button"
+          onClick={() => window.location.href = '?mode=shopkeeper'}
+          style={{ marginBottom: '8px' }}
+        >
+          <Store className="w-5 h-5" />
+          <span>Shopkeeper Dashboard</span>
+          <ChevronLeft className="w-5 h-5" style={{ transform: 'rotate(180deg)' }} />
+        </button>
+        <button 
+          className="order-history-button"
+          onClick={() => window.location.href = '?mode=rider'}
+        >
+          <Bike className="w-5 h-5" />
+          <span>Rider Dashboard</span>
           <ChevronLeft className="w-5 h-5" style={{ transform: 'rotate(180deg)' }} />
         </button>
       </div>
