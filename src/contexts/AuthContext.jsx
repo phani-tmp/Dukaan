@@ -102,9 +102,21 @@ export const AuthProvider = ({ children }) => {
       const userDoc = await getDoc(usersQuery);
       
       if (userDoc.exists()) {
-        // Existing user - ask for password
-        setIsNewUser(false);
-        setAuthStep('password');
+        // Existing user found - get their full profile to check if they have a password
+        const userId = userDoc.data().uid;
+        const userProfileRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userId);
+        const userProfile = await getDoc(userProfileRef);
+        
+        if (userProfile.exists() && userProfile.data().password) {
+          // User has a password - ask for password
+          setIsNewUser(false);
+          setAuthStep('password');
+        } else {
+          // User exists but has no password (OTP-only user) - send OTP
+          console.log('[Auth] OTP-only user detected - sending OTP');
+          setIsNewUser(false);
+          await handleSendOTP();
+        }
       } else {
         // New user - send OTP for verification
         setIsNewUser(true);
@@ -161,7 +173,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // For NEW users - verify OTP then show registration form
+  // Verify OTP for both new and existing users
   const handleVerifyOTP = async () => {
     if (!otp || otp.length !== 6) {
       alert('Please enter a valid 6-digit OTP');
@@ -177,8 +189,17 @@ export const AuthProvider = ({ children }) => {
       const result = await confirmationResult.confirm(otp);
       console.log('[Auth] OTP verified for user:', result.user.uid);
       
-      // OTP verified - now show registration form
-      setAuthStep('register');
+      // Check if this is a new user or existing OTP-only user
+      if (isNewUser) {
+        // New user - show registration form
+        console.log('[Auth] New user - showing registration');
+        setAuthStep('register');
+      } else {
+        // Existing OTP-only user - they're now authenticated
+        // onAuthStateChanged will load their profile automatically
+        console.log('[Auth] Existing OTP-only user - login complete');
+        setAuthStep('phone');
+      }
       setOtp('');
     } catch (error) {
       console.error('[Auth] OTP verification error:', error);
@@ -294,6 +315,17 @@ export const AuthProvider = ({ children }) => {
       const phoneNum = user.phoneNumber || profileData.phoneNumber;
       const cleanPhone = phoneNum.replace(/[^\d]/g, '').slice(-10); // Get last 10 digits
       
+      // PREVENT DUPLICATE PHONE NUMBERS: Check if this phone is already registered to a different user
+      const phoneDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users_by_phone', cleanPhone);
+      const existingPhoneMapping = await getDoc(phoneDocRef);
+      
+      if (existingPhoneMapping.exists() && existingPhoneMapping.data().uid !== user.uid) {
+        // Phone number is already used by a different user - prevent duplicate
+        alert('This phone number is already registered. Please use a different number or login with your existing account.');
+        console.error('[Auth] Duplicate phone number detected:', cleanPhone, 'Existing UID:', existingPhoneMapping.data().uid, 'Current UID:', user.uid);
+        return;
+      }
+      
       // Check if user already has a profile (to preserve role)
       const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid);
       const existingDoc = await getDoc(userDocRef);
@@ -321,8 +353,7 @@ export const AuthProvider = ({ children }) => {
       // Save user profile to Firestore
       await setDoc(userDocRef, userDoc, { merge: true });
 
-      // ALWAYS save phone number mapping for OTP-only users to work
-      const phoneDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users_by_phone', cleanPhone);
+      // Save phone number mapping (now safe - we checked for duplicates above)
       await setDoc(phoneDocRef, {
         uid: user.uid,
         phoneNumber: user.phoneNumber || phoneNum

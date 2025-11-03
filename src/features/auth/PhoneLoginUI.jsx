@@ -131,6 +131,20 @@ const PhoneLoginUI = ({
             </button>
             
             <button 
+              onClick={onSendOTP} 
+              className="otp-link-btn"
+              style={{
+                background: 'transparent',
+                border: '2px solid #4CAF50',
+                color: '#4CAF50',
+                marginTop: '12px'
+              }}
+            >
+              <Phone className="w-5 h-5" />
+              Use OTP Instead
+            </button>
+            
+            <button 
               onClick={() => window.location.reload()} 
               className="back-btn"
             >
