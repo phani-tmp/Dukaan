@@ -1557,54 +1557,6 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                 </button>
               </div>
             </div>
-
-            <div style={{ background: 'white', borderRadius: '12px', padding: '24px', marginTop: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
-                Switch Mode
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <button 
-                  onClick={() => window.location.href = '/'}
-                  style={{
-                    padding: '14px 20px',
-                    background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    cursor: 'pointer',
-                    fontSize: '15px',
-                    fontWeight: '500',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  <ShoppingBag className="w-5 h-5" />
-                  <span>Customer App</span>
-                </button>
-                <button 
-                  onClick={() => window.location.href = '?mode=rider'}
-                  style={{
-                    padding: '14px 20px',
-                    background: 'white',
-                    border: '2px solid #FF9800',
-                    borderRadius: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    cursor: 'pointer',
-                    fontSize: '15px',
-                    fontWeight: '500',
-                    color: '#FF9800',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  <Package className="w-5 h-5" />
-                  <span>Rider Dashboard</span>
-                </button>
-              </div>
-            </div>
           </div>
         )}
       </div>
