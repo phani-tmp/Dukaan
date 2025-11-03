@@ -129,18 +129,29 @@ Firebase uses SHA-1 fingerprints to verify that requests are coming from your ap
 
 ## 🔧 Complete Troubleshooting Guide
 
-### Issue: "Profile creation not appearing after OTP"
+### Issue: "Profile creation not appearing after OTP" ✅ FIXED
 
-**Symptoms:** After entering OTP, screen doesn't show registration form.
+**Symptoms:** After entering OTP, user sees "Loading profile..." instead of registration form.
 
-**Causes:**
-1. Firebase auth succeeds but React state doesn't update
-2. Android WebView cache issues
-3. JavaScript errors blocking UI
+**Root Cause:** User successfully authenticated via Firebase but profile document doesn't exist in Firestore.
 
-**Fix:**
+**The Fix (Already Applied):**
+The app now automatically detects when a user is authenticated but has no profile, and shows a comprehensive profile completion form that includes:
+- ✅ Full Name
+- ✅ Password (for future logins)
+- ✅ Confirm Password
+- ✅ Complete Address (street, city, pincode, state)
+
+**What to do:**
+1. **If you're stuck at "Loading profile..."**: Just refresh the page or restart the app
+2. **You should now see a "Complete Your Profile" modal**
+3. **Fill in ALL fields** (they're all required)
+4. **Click "Complete Profile"**
+5. **Done! You can now login anytime with phone + password**
+
+**If the modal still doesn't appear:**
 ```bash
-# Clear and rebuild
+# Clear cache and rebuild
 npm run build
 npx cap sync
 ```
@@ -151,10 +162,10 @@ Then in Android Studio:
 3. **Uninstall app from device**
 4. **Run app again**
 
-**Also check:**
-- Open Chrome DevTools for Android WebView: `chrome://inspect/#devices`
+**Debug with Chrome DevTools:**
+- Open `chrome://inspect/#devices`
 - Look for JavaScript errors in console
-- Make sure `authStep` state changes to 'register'
+- Check if "User authenticated but no profile found" appears in logs
 
 ---
 

@@ -7,7 +7,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, collection } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, addDoc } from 'firebase/firestore';
 import { getFirebaseInstances, appId } from '../services/firebase';
 
 const AuthContext = createContext(null);
@@ -59,6 +59,11 @@ export const AuthProvider = ({ children }) => {
       const userDoc = await getDoc(userDocRef);
       if (userDoc.exists()) {
         setUserProfile({ id: userDoc.id, ...userDoc.data() });
+      } else {
+        // User is authenticated but has no profile - show registration form
+        console.log('[Auth] User authenticated but no profile found - showing registration');
+        setShowProfileSetup(true);
+        setUserProfile(null);
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
@@ -267,15 +272,47 @@ export const AuthProvider = ({ children }) => {
     if (!user) return;
     
     try {
+      // Get phone number from Firebase auth
+      const phoneNum = user.phoneNumber || profileData.phoneNumber;
+      const cleanPhone = phoneNum.replace(/[^\d]/g, '').slice(-10); // Get last 10 digits
+      
+      // Save user profile to Firestore
       const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid);
       await setDoc(userDocRef, {
-        ...profileData,
+        name: profileData.name,
+        phoneNumber: user.phoneNumber || phoneNum,
+        password: profileData.password, // In production, this should be hashed!
+        email: profileData.email || '',
+        createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
-      }, { merge: true });
+      });
+
+      // Save phone number mapping for future logins
+      const phoneDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users_by_phone', cleanPhone);
+      await setDoc(phoneDocRef, {
+        uid: user.uid,
+        phoneNumber: user.phoneNumber || phoneNum
+      });
+
+      // Save default address if provided
+      if (profileData.address && profileData.address.street) {
+        const addressesCollection = collection(db, 'artifacts', appId, 'public', 'data', 'users', user.uid, 'addresses');
+        await addDoc(addressesCollection, {
+          ...profileData.address,
+          label: 'Home',
+          isDefault: true,
+          createdAt: new Date().toISOString()
+        });
+      }
       
       setShowProfileSetup(false);
-      setUserProfile({ id: user.uid, ...userProfile, ...profileData });
-      alert('Profile updated successfully!');
+      setUserProfile({ 
+        id: user.uid, 
+        name: profileData.name,
+        phoneNumber: user.phoneNumber || phoneNum,
+        email: profileData.email || ''
+      });
+      alert('Profile created successfully!');
     } catch (error) {
       console.error('Error saving profile:', error);
       alert('Failed to save profile. Please try again.');
