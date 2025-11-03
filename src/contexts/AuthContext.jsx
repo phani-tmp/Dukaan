@@ -58,7 +58,25 @@ export const AuthProvider = ({ children }) => {
       const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid);
       const userDoc = await getDoc(userDocRef);
       if (userDoc.exists()) {
-        setUserProfile({ id: userDoc.id, ...userDoc.data() });
+        const profileData = { id: userDoc.id, ...userDoc.data() };
+        setUserProfile(profileData);
+        
+        // Auto-redirect based on role (only on initial login)
+        const currentUrl = window.location.search;
+        const urlParams = new URLSearchParams(currentUrl);
+        const currentMode = urlParams.get('mode');
+        
+        // Only redirect if user is on default view (no mode parameter)
+        if (!currentMode) {
+          if (profileData.role === 'shopkeeper') {
+            console.log('[Auth] Auto-redirecting shopkeeper to dashboard');
+            window.location.href = '?mode=shopkeeper';
+          } else if (profileData.role === 'rider') {
+            console.log('[Auth] Auto-redirecting rider to dashboard');
+            window.location.href = '?mode=rider';
+          }
+          // Customers (role='customer') stay on default view - no redirect needed
+        }
       } else {
         // User is authenticated but has no profile - show registration form
         console.log('[Auth] User authenticated but no profile found - showing registration');
