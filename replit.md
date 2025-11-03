@@ -24,12 +24,19 @@ The application features a modern, mobile-first design with a professional, emoj
 ### Feature Specifications
 - **Authentication & Role-Based Access Control**:
     - Village-friendly registration (name-only, password/email optional).
-    - OTP-first login.
+    - OTP-first login with intelligent user detection.
+    - **Authentication Flow** (Fixed Nov 3, 2025):
+        - `checkUserExists` verifies if user has password field before asking for password.
+        - OTP-only users (no password) bypass password screen and use OTP directly.
+        - `handleVerifyOTP` branches on `isNewUser` flag: new users → registration, existing users → login.
+        - Duplicate phone number prevention in `handleSaveProfile` checks UID before creating profile.
+        - "Use OTP Instead" button on password screen for recovery.
     - Role-based system: `customer` by default, `shopkeeper`/`rider` assigned in Firebase Console.
     - Auto-redirect on login: shopkeepers → `?mode=shopkeeper`, riders → `?mode=rider`, customers → default app.
     - Strict role isolation for customer, shopkeeper, and rider interfaces.
     - Mode switching removed from dashboards; only accessible via customer profile for authorized roles.
     - Separate authentication for riders (`RiderContext`).
+    - **Known Security Issue**: Passwords stored in plaintext in Firestore (requires hashing implementation).
 - **Address Management**: CRUD operations, labels, default selection, delivery instructions.
 - **Three-Level Category Hierarchy**: Home → Subcategories → Products.
 - **Triple Interface Architecture**: Separate customer app, shopkeeper dashboard (`?mode=shopkeeper`), and rider dashboard (`?mode=rider`).
