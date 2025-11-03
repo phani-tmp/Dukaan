@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "344365593313",
+    "project_id": "dukaan-476221",
+    "storage_bucket": "dukaan-476221.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:344365593313:android:d88144fd18f79052bcbda0",
+        "android_client_info": {
+          "package_name": "com.dukaan.quickcommerce"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBTRIjrSVMOBs9kmF8JeHOm6LeXqBYkmM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
