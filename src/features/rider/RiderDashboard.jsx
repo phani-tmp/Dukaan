@@ -11,7 +11,9 @@ import {
   ChevronLeft, 
   Clock,
   User,
-  Navigation
+  Navigation,
+  Store,
+  Home
 } from 'lucide-react';
 
 const RiderDashboard = ({ rider, allOrders, language, onExit }) => {
@@ -252,6 +254,52 @@ const RiderDashboard = ({ rider, allOrders, language, onExit }) => {
             </div>
           ))
         )}
+      </div>
+
+      <div style={{ marginTop: '24px', padding: '0 16px' }}>
+        <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: '#666' }}>
+          Switch Mode
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <button 
+            onClick={() => window.location.href = '/'}
+            style={{
+              padding: '14px 20px',
+              background: 'white',
+              border: '2px solid #e0e0e0',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              fontSize: '15px',
+              fontWeight: '500'
+            }}
+          >
+            <Home className="w-5 h-5" />
+            <span>Customer App</span>
+          </button>
+          <button 
+            onClick={() => window.location.href = '?mode=shopkeeper'}
+            style={{
+              padding: '14px 20px',
+              background: 'white',
+              border: '2px solid #e0e0e0',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              fontSize: '15px',
+              fontWeight: '500'
+            }}
+          >
+            <Store className="w-5 h-5" />
+            <span>Shopkeeper Dashboard</span>
+          </button>
+        </div>
       </div>
     </div>
   );

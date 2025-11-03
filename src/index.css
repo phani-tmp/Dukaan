@@ -4848,3 +4848,312 @@ body {
   color: white;
   border-color: #4CAF50;
 }
+
+/* ===== MOBILE OPTIMIZATIONS ===== */
+@media (max-width: 768px) {
+  /* Profile View Mobile Optimizations */
+  .profile-view {
+    padding: 12px;
+    padding-bottom: 80px; /* Space for bottom navigation */
+  }
+
+  .profile-info {
+    padding: 20px 16px;
+    margin-bottom: 12px;
+  }
+
+  .profile-avatar {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 12px;
+  }
+
+  .profile-name {
+    font-size: 16px;
+  }
+
+  .profile-phone {
+    font-size: 13px;
+  }
+
+  .profile-stats {
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .stat-card {
+    padding: 14px 12px;
+    gap: 10px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .profile-section {
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .order-history-button {
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  .profile-edit-input {
+    padding: 10px 14px;
+    font-size: 15px;
+  }
+
+  /* Rider Dashboard Mobile Optimizations */
+  .rider-dashboard {
+    padding-bottom: 24px;
+  }
+
+  .rider-header {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .rider-title {
+    font-size: 18px;
+  }
+
+  .rider-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 12px 16px;
+  }
+
+  .rider-stats .stat-card {
+    flex-direction: column;
+    padding: 12px 8px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .stat-icon {
+    margin: 0;
+  }
+
+  .stat-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    text-align: center;
+  }
+
+  .rider-tabs {
+    padding: 0 16px;
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .rider-tab {
+    padding: 10px 14px;
+    font-size: 13px;
+    white-space: nowrap;
+    min-width: fit-content;
+  }
+
+  .rider-orders-list {
+    padding: 12px 16px;
+  }
+
+  .rider-order-card {
+    padding: 14px;
+  }
+
+  .order-header-rider {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .order-id-rider {
+    font-size: 13px;
+  }
+
+  .rider-action-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+    margin-top: 12px;
+  }
+
+  /* Login Screen Mobile Optimizations */
+  .login-container {
+    padding: 24px 20px;
+  }
+
+  .login-title {
+    font-size: 24px;
+  }
+
+  .login-subtitle {
+    font-size: 13px;
+  }
+
+  .form-title {
+    font-size: 18px;
+  }
+
+  .text-input,
+  .password-input,
+  .phone-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 12px 14px;
+  }
+
+  .login-btn {
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  .registration-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 12px 14px;
+  }
+
+  .registration-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .registration-row input {
+    width: 100% !important;
+  }
+
+  /* Shopkeeper Dashboard Mobile Optimizations */
+  .shopkeeper-header {
+    padding: 12px 16px;
+  }
+
+  .shopkeeper-tabs {
+    padding: 0 12px;
+    gap: 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .shopkeeper-tab {
+    padding: 10px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  /* Better touch targets for mobile */
+  button,
+  .clickable {
+    min-height: 44px; /* iOS recommended minimum touch target */
+  }
+
+  /* Improve modal experience on mobile */
+  .modal-overlay {
+    padding: 8px;
+  }
+
+  .modal-content {
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+
+  .modal-header {
+    padding: 16px;
+  }
+
+  /* Better spacing for forms on mobile */
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 12px 14px;
+  }
+
+  /* Optimize cart for mobile */
+  .cart-item {
+    padding: 12px;
+  }
+
+  .cart-footer {
+    padding: 16px;
+  }
+
+  /* Optimize product cards for mobile */
+  .product-card {
+    padding: 12px;
+  }
+
+  .product-name {
+    font-size: 14px;
+  }
+
+  .product-price {
+    font-size: 15px;
+  }
+
+  /* Better navigation bar on mobile */
+  .nav-bar {
+    padding: 8px 0;
+  }
+
+  .nav-item {
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+
+  .nav-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* Extra small devices (phones in portrait) */
+@media (max-width: 375px) {
+  .profile-avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .profile-name {
+    font-size: 15px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+  }
+
+  .rider-tab {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}
+
+/* Improve touch interactions */
+@media (hover: none) {
+  button:active,
+  .clickable:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
