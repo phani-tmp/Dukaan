@@ -26,7 +26,9 @@ The application features a modern, mobile-first design with a professional, emoj
     - Village-friendly registration (name-only, password/email optional).
     - OTP-first login.
     - Role-based system: `customer` by default, `shopkeeper`/`rider` assigned in Firebase Console.
+    - Auto-redirect on login: shopkeepers → `?mode=shopkeeper`, riders → `?mode=rider`, customers → default app.
     - Strict role isolation for customer, shopkeeper, and rider interfaces.
+    - Mode switching removed from dashboards; only accessible via customer profile for authorized roles.
     - Separate authentication for riders (`RiderContext`).
 - **Address Management**: CRUD operations, labels, default selection, delivery instructions.
 - **Three-Level Category Hierarchy**: Home → Subcategories → Products.
