@@ -276,43 +276,49 @@ export const AuthProvider = ({ children }) => {
       const phoneNum = user.phoneNumber || profileData.phoneNumber;
       const cleanPhone = phoneNum.replace(/[^\d]/g, '').slice(-10); // Get last 10 digits
       
-      // Save user profile to Firestore
+      // Check if user already has a profile (to preserve role)
       const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid);
-      await setDoc(userDocRef, {
+      const existingDoc = await getDoc(userDocRef);
+      const existingRole = existingDoc.exists() ? existingDoc.data().role : null;
+      
+      // Create user document preserving existing role
+      const userDoc = {
         name: profileData.name,
         phoneNumber: user.phoneNumber || phoneNum,
-        password: profileData.password, // In production, this should be hashed!
-        email: profileData.email || '',
-        createdAt: new Date().toISOString(),
+        email: profileData.email || null,
+        role: existingRole || 'customer', // Preserve existing role or default to customer
         updatedAt: new Date().toISOString()
-      });
+      };
 
-      // Save phone number mapping for future logins
+      // Only set createdAt if this is a new user
+      if (!existingDoc.exists()) {
+        userDoc.createdAt = new Date().toISOString();
+      }
+
+      // Only add password if provided (it's optional)
+      if (profileData.password) {
+        userDoc.password = profileData.password; // In production, this should be hashed!
+      }
+      
+      // Save user profile to Firestore
+      await setDoc(userDocRef, userDoc, { merge: true });
+
+      // ALWAYS save phone number mapping for OTP-only users to work
       const phoneDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users_by_phone', cleanPhone);
       await setDoc(phoneDocRef, {
         uid: user.uid,
         phoneNumber: user.phoneNumber || phoneNum
       });
-
-      // Save default address if provided
-      if (profileData.address && profileData.address.street) {
-        const addressesCollection = collection(db, 'artifacts', appId, 'public', 'data', 'users', user.uid, 'addresses');
-        await addDoc(addressesCollection, {
-          ...profileData.address,
-          label: 'Home',
-          isDefault: true,
-          createdAt: new Date().toISOString()
-        });
-      }
       
       setShowProfileSetup(false);
       setUserProfile({ 
         id: user.uid, 
         name: profileData.name,
         phoneNumber: user.phoneNumber || phoneNum,
-        email: profileData.email || ''
+        email: profileData.email || null,
+        role: existingRole || 'customer'
       });
-      alert('Profile created successfully!');
+      alert('Welcome to DUKAAN! 🎉 You can now start shopping.');
     } catch (error) {
       console.error('Error saving profile:', error);
       alert('Failed to save profile. Please try again.');

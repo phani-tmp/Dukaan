@@ -160,28 +160,35 @@ const ProfileView = ({
         </button>
       </div>
 
-      <div className="profile-section">
-        <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: '#666' }}>
-          Switch Mode
-        </h3>
-        <button 
-          className="order-history-button"
-          onClick={() => window.location.href = '?mode=shopkeeper'}
-          style={{ marginBottom: '8px' }}
-        >
-          <Store className="w-5 h-5" />
-          <span>Shopkeeper Dashboard</span>
-          <ChevronLeft className="w-5 h-5" style={{ transform: 'rotate(180deg)' }} />
-        </button>
-        <button 
-          className="order-history-button"
-          onClick={() => window.location.href = '?mode=rider'}
-        >
-          <Bike className="w-5 h-5" />
-          <span>Rider Dashboard</span>
-          <ChevronLeft className="w-5 h-5" style={{ transform: 'rotate(180deg)' }} />
-        </button>
-      </div>
+      {/* Only show mode switching for shopkeepers and riders */}
+      {userProfile && (userProfile.role === 'shopkeeper' || userProfile.role === 'rider') && (
+        <div className="profile-section">
+          <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: '#666' }}>
+            Switch Mode
+          </h3>
+          {userProfile.role === 'shopkeeper' && (
+            <button 
+              className="order-history-button"
+              onClick={() => window.location.href = '?mode=shopkeeper'}
+              style={{ marginBottom: '8px' }}
+            >
+              <Store className="w-5 h-5" />
+              <span>Shopkeeper Dashboard</span>
+              <ChevronLeft className="w-5 h-5" style={{ transform: 'rotate(180deg)' }} />
+            </button>
+          )}
+          {userProfile.role === 'rider' && (
+            <button 
+              className="order-history-button"
+              onClick={() => window.location.href = '?mode=rider'}
+            >
+              <Bike className="w-5 h-5" />
+              <span>Rider Dashboard</span>
+              <ChevronLeft className="w-5 h-5" style={{ transform: 'rotate(180deg)' }} />
+            </button>
+          )}
+        </div>
+      )}
 
       <button onClick={onLogout} className="logout-button">
         <LogOut className="w-5 h-5" />
