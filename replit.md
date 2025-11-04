@@ -76,3 +76,14 @@ The application features a modern, mobile-first design with a professional, emoj
 - **Google Gemini AI**: Used for voice-powered shopping, semantic search, and language translation (`@google/genai` package).
 - **Web Speech API**: Browser-native speech recognition.
 - **lucide-react**: For vector icons.
+
+## Android-Specific Configuration
+
+### Firebase Phone Authentication Fix (Nov 3, 2025)
+- **Issue**: reCAPTCHA fails in Android WebView, causing `auth/operation-not-allowed` errors.
+- **Solution**: 
+  - `MainActivity.java`: Configured WebView to enable third-party cookies, mixed content, DOM storage, and database support.
+  - `AndroidManifest.xml`: Added `usesCleartextTraffic="true"` for reCAPTCHA compatibility.
+- **Requirements**: Phone + Email/Password authentication must be enabled in Firebase Console.
+- **Testing**: Use Firebase test phone numbers to bypass SMS charges during development.
+- **Documentation**: See `ANDROID_FIREBASE_FIX.md` for complete guide.
