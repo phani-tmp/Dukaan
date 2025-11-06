@@ -25,12 +25,13 @@ The application features a modern, mobile-first design with a professional, emoj
 - **Authentication & Role-Based Access Control**:
     - Village-friendly registration (name-only, password/email optional).
     - OTP-first login with intelligent user detection.
-    - **Authentication Flow** (Fixed Nov 3, 2025):
+    - **Authentication Flow** (Fixed Nov 3, 2025; Updated Nov 6, 2025):
         - `checkUserExists` verifies if user has password field before asking for password.
         - OTP-only users (no password) bypass password screen and use OTP directly.
         - `handleVerifyOTP` branches on `isNewUser` flag: new users → registration, existing users → login.
         - Duplicate phone number prevention in `handleSaveProfile` checks UID before creating profile.
         - "Use OTP Instead" button on password screen for recovery.
+        - **Fixed**: ProfileSetupModal now only appears for truly new users, not returning users (Nov 6, 2025).
     - **Profile Setup Flexibility** (Nov 6, 2025):
         - "Skip for Now" button allows users to bypass initial profile setup.
         - Auto-generated usernames (`User1`, `User2`, etc.) for skipped profiles.

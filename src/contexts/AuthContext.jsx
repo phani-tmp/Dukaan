@@ -60,6 +60,7 @@ export const AuthProvider = ({ children }) => {
       if (userDoc.exists()) {
         const profileData = { id: userDoc.id, ...userDoc.data() };
         setUserProfile(profileData);
+        setShowProfileSetup(false); // Hide profile setup for existing users
         
         // Auto-redirect based on role (only on initial login)
         const currentUrl = window.location.search;
@@ -78,10 +79,11 @@ export const AuthProvider = ({ children }) => {
           // Customers (role='customer') stay on default view - no redirect needed
         }
       } else {
-        // User is authenticated but has no profile - show registration form
-        console.log('[Auth] User authenticated but no profile found - showing registration');
-        setShowProfileSetup(true);
+        // User is authenticated but has no profile
+        // Only show profile setup if they're in the registration step
+        console.log('[Auth] User authenticated but no profile found');
         setUserProfile(null);
+        // Don't automatically show profile setup here - let the auth flow control it
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
@@ -192,12 +194,14 @@ export const AuthProvider = ({ children }) => {
       // Check if this is a new user or existing OTP-only user
       if (isNewUser) {
         // New user - show registration form
-        console.log('[Auth] New user - showing registration');
+        console.log('[Auth] New user - showing registration/profile setup');
+        setShowProfileSetup(true);
         setAuthStep('register');
       } else {
         // Existing OTP-only user - they're now authenticated
         // onAuthStateChanged will load their profile automatically
         console.log('[Auth] Existing OTP-only user - login complete');
+        setShowProfileSetup(false); // Explicitly hide profile setup for existing users
         setAuthStep('phone');
       }
       setOtp('');
@@ -218,6 +222,7 @@ export const AuthProvider = ({ children }) => {
       const phoneEmail = `${countryCode}${phoneNumber}@dukaan.app`;
       const result = await signInWithEmailAndPassword(auth, phoneEmail, password);
       console.log('[Auth] Password login successful:', result.user.uid);
+      setShowProfileSetup(false); // Explicitly hide profile setup for logged-in users
       setPassword('');
       setPhoneNumber('');
       setAuthStep('phone');
