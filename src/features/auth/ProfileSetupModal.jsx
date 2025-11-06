@@ -54,15 +54,15 @@ const ProfileSetupModal = ({ onSave, onClose }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: '0' }}>
-        <div className="modal-header" style={{ background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)', color: 'white', padding: '28px 24px', borderRadius: '16px 16px 0 0' }}>
+      <div className="modal-content profile-setup-modal" onClick={(e) => e.stopPropagation()} style={{ padding: '0' }}>
+        <div className="modal-header profile-setup-header">
           <h3 className="modal-title" style={{ color: 'white', margin: 0, fontSize: '24px', fontWeight: '700' }}>Welcome! 👋</h3>
           <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.95)', marginTop: '10px', margin: 0 }}>
             Just tell us your name to get started
           </p>
         </div>
         
-        <form onSubmit={handleSubmit} style={{ padding: '28px 24px' }}>
+        <form onSubmit={handleSubmit} className="profile-setup-form">
           <div className="form-group" style={{ marginBottom: '22px' }}>
             <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', fontWeight: '600', fontSize: '15px' }}>
               <User className="w-5 h-5" />

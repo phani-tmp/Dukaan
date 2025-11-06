@@ -1211,6 +1211,20 @@ body {
   margin: auto;
 }
 
+/* ProfileSetupModal specific styles */
+.profile-setup-header {
+  background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+  color: white;
+  padding: 28px 24px;
+  border-radius: 16px 16px 0 0;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.profile-setup-form {
+  padding: 28px 24px;
+}
+
 /* Mobile-specific modal adjustments for better UX */
 @media (max-width: 500px) {
   .modal-overlay {
@@ -1241,6 +1255,15 @@ body {
   
   .modal-title {
     font-size: 18px;
+  }
+  
+  /* ProfileSetupModal mobile adjustments */
+  .profile-setup-header {
+    padding: 20px 16px;
+  }
+  
+  .profile-setup-form {
+    padding: 20px 16px;
   }
 }
 
