@@ -97,45 +97,44 @@ const AddressForm = ({ onSave, onClose, editingAddress }) => {
           
           <div className="form-group">
             <label className="form-label">Full Address</label>
-            <div style={{ position: 'relative' }}>
-              <textarea
-                className="form-input"
-                rows="3"
-                placeholder="Enter complete delivery address"
-                value={formData.fullAddress}
-                onChange={(e) => setFormData({ ...formData, fullAddress: e.target.value })}
-                required
-              />
-              <button
-                type="button"
-                onClick={handleGetLocation}
-                disabled={loadingLocation}
-                style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '12px',
-                  background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '8px 12px',
-                  cursor: loadingLocation ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '13px',
-                  fontWeight: '500',
-                  opacity: loadingLocation ? 0.6 : 1
-                }}
-              >
-                <Navigation className="w-4 h-4" />
-                {loadingLocation ? 'Getting...' : 'Use My Location'}
-              </button>
-            </div>
+            <textarea
+              className="form-input"
+              rows="3"
+              placeholder="Enter complete delivery address"
+              value={formData.fullAddress}
+              onChange={(e) => setFormData({ ...formData, fullAddress: e.target.value })}
+              required
+            />
+            <button
+              type="button"
+              onClick={handleGetLocation}
+              disabled={loadingLocation}
+              style={{
+                width: '100%',
+                marginTop: '10px',
+                background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '12px 16px',
+                cursor: loadingLocation ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                fontSize: '14px',
+                fontWeight: '600',
+                opacity: loadingLocation ? 0.6 : 1,
+                transition: 'opacity 0.2s'
+              }}
+            >
+              <Navigation className="w-4 h-4" />
+              {loadingLocation ? 'Getting Location...' : 'Use My Location'}
+            </button>
             {formData.latitude && formData.longitude && (
-              <p className="form-hint" style={{ color: '#4CAF50', marginTop: '8px' }}>
-                <MapPin className="w-3 h-3" style={{ display: 'inline', marginRight: '4px' }} />
-                Coordinates: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
+              <p className="form-hint" style={{ color: '#4CAF50', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px' }}>
+                <MapPin className="w-4 h-4" />
+                Location captured: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
               </p>
             )}
           </div>

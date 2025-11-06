@@ -1122,18 +1122,20 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 16px;
+  padding: 20px;
+  overflow-y: auto;
 }
 
 .modal-content {
   background: white;
   border-radius: 16px;
-  max-width: 480px;
+  max-width: 500px;
   width: 100%;
-  max-height: 90vh;
+  max-height: calc(100vh - 40px);
   overflow-y: auto;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   animation: modalSlideIn 0.3s ease-out;
+  margin: auto;
 }
 
 @keyframes modalSlideIn {
