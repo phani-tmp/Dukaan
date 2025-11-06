@@ -331,12 +331,23 @@ export const AuthProvider = ({ children }) => {
       const existingDoc = await getDoc(userDocRef);
       const existingRole = existingDoc.exists() ? existingDoc.data().role : null;
       
+      // Generate auto username if name not provided (user clicked "Skip for Now")
+      let userName = profileData.name;
+      if (!userName) {
+        // Count existing users to generate unique username
+        const usersSnapshot = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'users'));
+        const userCount = usersSnapshot.size;
+        userName = `User${userCount + 1}`;
+        console.log('[Auth] Auto-generated username:', userName);
+      }
+      
       // Create user document preserving existing role
       const userDoc = {
-        name: profileData.name,
+        name: userName,
         phoneNumber: user.phoneNumber || phoneNum,
         email: profileData.email || null,
         role: existingRole || 'customer', // Preserve existing role or default to customer
+        profileCompleted: profileData.profileCompleted || false, // Track if user completed setup or skipped
         updatedAt: new Date().toISOString()
       };
 
@@ -362,12 +373,18 @@ export const AuthProvider = ({ children }) => {
       setShowProfileSetup(false);
       setUserProfile({ 
         id: user.uid, 
-        name: profileData.name,
+        name: userName,
         phoneNumber: user.phoneNumber || phoneNum,
         email: profileData.email || null,
-        role: existingRole || 'customer'
+        role: existingRole || 'customer',
+        profileCompleted: profileData.profileCompleted || false
       });
-      alert('Welcome to DUKAAN! 🎉 You can now start shopping.');
+      
+      if (profileData.profileCompleted) {
+        alert('Welcome to DUKAAN! 🎉 You can now start shopping.');
+      } else {
+        alert('Welcome to DUKAAN! You can complete your profile anytime from the Profile tab.');
+      }
     } catch (error) {
       console.error('Error saving profile:', error);
       alert('Failed to save profile. Please try again.');

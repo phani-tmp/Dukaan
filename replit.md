@@ -31,6 +31,12 @@ The application features a modern, mobile-first design with a professional, emoj
         - `handleVerifyOTP` branches on `isNewUser` flag: new users → registration, existing users → login.
         - Duplicate phone number prevention in `handleSaveProfile` checks UID before creating profile.
         - "Use OTP Instead" button on password screen for recovery.
+    - **Profile Setup Flexibility** (Nov 6, 2025):
+        - "Skip for Now" button allows users to bypass initial profile setup.
+        - Auto-generated usernames (`User1`, `User2`, etc.) for skipped profiles.
+        - `profileCompleted` field tracks setup status.
+        - Profile completion enforced before checkout - users must complete profile to place orders.
+        - Users can complete profile anytime from Profile tab.
     - Role-based system: `customer` by default, `shopkeeper`/`rider` assigned in Firebase Console.
     - Auto-redirect on login: shopkeepers → `?mode=shopkeeper`, riders → `?mode=rider`, customers → default app.
     - Strict role isolation for customer, shopkeeper, and rider interfaces.

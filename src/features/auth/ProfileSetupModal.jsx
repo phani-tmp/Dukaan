@@ -37,7 +37,18 @@ const ProfileSetupModal = ({ onSave, onClose }) => {
     onSave({
       name: formData.name.trim(),
       email: formData.email.trim() || null,
-      password: formData.password || null
+      password: formData.password || null,
+      profileCompleted: true
+    });
+  };
+
+  const handleSkip = () => {
+    // User skipped profile setup - will get auto-generated username
+    onSave({
+      name: null, // Will be auto-generated as "User1", "User2", etc.
+      email: null,
+      password: null,
+      profileCompleted: false
     });
   };
 
@@ -122,13 +133,33 @@ const ProfileSetupModal = ({ onSave, onClose }) => {
             </p>
           </div>
           
-          <button type="submit" className="btn-primary" style={{ width: '100%', padding: '16px', fontSize: '16px', fontWeight: '600', background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)', border: 'none', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <button type="submit" className="btn-primary" style={{ width: '100%', padding: '16px', fontSize: '16px', fontWeight: '600', background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)', border: 'none', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '12px' }}>
             <Save className="w-5 h-5" />
             Complete Setup
           </button>
 
+          <button 
+            type="button" 
+            onClick={handleSkip}
+            className="btn-secondary" 
+            style={{ 
+              width: '100%', 
+              padding: '14px', 
+              fontSize: '14px', 
+              fontWeight: '500', 
+              background: 'transparent',
+              color: '#4CAF50',
+              border: '2px solid #4CAF50', 
+              borderRadius: '12px', 
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            Skip for Now
+          </button>
+
           <p style={{ fontSize: '11px', color: '#999', textAlign: 'center', marginTop: '12px', marginBottom: 0 }}>
-            You can add your address later from your profile
+            You can complete your profile later before placing orders
           </p>
         </form>
       </div>

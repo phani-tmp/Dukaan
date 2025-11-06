@@ -52,6 +52,13 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
+    // Enforce profile completion before checkout
+    if (!userProfile.profileCompleted) {
+      alert('Please complete your profile before placing an order.\n\nGo to Profile → Edit your name and details.');
+      setCurrentView('Profile');
+      return;
+    }
+
     if (deliveryMethod === 'delivery') {
       if (userAddresses.length === 0) {
         alert('Please add a delivery address first (Profile tab → Manage Addresses)');
