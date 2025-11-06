@@ -111,6 +111,7 @@ The application features a modern, mobile-first design with a professional, emoj
     - Desktop: 28px/24px padding (original design preserved)
     - Mobile: 20px/16px padding (optimized for small screens)
   - **Login Page Mobile Fix**: Login container width changed to `calc(100% - 32px)` for proper 16px side margins on mobile devices
+  - **Login Input Overflow Fix**: Phone input group now properly constrained with box-sizing and width controls to prevent horizontal overflow on mobile
   - All modals verified: CheckoutConfirmationModal, ChangeOrderTypeModal, OrderDetailsModal, AddressForm
   - Toast notifications already optimized at 90% width
   - Android build updated with all modal improvements
