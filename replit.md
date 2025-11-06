@@ -87,12 +87,19 @@ The application features a modern, mobile-first design with a professional, emoj
 ## Recent Updates (Nov 6, 2025)
 
 ### UI/UX Improvements
-- **Header Optimization**: DUKAAN logo enlarged (22px, bold 700) with improved letter spacing for better mobile visibility.
+- **Header Redesign**: Three-row layout - location with MapPin icon at top, custom logo centered below (40x40px), EN/తె language toggle on right side. Logo displays custom branding from shopkeeper dashboard with fallback to `/dukaan-logo.png`.
 - **ProfileSetupModal Mobile Enhancement**: Wider modal (90% screen width, max 500px), larger input fields (16px font, 14-16px padding), improved spacing and readability for mobile users.
 - **Profile Loading Enhancement**: Added comprehensive logging to track profile loading issues and ensure userProfile state updates correctly after authentication.
 - **Loading Screen Enhancement**: Beautiful gradient loading screen displaying custom logo (if uploaded) or DUKAAN branding with pulsing animation.
-- **Geolocation Integration**: Automatic location detection using browser geolocation API with OpenStreetMap reverse geocoding for accurate city/state display.
 - **Bilingual Support**: Strict Telugu/English only language toggle - no additional languages.
+
+### Geolocation & Navigation Features
+- **Address Geolocation**: "Use My Location" button in AddressForm with browser geolocation API (high-accuracy mode).
+- **Reverse Geocoding**: OpenStreetMap Nominatim integration to convert GPS coordinates to human-readable addresses.
+- **Coordinates Storage**: Latitude/longitude saved with addresses in Firestore (`latitude`, `longitude` fields).
+- **Rider Navigation**: Orders include `deliveryLatitude` and `deliveryLongitude` fields for GPS-based rider navigation to delivery addresses.
+- **Error Handling**: Graceful fallbacks for permission denials, timeout errors, and unsupported devices.
+- **Coordinate Display**: Visual feedback showing captured coordinates in address form after successful geolocation.
 
 ## Android-Specific Configuration
 
