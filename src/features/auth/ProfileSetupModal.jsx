@@ -54,7 +54,7 @@ const ProfileSetupModal = ({ onSave, onClose }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px', width: '90%', padding: '0', margin: '20px auto' }}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: '0' }}>
         <div className="modal-header" style={{ background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)', color: 'white', padding: '28px 24px', borderRadius: '16px 16px 0 0' }}>
           <h3 className="modal-title" style={{ color: 'white', margin: 0, fontSize: '24px', fontWeight: '700' }}>Welcome! 👋</h3>
           <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.95)', marginTop: '10px', margin: 0 }}>
