@@ -5145,9 +5145,9 @@ body {
 
   /* Login Screen Mobile Optimizations */
   .login-screen {
-    padding: 12px;
-    align-items: flex-start;
-    padding-top: 20px;
+    padding: 16px;
+    align-items: center;
+    justify-content: center;
   }
   
   .login-container {
