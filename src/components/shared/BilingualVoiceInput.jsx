@@ -20,13 +20,13 @@ const BilingualVoiceInput = ({ onTranscript, className = '' }) => {
         setIsAvailable(available);
         
         if (available) {
-          const { granted } = await SpeechRecognition.checkPermissions();
-          if (!granted) {
+          const { speechRecognition } = await SpeechRecognition.checkPermissions();
+          if (speechRecognition !== 'granted') {
             await SpeechRecognition.requestPermissions();
           }
         }
       } catch (error) {
-        console.error('[BilingualVoice] Capacitor availability check failed:', error);
+        console.error('[BilingualVoice] Availability check failed:', error);
         setIsAvailable(false);
       }
     } else {
@@ -60,51 +60,54 @@ const BilingualVoiceInput = ({ onTranscript, className = '' }) => {
   };
 
   const startNativeListening = async () => {
+    let resultReceived = false;
+    
+    const handleResult = async (data) => {
+      if (resultReceived) return;
+      resultReceived = true;
+      
+      if (data.matches && data.matches.length > 0) {
+        await handleTranscript(data.matches[0]);
+      }
+      setIsListening(false);
+      await cleanup();
+    };
+
+    const handleStateChange = (state) => {
+      if (state.status === 'stopped' && !resultReceived) {
+        setIsListening(false);
+        cleanup();
+      }
+    };
+
+    const cleanup = async () => {
+      try {
+        await SpeechRecognition.removeAllListeners();
+      } catch (e) {
+        console.error('[BilingualVoice] Cleanup error:', e);
+      }
+    };
+
     try {
+      await SpeechRecognition.removeAllListeners();
+      
+      await SpeechRecognition.addListener('listeningState', handleStateChange);
+      await SpeechRecognition.addListener('finalResults', handleResult);
+
+      setIsListening(true);
+
       await SpeechRecognition.start({
         language: 'te-IN',
-        maxResults: 1,
+        maxResults: 5,
         prompt: 'మాట్లాడండి...',
         partialResults: false,
         popup: true
       });
 
-      setIsListening(true);
-
-      const result = await new Promise((resolve, reject) => {
-        SpeechRecognition.addListener('listeningState', (state) => {
-          if (state.status === 'stopped') {
-            setIsListening(false);
-          }
-        });
-
-        let hasResolved = false;
-        SpeechRecognition.addListener('finalResults', (data) => {
-          if (!hasResolved && data.matches && data.matches.length > 0) {
-            hasResolved = true;
-            resolve(data.matches[0]);
-          }
-        });
-
-        setTimeout(() => {
-          if (!hasResolved) {
-            reject(new Error('Timeout'));
-          }
-        }, 10000);
-      });
-
-      if (result) {
-        await handleTranscript(result);
-      }
-      
-      await SpeechRecognition.stop();
-      setIsListening(false);
-      SpeechRecognition.removeAllListeners();
     } catch (error) {
-      console.error('[BilingualVoice] Native recognition error:', error);
+      console.error('[BilingualVoice] Error:', error);
       setIsListening(false);
-      await SpeechRecognition.stop();
-      SpeechRecognition.removeAllListeners();
+      await cleanup();
     }
   };
 

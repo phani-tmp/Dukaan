@@ -19,13 +19,13 @@ export default function VoiceInput({ onTranscript, language = 'en', className = 
         setIsAvailable(available);
         
         if (available) {
-          const { granted } = await SpeechRecognition.checkPermissions();
-          if (!granted) {
+          const { speechRecognition } = await SpeechRecognition.checkPermissions();
+          if (speechRecognition !== 'granted') {
             await SpeechRecognition.requestPermissions();
           }
         }
       } catch (error) {
-        console.error('[Voice] Capacitor availability check failed:', error);
+        console.error('[VoiceInput] Availability check failed:', error);
         setIsAvailable(false);
       }
     } else {
@@ -35,57 +35,56 @@ export default function VoiceInput({ onTranscript, language = 'en', className = 
   };
 
   const startNativeListening = async () => {
+    let resultReceived = false;
+    
+    const handleResult = async (data) => {
+      if (resultReceived) return;
+      resultReceived = true;
+      
+      if (data.matches && data.matches.length > 0) {
+        onTranscript(data.matches[0]);
+      }
+      setIsListening(false);
+      await cleanup();
+    };
+
+    const handleStateChange = (state) => {
+      if (state.status === 'stopped' && !resultReceived) {
+        setIsListening(false);
+        cleanup();
+      }
+    };
+
+    const cleanup = async () => {
+      try {
+        await SpeechRecognition.removeAllListeners();
+      } catch (e) {
+        console.error('[VoiceInput] Cleanup error:', e);
+      }
+    };
+
     try {
+      await SpeechRecognition.removeAllListeners();
+      
+      await SpeechRecognition.addListener('listeningState', handleStateChange);
+      await SpeechRecognition.addListener('finalResults', handleResult);
+
       const lang = language === 'te' ? 'te-IN' : 'en-IN';
       
+      setIsListening(true);
+
       await SpeechRecognition.start({
         language: lang,
-        maxResults: 1,
+        maxResults: 5,
         prompt: language === 'te' ? 'మాట్లాడండి...' : 'Speak now...',
         partialResults: false,
         popup: true
       });
 
-      setIsListening(true);
-
-      SpeechRecognition.addListener('partialResults', (data) => {
-        console.log('[Voice] Partial results:', data.matches);
-      });
-
-      const result = await new Promise((resolve, reject) => {
-        SpeechRecognition.addListener('listeningState', (state) => {
-          if (state.status === 'stopped') {
-            setIsListening(false);
-          }
-        });
-
-        let hasResolved = false;
-        SpeechRecognition.addListener('finalResults', (data) => {
-          if (!hasResolved && data.matches && data.matches.length > 0) {
-            hasResolved = true;
-            resolve(data.matches[0]);
-          }
-        });
-
-        setTimeout(() => {
-          if (!hasResolved) {
-            reject(new Error('Timeout'));
-          }
-        }, 10000);
-      });
-
-      if (result) {
-        onTranscript(result);
-      }
-      
-      await SpeechRecognition.stop();
-      setIsListening(false);
-      SpeechRecognition.removeAllListeners();
     } catch (error) {
-      console.error('[Voice] Native recognition error:', error);
+      console.error('[VoiceInput] Error:', error);
       setIsListening(false);
-      await SpeechRecognition.stop();
-      SpeechRecognition.removeAllListeners();
+      await cleanup();
     }
   };
 
@@ -107,7 +106,7 @@ export default function VoiceInput({ onTranscript, language = 'en', className = 
     };
 
     recognition.onerror = (event) => {
-      console.error('[Voice] Web recognition error:', event.error);
+      console.error('[VoiceInput] Web recognition error:', event.error);
       setIsListening(false);
     };
 
@@ -122,9 +121,9 @@ export default function VoiceInput({ onTranscript, language = 'en', className = 
     if (isNative) {
       try {
         await SpeechRecognition.stop();
-        SpeechRecognition.removeAllListeners();
+        await SpeechRecognition.removeAllListeners();
       } catch (error) {
-        console.error('[Voice] Stop error:', error);
+        console.error('[VoiceInput] Stop error:', error);
       }
     }
     setIsListening(false);
