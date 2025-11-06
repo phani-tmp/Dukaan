@@ -31,7 +31,7 @@ const CartView = ({
         <h2 className="view-title">{t.cart}</h2>
       </div>
 
-      <div className="cart-items">
+      <div className="cart-items" style={{ paddingBottom: '140px' }}>
         {items.map(item => (
           <div key={item.id} className="cart-item">
             <img src={item.imageUrl || 'https://via.placeholder.com/80'} alt={item.name} className="cart-item-image" />
@@ -56,7 +56,7 @@ const CartView = ({
         ))}
       </div>
 
-      <div className="cart-footer">
+      <div className="cart-footer-fixed">
         <div className="cart-total">
           <span>{t.total}</span>
           <span className="total-amount">

@@ -47,13 +47,74 @@ body {
 
 /* --- MODERN HEADER --- */
 .app-header-modern {
-  background: linear-gradient(135deg, var(--color-green-600) 0%, var(--color-green-700) 100%);
-  color: white;
-  padding: 12px 16px 20px;
+  background: white;
+  padding: 16px 20px;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-logo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 2px solid var(--color-green-600);
+  padding: 4px;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.brand-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin: 0;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.brand-name-telugu {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-gray-600);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.language-toggle-modern {
+  background: var(--color-gray-100);
+  border: 1px solid var(--color-gray-300);
+  color: var(--color-gray-900);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.language-toggle-modern:hover {
+  background: var(--color-gray-200);
+  border-color: var(--color-gray-400);
 }
 
 .location-bar {
@@ -119,11 +180,11 @@ body {
 .search-bar-modern {
   display: flex;
   align-items: center;
-  background: white;
+  background: var(--color-gray-100);
   border-radius: 12px;
   padding: 12px 14px;
   gap: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border: 1px solid var(--color-gray-200);
 }
 
 .search-icon {
@@ -139,10 +200,11 @@ body {
   outline: none;
   font-size: 15px;
   color: var(--color-gray-900);
+  background: transparent;
 }
 
 .search-input::placeholder {
-  color: var(--color-gray-600);
+  color: var(--color-gray-500);
 }
 
 .voice-button {
@@ -654,6 +716,20 @@ body {
   border-top: 1px solid var(--color-gray-200);
   padding: 16px;
   box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+}
+
+.cart-footer-fixed {
+  position: fixed;
+  bottom: calc(60px + env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  max-width: 500px;
+  margin: 0 auto;
+  background: white;
+  border-top: 1px solid var(--color-gray-200);
+  padding: 16px 20px;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.1);
+  z-index: 101;
 }
 
 .cart-total {
