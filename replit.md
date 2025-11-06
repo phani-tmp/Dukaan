@@ -110,9 +110,14 @@ The application features a modern, mobile-first design with a professional, emoj
   - ProfileSetupModal converted from inline styles to CSS classes with responsive adjustments:
     - Desktop: 28px/24px padding (original design preserved)
     - Mobile: 20px/16px padding (optimized for small screens)
+  - **Login Page Mobile Fix**: Login container width changed to `calc(100% - 32px)` for proper 16px side margins on mobile devices
   - All modals verified: CheckoutConfirmationModal, ChangeOrderTypeModal, OrderDetailsModal, AddressForm
   - Toast notifications already optimized at 90% width
   - Android build updated with all modal improvements
+- **Analytics Revenue Fix** (Nov 6, 2025):
+  - Daily revenue calculation now only counts Completed and Delivered orders
+  - Excludes pending, accepted, and cancelled orders from revenue totals
+  - Provides accurate financial reporting for shopkeepers
 
 ### Geolocation & Navigation Features
 - **Address Geolocation**: "Use My Location" button in AddressForm with browser geolocation API (high-accuracy mode).

@@ -2931,7 +2931,7 @@ body {
   border-radius: 20px;
   padding: 32px 24px;
   max-width: 420px;
-  width: 100%;
+  width: calc(100% - 32px);
   box-sizing: border-box;
   box-shadow: 0 10px 40px rgba(0,0,0,0.1);
 }

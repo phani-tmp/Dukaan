@@ -1487,7 +1487,9 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                 return orderDate === selectedDate;
               });
               
-              const totalRevenue = dayOrders.reduce((sum, order) => sum + order.total, 0);
+              const totalRevenue = dayOrders
+                .filter(o => o.status === 'completed' || o.status === 'delivered')
+                .reduce((sum, order) => sum + order.total, 0);
               const completedOrders = dayOrders.filter(o => o.status === 'completed' || o.status === 'delivered').length;
               const pendingOrders = dayOrders.filter(o => o.status === 'pending').length;
               const cancelledOrders = dayOrders.filter(o => o.status === 'cancelled').length;
