@@ -179,12 +179,14 @@ const RiderDashboard = ({ rider, allOrders, language, onExit }) => {
               <div className="rider-customer-info">
                 <div className="customer-detail">
                   <User className="w-4 h-4 text-gray-600" />
-                  <span className="customer-name">{order.customerName}</span>
+                  <span className="customer-name">{order.customerName || order.userName || 'Customer'}</span>
                 </div>
-                <a href={`tel:${order.customerPhone}`} className="customer-phone-link">
-                  <Phone className="w-4 h-4" />
-                  {order.customerPhone}
-                </a>
+                {(order.customerPhone || order.userPhone) && (
+                  <a href={`tel:${order.customerPhone || order.userPhone}`} className="customer-phone-link">
+                    <Phone className="w-4 h-4" />
+                    {order.customerPhone || order.userPhone}
+                  </a>
+                )}
               </div>
 
               <div className="rider-delivery-address">

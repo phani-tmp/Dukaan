@@ -124,7 +124,7 @@ The application features a modern, mobile-first design with a professional, emoj
   - Fixed missing customer phone numbers in rider dashboard
   - Changed order field names from `userName`/`userPhone` to `customerName`/`customerPhone` for consistency
   - Riders can now see and call customers during delivery
-  - Note: Existing old orders may not show phone numbers until reordered
+  - Added backward compatibility: RiderDashboard now displays phone numbers from both old orders (userName/userPhone) and new orders (customerName/customerPhone)
 
 ### Geolocation & Navigation Features
 - **Address Geolocation**: "Use My Location" button in AddressForm with browser geolocation API (high-accuracy mode).
