@@ -2986,6 +2986,8 @@ body {
 .phone-input-group {
   display: flex;
   gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .country-code-select {
@@ -2996,6 +2998,8 @@ body {
   outline: none;
   transition: border-color 0.3s;
   min-width: 120px;
+  max-width: 140px;
+  box-sizing: border-box;
 }
 
 .country-code-select:focus {
@@ -3010,6 +3014,8 @@ body {
   font-size: 16px;
   outline: none;
   transition: border-color 0.3s;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .phone-input:focus {
@@ -5160,6 +5166,17 @@ body {
 
   .form-title {
     font-size: 18px;
+  }
+
+  .phone-input-group {
+    gap: 8px;
+  }
+
+  .country-code-select {
+    min-width: 105px;
+    max-width: 115px;
+    padding: 12px 8px;
+    font-size: 15px;
   }
 
   .text-input,
