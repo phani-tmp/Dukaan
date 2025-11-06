@@ -100,6 +100,19 @@ The application features a modern, mobile-first design with a professional, emoj
 - **Profile Loading Enhancement**: Added comprehensive logging to track profile loading issues and ensure userProfile state updates correctly after authentication.
 - **Loading Screen Enhancement**: Beautiful gradient loading screen displaying custom logo (if uploaded) or DUKAAN branding with pulsing animation.
 - **Bilingual Support**: Strict Telugu/English only language toggle - no additional languages.
+- **Mobile-First Modal/Popup Optimization** (Nov 6, 2025):
+  - All modals now have 16px spacing from screen edges on mobile (prevents edge-touching issue)
+  - Base modal CSS updated: `width: calc(100% - 32px)` provides consistent side margins
+  - Mobile-specific padding optimization (@media max-width: 500px):
+    - Modal header/body/footer: 16px (reduced from 20px for better screen utilization)
+    - Checkout sections: 16px internal padding
+    - Modal titles: 18px font size (down from 20px)
+  - ProfileSetupModal converted from inline styles to CSS classes with responsive adjustments:
+    - Desktop: 28px/24px padding (original design preserved)
+    - Mobile: 20px/16px padding (optimized for small screens)
+  - All modals verified: CheckoutConfirmationModal, ChangeOrderTypeModal, OrderDetailsModal, AddressForm
+  - Toast notifications already optimized at 90% width
+  - Android build updated with all modal improvements
 
 ### Geolocation & Navigation Features
 - **Address Geolocation**: "Use My Location" button in AddressForm with browser geolocation API (high-accuracy mode).
