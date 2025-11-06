@@ -249,6 +249,10 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
     }
     
     try {
+      if (!db) {
+        throw new Error('Firebase database not initialized');
+      }
+      
       const productData = {
         ...formData,
         price: parseFloat(formData.price),
@@ -272,7 +276,11 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
       setEditingId(null);
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Failed to save product');
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      console.error('AppId:', appId);
+      console.error('Database instance:', db ? 'initialized' : 'not initialized');
+      alert(`Failed to save product: ${error.message || error.code || 'Unknown error'}`);
     }
   };
 

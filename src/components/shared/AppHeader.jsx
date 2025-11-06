@@ -17,12 +17,13 @@ const AppHeader = ({ searchTerm, setSearchTerm, location, language, toggleLangua
           )}
           <span className="location-text">{location || 'Ponnur, AP'}</span>
         </div>
+        
+        <h1 className="app-title-inline">{t.appName}</h1>
+        
         <button onClick={toggleLanguage} className="language-toggle">
-          {language === 'en' ? 'EN / తెలుగు' : 'తెలుగు / EN'}
+          {language === 'en' ? 'EN' : 'తె'}
         </button>
       </div>
-
-      <h1 className="app-title">{t.appName}</h1>
 
       <div className="search-bar-modern">
         <Search className="search-icon" />

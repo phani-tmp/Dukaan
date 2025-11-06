@@ -105,6 +105,13 @@ body {
   font-weight: 700;
   text-align: center;
   margin-bottom: 16px;
+}
+
+.app-title-inline {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  flex-shrink: 0;
   letter-spacing: -0.5px;
 }
 
@@ -500,6 +507,8 @@ body {
   display: flex;
   justify-content: space-around;
   padding: 8px 0 12px;
+  /* Android safe area - prevents collision with native buttons */
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
   box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
   z-index: 100;
 }
@@ -2782,15 +2791,17 @@ body {
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%);
-  padding: 20px;
+  padding: 16px;
+  overflow-y: auto;
 }
 
 .login-container {
   background: white;
   border-radius: 20px;
-  padding: 40px;
-  max-width: 440px;
+  padding: 32px 24px;
+  max-width: 420px;
   width: 100%;
+  box-sizing: border-box;
   box-shadow: 0 10px 40px rgba(0,0,0,0.1);
 }
 
@@ -4996,12 +5007,20 @@ body {
   }
 
   /* Login Screen Mobile Optimizations */
+  .login-screen {
+    padding: 12px;
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+  
   .login-container {
-    padding: 24px 20px;
+    padding: 24px 16px;
+    margin: 0 auto;
   }
 
   .login-title {
-    font-size: 24px;
+    font-size: 22px;
+    margin-bottom: 8px;
   }
 
   .login-subtitle {
