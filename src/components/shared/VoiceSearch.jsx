@@ -24,21 +24,29 @@ export default function VoiceSearch({
   const checkAvailability = async () => {
     if (isNative) {
       try {
+        console.log('[VoiceSearch] Checking native speech recognition...');
         const { available } = await SpeechRecognition.available();
+        console.log('[VoiceSearch] Available:', available);
         setIsAvailable(available);
         
         if (available) {
           const { granted } = await SpeechRecognition.checkPermissions();
+          console.log('[VoiceSearch] Permission granted:', granted);
           if (!granted) {
-            await SpeechRecognition.requestPermissions();
+            const result = await SpeechRecognition.requestPermissions();
+            console.log('[VoiceSearch] Permission request result:', result);
           }
+        } else {
+          console.log('[VoiceSearch] Speech recognition not available on this device');
         }
       } catch (error) {
         console.error('[VoiceSearch] Capacitor availability check failed:', error);
+        alert('Voice Error: ' + error.message);
         setIsAvailable(false);
       }
     } else {
       const webSupport = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+      console.log('[VoiceSearch] Web speech support:', webSupport);
       setIsAvailable(webSupport);
     }
   };
@@ -78,6 +86,7 @@ export default function VoiceSearch({
   const startNativeListening = async () => {
     try {
       const lang = language === 'te' ? 'te-IN' : 'en-IN';
+      console.log('[VoiceSearch] Starting native recognition with language:', lang);
       
       await SpeechRecognition.start({
         language: lang,
@@ -89,9 +98,11 @@ export default function VoiceSearch({
 
       setIsListening(true);
       onVoiceStart?.();
+      console.log('[VoiceSearch] Listening started...');
 
       const result = await new Promise((resolve, reject) => {
         SpeechRecognition.addListener('listeningState', (state) => {
+          console.log('[VoiceSearch] Listening state:', state.status);
           if (state.status === 'stopped') {
             setIsListening(false);
             onVoiceEnd?.();
@@ -100,6 +111,7 @@ export default function VoiceSearch({
 
         let hasResolved = false;
         SpeechRecognition.addListener('finalResults', (data) => {
+          console.log('[VoiceSearch] Got results:', data.matches);
           if (!hasResolved && data.matches && data.matches.length > 0) {
             hasResolved = true;
             resolve(data.matches[0]);
@@ -108,12 +120,15 @@ export default function VoiceSearch({
 
         setTimeout(() => {
           if (!hasResolved) {
-            reject(new Error('Timeout'));
+            console.log('[VoiceSearch] Recognition timeout');
+            reject(new Error('No speech detected - please try again'));
           }
         }, 10000);
       });
 
+      console.log('[VoiceSearch] Recognized text:', result);
       if (result) {
+        alert('Heard: ' + result);
         await handleVoiceSearch(result);
       }
       
@@ -123,11 +138,16 @@ export default function VoiceSearch({
       SpeechRecognition.removeAllListeners();
     } catch (error) {
       console.error('[VoiceSearch] Native recognition error:', error);
+      alert('Voice failed: ' + error.message);
       setIsListening(false);
       setIsProcessing(false);
       onVoiceEnd?.();
-      await SpeechRecognition.stop();
-      SpeechRecognition.removeAllListeners();
+      try {
+        await SpeechRecognition.stop();
+        SpeechRecognition.removeAllListeners();
+      } catch (e) {
+        console.error('[VoiceSearch] Error stopping:', e);
+      }
     }
   };
 
