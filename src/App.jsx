@@ -105,7 +105,7 @@ function App() {
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [voiceSearchResults, setVoiceSearchResults] = useState(null);
   const [language, setLanguage] = useState('en');
-  const [location, setLocation] = useState('Ponnur, AP');
+  const [location, setLocation] = useState('Getting location...');
   const [logoUrl, setLogoUrl] = useState('/dukaan-logo.png');
   const [notification, setNotification] = useState(null);
   const [previousOrderStatuses, setPreviousOrderStatuses] = useState({});
@@ -117,6 +117,40 @@ function App() {
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'en' ? 'te' : 'en');
   };
+
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const { latitude, longitude } = position.coords;
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+            );
+            const data = await response.json();
+            
+            const city = data.address.city || data.address.town || data.address.village || 'Unknown';
+            const state = data.address.state || '';
+            setLocation(`${city}${state ? ', ' + state : ''}`);
+          } catch (error) {
+            console.error('Error getting location name:', error);
+            setLocation('Ponnur, AP');
+          }
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          setLocation('Ponnur, AP');
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 10000,
+          maximumAge: 300000
+        }
+      );
+    } else {
+      setLocation('Ponnur, AP');
+    }
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

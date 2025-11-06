@@ -90,6 +90,9 @@ The application features a modern, mobile-first design with a professional, emoj
 - **Header Optimization**: DUKAAN logo enlarged (22px, bold 700) with improved letter spacing for better mobile visibility.
 - **ProfileSetupModal Mobile Enhancement**: Wider modal (90% screen width, max 500px), larger input fields (16px font, 14-16px padding), improved spacing and readability for mobile users.
 - **Profile Loading Enhancement**: Added comprehensive logging to track profile loading issues and ensure userProfile state updates correctly after authentication.
+- **Loading Screen Enhancement**: Beautiful gradient loading screen displaying custom logo (if uploaded) or DUKAAN branding with pulsing animation.
+- **Geolocation Integration**: Automatic location detection using browser geolocation API with OpenStreetMap reverse geocoding for accurate city/state display.
+- **Bilingual Support**: Strict Telugu/English only language toggle - no additional languages.
 
 ## Android-Specific Configuration
 
