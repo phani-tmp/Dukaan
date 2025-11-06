@@ -63,10 +63,11 @@ The application features a modern, mobile-first design with a professional, emoj
 - **Enhanced Order Type Modal**: Professional UI for changing delivery method with address display and improved styling.
 - **Price Calculation Consistency**: Uses discounted prices consistently across all views.
 - **Voice Shopping with Gemini AI**:
-    - Integrated Google Gemini 2.0 Flash for AI-powered shopping.
+    - Audio recording via MediaRecorder API → Gemini 2.0 Flash audio transcription → Product search.
     - Voice search in header search bar (mic button) supporting multiple languages (Telugu/English/Hindi/Hinglish).
     - Semantic product search with AI understanding synonyms and local languages.
-    - Shopkeeper voice-to-text input for forms with language-aware recognition.
+    - Shopkeeper voice-to-text input for forms with automatic language translation.
+    - Tap-and-hold recording interface with visual feedback.
 - **User Profile**: Order history, user statistics, admin panel access.
 - **Real-time Notifications**: Toast notifications for order status.
 - **Customizable Branding**: Logo upload capability in Shopkeeper Dashboard Settings, displaying across all interfaces. Custom favicon.
@@ -80,8 +81,8 @@ The application features a modern, mobile-first design with a professional, emoj
 
 ## External Dependencies
 - **Firebase**: Firestore (database), Authentication (phone and anonymous sign-in).
-- **Google Gemini AI**: Used for voice-powered shopping, semantic search, and language translation (`@google/genai` package).
-- **Web Speech API**: Browser-native speech recognition.
+- **Google Gemini AI**: Used for voice-powered shopping (audio transcription), semantic search, and language translation (`@google/genai` package).
+- **Browser MediaRecorder API**: Audio recording for voice input on web and Android.
 - **lucide-react**: For vector icons.
 
 ## Recent Updates (Nov 6, 2025)
@@ -141,16 +142,21 @@ The application features a modern, mobile-first design with a professional, emoj
 
 ## Android-Specific Configuration
 
-### Voice Recognition Fix (Nov 6, 2025)
-- **Issue**: Web Speech API doesn't work in Android WebViews (Capacitor apps), only in Chrome browser.
-- **Solution**: 
-  - Installed native Capacitor plugin `@capacitor-community/speech-recognition@7.0.1`
-  - Updated all voice components with hybrid implementation: native plugin on Android, Web Speech API on browsers
-  - Components updated: `VoiceInput.jsx`, `VoiceSearch.jsx`, `BilingualVoiceInput.jsx`
-  - Automatic permission handling and language detection (Telugu/English/Hindi)
+### Voice Recognition with Gemini AI (Nov 6, 2025)
+- **Implementation**: Browser MediaRecorder API + Google Gemini 2.0 Flash audio transcription
+- **How it Works**:
+  1. User clicks mic button → App records audio using MediaRecorder API (works on both web and Android WebView)
+  2. Audio blob sent to Gemini API for transcription
+  3. Gemini returns transcribed text → App searches for products
+- **Advantages**:
+  - ✅ Works reliably on Android WebView (Capacitor apps) and web browsers
+  - ✅ Supports Telugu, English, Hindi, and mixed languages
+  - ✅ No dependency on device-specific speech recognition
+  - ✅ Uses existing `GEMINI_API_KEY` (no additional API keys required)
+- **Components**: `VoiceSearch.jsx`, `VoiceInput.jsx`, `BilingualVoiceInput.jsx`, `audioRecorder.js`
+- **API**: `transcribeAudio()` function in `gemini.js` service
 - **Permissions**: `RECORD_AUDIO` already configured in AndroidManifest.xml
 - **Rebuild Required**: Run `npm run build && npx cap sync android` to apply changes to APK
-- **Documentation**: See `ANDROID_API_FIXES.md` for complete guide.
 
 ### Firebase Phone Authentication Fix (Nov 3, 2025)
 - **Issue**: reCAPTCHA fails in Android WebView, causing `auth/operation-not-allowed` errors.

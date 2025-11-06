@@ -3,10 +3,19 @@ export class AudioRecorder {
     this.mediaRecorder = null;
     this.audioChunks = [];
     this.stream = null;
+    this.actualMimeType = null;
+  }
+
+  static isSupported() {
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
   }
 
   async startRecording() {
     try {
+      if (!AudioRecorder.isSupported()) {
+        throw new Error('FEATURE_NOT_SUPPORTED');
+      }
+
       this.stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           channelCount: 1,
@@ -18,18 +27,20 @@ export class AudioRecorder {
 
       this.audioChunks = [];
       
-      const options = { mimeType: 'audio/webm;codecs=opus' };
-      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        options.mimeType = 'audio/webm';
-      }
-      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        options.mimeType = 'audio/ogg;codecs=opus';
-      }
-      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        options.mimeType = '';
+      let mimeType = null;
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        mimeType = 'audio/webm;codecs=opus';
+      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+        mimeType = 'audio/webm';
+      } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
+        mimeType = 'audio/ogg;codecs=opus';
+      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        mimeType = 'audio/mp4';
       }
 
+      const options = mimeType ? { mimeType } : {};
       this.mediaRecorder = new MediaRecorder(this.stream, options);
+      this.actualMimeType = this.mediaRecorder.mimeType || mimeType || 'audio/webm';
 
       this.mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -38,7 +49,7 @@ export class AudioRecorder {
       };
 
       this.mediaRecorder.start(100);
-      console.log('[AudioRecorder] Recording started');
+      console.log('[AudioRecorder] Recording started with mimeType:', this.actualMimeType);
       return true;
     } catch (error) {
       console.error('[AudioRecorder] Error starting recording:', error);
@@ -55,14 +66,14 @@ export class AudioRecorder {
 
       this.mediaRecorder.onstop = async () => {
         try {
-          const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+          const audioBlob = new Blob(this.audioChunks, { type: this.actualMimeType });
           
           if (this.stream) {
             this.stream.getTracks().forEach(track => track.stop());
             this.stream = null;
           }
 
-          console.log('[AudioRecorder] Recording stopped, blob size:', audioBlob.size);
+          console.log('[AudioRecorder] Recording stopped, blob size:', audioBlob.size, 'type:', this.actualMimeType);
           resolve(audioBlob);
         } catch (error) {
           reject(error);

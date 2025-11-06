@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mic, MicOff } from 'lucide-react';
 import { AudioRecorder } from '../../utils/audioRecorder';
 import { transcribeAudio } from '../../services/gemini';
 
 export default function VoiceInput({ onTranscript, language = 'en', className = '' }) {
   const [isListening, setIsListening] = useState(false);
+  const [isSupported, setIsSupported] = useState(true);
   const [recorder] = useState(() => new AudioRecorder());
+
+  useEffect(() => {
+    setIsSupported(AudioRecorder.isSupported());
+  }, []);
 
   const startRecording = async () => {
     try {
@@ -13,9 +18,20 @@ export default function VoiceInput({ onTranscript, language = 'en', className = 
       setIsListening(true);
     } catch (error) {
       console.error('[VoiceInput] Recording error:', error);
-      alert(language === 'te' 
-        ? 'మైక్రోఫోన్ యాక్సెస్ అనుమతించండి' 
-        : 'Please allow microphone access');
+      
+      if (error.message === 'FEATURE_NOT_SUPPORTED') {
+        alert(language === 'te' 
+          ? 'వాయిస్ రికార్డింగ్ మీ పరికరంలో మద్దతు లేదు' 
+          : 'Voice recording is not supported on your device');
+      } else if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        alert(language === 'te' 
+          ? 'మైక్రోఫోన్ యాక్సెస్ అనుమతించండి' 
+          : 'Please allow microphone access');
+      } else {
+        alert(language === 'te' 
+          ? 'వాయిస్ రికార్డింగ్ ప్రారంభించడం విఫలమైంది' 
+          : 'Failed to start voice recording');
+      }
     }
   };
 
@@ -44,6 +60,8 @@ export default function VoiceInput({ onTranscript, language = 'en', className = 
       await startRecording();
     }
   };
+
+  if (!isSupported) return null;
 
   return (
     <button

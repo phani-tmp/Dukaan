@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mic, MicOff } from 'lucide-react';
 import { AudioRecorder } from '../../utils/audioRecorder';
 import { transcribeAudio, translateText } from '../../services/gemini';
 
 const BilingualVoiceInput = ({ onTranscript, className = '' }) => {
   const [isListening, setIsListening] = useState(false);
+  const [isSupported, setIsSupported] = useState(true);
   const [recorder] = useState(() => new AudioRecorder());
+
+  useEffect(() => {
+    setIsSupported(AudioRecorder.isSupported());
+  }, []);
 
   const handleTranscript = async (transcript) => {
     console.log('[BilingualVoiceInput] Recognized:', transcript);
@@ -37,7 +42,14 @@ const BilingualVoiceInput = ({ onTranscript, className = '' }) => {
       setIsListening(true);
     } catch (error) {
       console.error('[BilingualVoiceInput] Recording error:', error);
-      alert('Please allow microphone access');
+      
+      if (error.message === 'FEATURE_NOT_SUPPORTED') {
+        alert('Voice recording is not supported on your device\nవాయిస్ రికార్డింగ్ మీ పరికరంలో మద్దతు లేదు');
+      } else if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        alert('Please allow microphone access\nమైక్రోఫోన్ యాక్సెస్ అనుమతించండి');
+      } else {
+        alert('Failed to start voice recording\nవాయిస్ రికార్డింగ్ ప్రారంభించడం విఫలమైంది');
+      }
     }
   };
 
@@ -51,7 +63,7 @@ const BilingualVoiceInput = ({ onTranscript, className = '' }) => {
       
     } catch (error) {
       console.error('[BilingualVoiceInput] Transcription error:', error);
-      alert('Voice input failed. Please try again');
+      alert('Voice input failed. Please try again\nవాయిస్ విఫలమైంది. మళ్లీ ప్రయత్నించండి');
     } finally {
       setIsListening(false);
     }
@@ -64,6 +76,8 @@ const BilingualVoiceInput = ({ onTranscript, className = '' }) => {
       await startRecording();
     }
   };
+
+  if (!isSupported) return null;
 
   return (
     <button
