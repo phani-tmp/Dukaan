@@ -87,7 +87,14 @@ The application features a modern, mobile-first design with a professional, emoj
 ## Recent Updates (Nov 6, 2025)
 
 ### UI/UX Improvements
-- **Header Redesign**: Three-row layout - location with MapPin icon at top, custom logo centered below (40x40px), EN/తె language toggle on right side. Logo displays custom branding from shopkeeper dashboard with fallback to `/dukaan-logo.png`.
+- **Modern Header Redesign**: Complete UI overhaul to sleek, modern design:
+  - Clean white background (removed green gradient)
+  - Logo + "DUKAAN / దుకాణ్" text displayed side-by-side for brand visibility
+  - Removed location display (users select delivery address during checkout)
+  - Gray search bar background for modern aesthetic
+  - Modernized language toggle (EN/తె) with new styling
+  - Lightweight shadow for subtle depth
+- **Fixed Cart Footer**: Checkout footer now stays fixed at bottom of screen with z-index:101 and safe-area-inset support for better UX on all devices. Users don't need to scroll to find checkout button.
 - **ProfileSetupModal Mobile Enhancement**: Wider modal (90% screen width, max 500px), larger input fields (16px font, 14-16px padding), improved spacing and readability for mobile users.
 - **Profile Loading Enhancement**: Added comprehensive logging to track profile loading issues and ensure userProfile state updates correctly after authentication.
 - **Loading Screen Enhancement**: Beautiful gradient loading screen displaying custom logo (if uploaded) or DUKAAN branding with pulsing animation.
