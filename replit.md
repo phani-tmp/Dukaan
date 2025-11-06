@@ -89,11 +89,12 @@ The application features a modern, mobile-first design with a professional, emoj
 ### UI/UX Improvements
 - **Modern Header Redesign**: Complete UI overhaul to sleek, modern design:
   - Clean white background (removed green gradient)
-  - Logo + "DUKAAN / దుకాణ్" text displayed side-by-side for brand visibility
+  - Logo displayed with language-conditional brand name (shows "DUKAAN" in English OR "దుకాణ్" in Telugu, not both)
   - Removed location display (users select delivery address during checkout)
   - Gray search bar background for modern aesthetic
-  - Modernized language toggle (EN/తె) with new styling
+  - Language toggle always displays "తెలుగు/EN" for clarity
   - Lightweight shadow for subtle depth
+  - External logo fallback (imgbb) when no custom Firebase logo uploaded
 - **Fixed Cart Footer**: Checkout footer now stays fixed at bottom of screen with z-index:101 and safe-area-inset support for better UX on all devices. Users don't need to scroll to find checkout button.
 - **ProfileSetupModal Mobile Enhancement**: Wider modal (90% screen width, max 500px), larger input fields (16px font, 14-16px padding), improved spacing and readability for mobile users.
 - **Profile Loading Enhancement**: Added comprehensive logging to track profile loading issues and ensure userProfile state updates correctly after authentication.
