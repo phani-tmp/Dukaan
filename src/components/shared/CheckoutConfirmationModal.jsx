@@ -16,7 +16,7 @@ const CheckoutConfirmationModal = ({
 
   if (!isOpen) return null;
 
-  const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const cartTotal = cartItems.reduce((total, item) => total + ((item.discountedPrice ?? item.price) * item.quantity), 0);
 
   const handleConfirmOrder = () => {
     if (deliveryMethod === 'delivery' && !selectedAddress) {
@@ -120,7 +120,7 @@ const CheckoutConfirmationModal = ({
                 {cartItems.map(item => (
                   <div key={item.id} className="summary-item">
                     <span>{item.name} × {item.quantity}</span>
-                    <span>₹{(item.price * item.quantity).toFixed(2)}</span>
+                    <span>₹{((item.discountedPrice ?? item.price) * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
               </div>

@@ -133,7 +133,7 @@ const ProfileView = ({
         <div className="stat-card">
           <IndianRupee className="w-6 h-6 text-green-600" />
           <div>
-            <p className="stat-value">₹{Math.round(totalSpent * 0.15)}</p>
+            <p className="stat-value">{Math.round(totalSpent * 0.15)}</p>
             <p className="stat-label">Money Saved</p>
           </div>
         </div>

@@ -72,7 +72,7 @@ export const CartProvider = ({ children }) => {
     }
 
     const items = Object.values(cartItems);
-    const total = items.reduce((sum, item) => sum + (item.discountedPrice || item.price) * item.quantity, 0);
+    const total = items.reduce((sum, item) => sum + (item.discountedPrice ?? item.price) * item.quantity, 0);
 
     const orderData = {
       userId: user.uid,
@@ -81,7 +81,7 @@ export const CartProvider = ({ children }) => {
       items: items.map(item => ({
         id: item.id,
         name: item.name,
-        price: item.discountedPrice || item.price,
+        price: item.discountedPrice ?? item.price,
         quantity: item.quantity,
         imageUrl: item.imageUrl || '',
         weight: item.weight || '',

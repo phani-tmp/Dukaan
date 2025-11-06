@@ -34,52 +34,62 @@ const LoadingSpinner = () => {
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)'
     }}>
-      {logoUrl ? (
-        <img 
-          src={logoUrl} 
-          alt="DUKAAN Logo" 
-          style={{ 
-            width: '120px', 
-            height: '120px', 
-            objectFit: 'contain',
-            marginBottom: '24px',
-            animation: 'pulse 2s ease-in-out infinite'
-          }} 
-        />
-      ) : (
-        <div style={{
-          width: '120px',
-          height: '120px',
-          marginBottom: '24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <h1 style={{ 
-            fontSize: '32px', 
-            fontWeight: '700', 
-            color: 'white',
-            textAlign: 'center',
-            animation: 'pulse 2s ease-in-out infinite'
-          }}>DUKAAN<br/>దుకాణ్</h1>
-        </div>
-      )}
-      <div className="animate-spin rounded-full h-10 w-10 border-b-3 border-white" style={{
-        borderWidth: '3px',
-        borderStyle: 'solid',
-        borderColor: 'white',
-        borderBottomColor: 'transparent',
-        borderRadius: '50%',
-        width: '40px',
-        height: '40px',
-        animation: 'spin 1s linear infinite'
-      }}></div>
-      <p style={{ 
-        marginTop: '20px', 
-        color: 'white', 
-        fontWeight: '600',
-        fontSize: '16px'
-      }}>Loading...</p>
+      <div style={{
+        background: 'rgba(255, 255, 255, 0.95)',
+        borderRadius: '24px',
+        padding: '48px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+      }}>
+        {logoUrl ? (
+          <img 
+            src={logoUrl} 
+            alt="DUKAAN Logo" 
+            style={{ 
+              width: '200px', 
+              height: '200px', 
+              objectFit: 'contain',
+              marginBottom: '32px',
+              animation: 'pulse 2s ease-in-out infinite'
+            }} 
+          />
+        ) : (
+          <div style={{
+            width: '200px',
+            height: '200px',
+            marginBottom: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <h1 style={{ 
+              fontSize: '48px', 
+              fontWeight: '700', 
+              color: '#2E7D32',
+              textAlign: 'center',
+              animation: 'pulse 2s ease-in-out infinite'
+            }}>DUKAAN<br/>దుకాణ్</h1>
+          </div>
+        )}
+        <div className="animate-spin rounded-full h-10 w-10 border-b-3 border-white" style={{
+          borderWidth: '4px',
+          borderStyle: 'solid',
+          borderColor: '#4CAF50',
+          borderBottomColor: 'transparent',
+          borderRadius: '50%',
+          width: '48px',
+          height: '48px',
+          animation: 'spin 1s linear infinite'
+        }}></div>
+        <p style={{ 
+          marginTop: '24px', 
+          color: '#2E7D32', 
+          fontWeight: '600',
+          fontSize: '18px'
+        }}>Loading...</p>
+      </div>
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; }

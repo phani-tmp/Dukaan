@@ -26,13 +26,17 @@ import {
   XCircle,
   ShoppingBag,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  Calendar,
+  TrendingUp,
+  IndianRupee
 } from 'lucide-react';
 
 const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit, categoriesData, subcategoriesData, logoUrl, onLogoChange }) => {
   const { db, storage } = getFirebaseInstances();
   const t = translations[language];
   const [activeTab, setActiveTab] = useState('orders');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [showForm, setShowForm] = useState(false);
   const [logoFormData, setLogoFormData] = useState('');
   const [logoPreview, setLogoPreview] = useState(null);
@@ -612,11 +616,11 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
           Riders
         </button>
         <button 
-          className={`tab-button ${activeTab === 'settings' ? 'active' : ''}`}
-          onClick={() => setActiveTab('settings')}
+          className={`tab-button ${activeTab === 'analytics' ? 'active' : ''}`}
+          onClick={() => setActiveTab('analytics')}
         >
-          <Settings className="w-5 h-5" />
-          Settings
+          <TrendingUp className="w-5 h-5" />
+          Analytics
         </button>
       </div>
 
@@ -1455,116 +1459,134 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
           </div>
         )}
 
-        {activeTab === 'settings' && (
-          <div className="settings-section">
-            <h3 className="section-subtitle">App Settings</h3>
-            
-            <div style={{ background: 'white', borderRadius: '12px', padding: '24px', marginTop: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Upload className="w-5 h-5" />
-                App Logo
-              </h4>
-              
-              {logoUrl && (
-                <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ padding: '12px', background: '#f5f5f5', borderRadius: '8px' }}>
-                    <img src={logoUrl} alt="Current Logo" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
-                  </div>
-                  <div>
-                    <p style={{ fontSize: '14px', color: '#666' }}>Current Logo</p>
-                    <p style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>Displayed in app header</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="form-group">
-                <label className="form-label">Logo Image URL or Upload</label>
+        {activeTab === 'analytics' && (
+          <div className="analytics-section">
+            <div className="section-header">
+              <h3 className="section-subtitle">Daily Analytics</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Calendar className="w-5 h-5 text-gray-600" />
                 <input
-                  type="text"
-                  placeholder="Enter image URL or upload below"
-                  value={logoFormData}
-                  onChange={(e) => {
-                    setLogoFormData(e.target.value);
-                    setLogoPreview(e.target.value);
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #E0E0E0',
+                    fontSize: '14px',
+                    cursor: 'pointer'
                   }}
-                  className="form-input"
-                  style={{ marginBottom: '12px' }}
                 />
-                
-                <div style={{ marginTop: '12px' }}>
-                  <label className="form-label">Or upload logo:</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      if (file) {
-                        setLogoFile(file);
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                          setLogoPreview(reader.result);
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
-                    className="form-input"
-                  />
-                </div>
-
-                {logoPreview && (
-                  <div style={{ marginTop: '16px', padding: '16px', background: '#f5f5f5', borderRadius: '8px' }}>
-                    <p style={{ fontSize: '13px', color: '#666', marginBottom: '8px' }}>Preview:</p>
-                    <img src={logoPreview} alt="Logo Preview" style={{ width: '80px', height: '80px', objectFit: 'contain', background: 'white', padding: '8px', borderRadius: '8px' }} />
-                  </div>
-                )}
-
-                <button
-                  onClick={async () => {
-                    if (!logoFormData && !logoFile) {
-                      alert('Please enter a logo URL or upload an image');
-                      return;
-                    }
-                    
-                    setIsUploadingLogo(true);
-                    try {
-                      let finalLogoUrl = logoFormData;
-                      
-                      if (logoFile) {
-                        const timestamp = Date.now();
-                        const storageRef = ref(storage, `logos/${timestamp}_${logoFile.name}`);
-                        await uploadBytes(storageRef, logoFile);
-                        finalLogoUrl = await getDownloadURL(storageRef);
-                      }
-                      
-                      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app'), {
-                        logoUrl: finalLogoUrl,
-                        updatedAt: new Date().toISOString()
-                      });
-                      
-                      if (onLogoChange) {
-                        onLogoChange(finalLogoUrl);
-                      }
-                      
-                      alert('Logo updated successfully!');
-                      setLogoFormData('');
-                      setLogoPreview(null);
-                      setLogoFile(null);
-                    } catch (error) {
-                      console.error('Error updating logo:', error);
-                      alert('Failed to update logo: ' + error.message);
-                    } finally {
-                      setIsUploadingLogo(false);
-                    }
-                  }}
-                  className="save-btn"
-                  style={{ marginTop: '16px' }}
-                  disabled={isUploadingLogo}
-                >
-                  <Save className="w-4 h-4" />
-                  {isUploadingLogo ? 'Uploading...' : 'Save Logo'}
-                </button>
               </div>
             </div>
+
+            {(() => {
+              const dayOrders = allOrders.filter(order => {
+                const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
+                return orderDate === selectedDate;
+              });
+              
+              const totalRevenue = dayOrders.reduce((sum, order) => sum + order.total, 0);
+              const completedOrders = dayOrders.filter(o => o.status === 'completed' || o.status === 'delivered').length;
+              const pendingOrders = dayOrders.filter(o => o.status === 'pending').length;
+              const cancelledOrders = dayOrders.filter(o => o.status === 'cancelled').length;
+
+              return (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '20px' }}>
+                    <div style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                        <IndianRupee className="w-6 h-6" style={{ color: '#4CAF50' }} />
+                        <span style={{ fontSize: '14px', color: '#666' }}>Total Revenue</span>
+                      </div>
+                      <div style={{ fontSize: '28px', fontWeight: '700', color: '#2E7D32' }}>
+                        ₹{totalRevenue.toFixed(0)}
+                      </div>
+                    </div>
+
+                    <div style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                        <Package className="w-6 h-6" style={{ color: '#2196F3' }} />
+                        <span style={{ fontSize: '14px', color: '#666' }}>Total Orders</span>
+                      </div>
+                      <div style={{ fontSize: '28px', fontWeight: '700', color: '#1976D2' }}>
+                        {dayOrders.length}
+                      </div>
+                    </div>
+
+                    <div style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                        <Package className="w-6 h-6" style={{ color: '#4CAF50' }} />
+                        <span style={{ fontSize: '14px', color: '#666' }}>Completed</span>
+                      </div>
+                      <div style={{ fontSize: '28px', fontWeight: '700', color: '#2E7D32' }}>
+                        {completedOrders}
+                      </div>
+                    </div>
+
+                    <div style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                        <Clock className="w-6 h-6" style={{ color: '#FF9800' }} />
+                        <span style={{ fontSize: '14px', color: '#666' }}>Pending</span>
+                      </div>
+                      <div style={{ fontSize: '28px', fontWeight: '700', color: '#F57C00' }}>
+                        {pendingOrders}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ background: 'white', borderRadius: '12px', padding: '24px', marginTop: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                    <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+                      Orders for {new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    </h4>
+                    {dayOrders.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+                        <Package className="w-12 h-12" style={{ margin: '0 auto 12px', opacity: 0.3 }} />
+                        <p>No orders on this date</p>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {dayOrders.map(order => (
+                          <div key={order.id} style={{ 
+                            padding: '16px', 
+                            background: '#f9f9f9', 
+                            borderRadius: '8px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            <div>
+                              <div style={{ fontWeight: '600', marginBottom: '4px' }}>
+                                Order #{order.id.substring(0, 8)}
+                              </div>
+                              <div style={{ fontSize: '13px', color: '#666' }}>
+                                {new Date(order.createdAt).toLocaleTimeString('en-IN')} • {order.items.length} items
+                              </div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontWeight: '700', fontSize: '16px', color: '#2E7D32' }}>
+                                ₹{order.total.toFixed(0)}
+                              </div>
+                              <div style={{ 
+                                fontSize: '12px', 
+                                padding: '4px 8px', 
+                                borderRadius: '4px',
+                                background: order.status === 'completed' || order.status === 'delivered' ? '#E8F5E9' : '#FFF3E0',
+                                color: order.status === 'completed' || order.status === 'delivered' ? '#2E7D32' : '#F57C00',
+                                marginTop: '4px'
+                              }}>
+                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              );
+            })()}
           </div>
         )}
       </div>

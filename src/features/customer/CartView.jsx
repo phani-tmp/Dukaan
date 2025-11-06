@@ -11,7 +11,7 @@ const CartView = ({
 }) => {
   const t = translations[language];
   const items = Object.values(cartItems);
-  const total = items.reduce((sum, item) => sum + (item.discountedPrice || item.price) * item.quantity, 0);
+  const total = items.reduce((sum, item) => sum + (item.discountedPrice ?? item.price) * item.quantity, 0);
 
   if (items.length === 0) {
     return (
@@ -40,7 +40,7 @@ const CartView = ({
               <p className="cart-item-weight">{item.weight}</p>
               <p className="cart-item-price">
                 <IndianRupee className="w-4 h-4" />
-                {item.discountedPrice || item.price}
+                {item.discountedPrice ?? item.price}
               </p>
             </div>
             <div className="quantity-controls">
