@@ -1,39 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Mic } from 'lucide-react';
-import { Capacitor } from '@capacitor/core';
-import { SpeechRecognition } from '@capacitor-community/speech-recognition';
-import { translateText } from '../../services/gemini';
+import React, { useState } from 'react';
+import { Mic, MicOff } from 'lucide-react';
+import { AudioRecorder } from '../../utils/audioRecorder';
+import { transcribeAudio, translateText } from '../../services/gemini';
 
 const BilingualVoiceInput = ({ onTranscript, className = '' }) => {
   const [isListening, setIsListening] = useState(false);
-  const [isAvailable, setIsAvailable] = useState(false);
-  const isNative = Capacitor.isNativePlatform();
-
-  useEffect(() => {
-    checkAvailability();
-  }, []);
-
-  const checkAvailability = async () => {
-    if (isNative) {
-      try {
-        const { available } = await SpeechRecognition.available();
-        setIsAvailable(available);
-        
-        if (available) {
-          const { speechRecognition } = await SpeechRecognition.checkPermissions();
-          if (speechRecognition !== 'granted') {
-            await SpeechRecognition.requestPermissions();
-          }
-        }
-      } catch (error) {
-        console.error('[BilingualVoice] Availability check failed:', error);
-        setIsAvailable(false);
-      }
-    } else {
-      const webSupport = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
-      setIsAvailable(webSupport);
-    }
-  };
+  const [recorder] = useState(() => new AudioRecorder());
 
   const handleTranscript = async (transcript) => {
     console.log('[BilingualVoiceInput] Recognized:', transcript);
@@ -59,110 +31,50 @@ const BilingualVoiceInput = ({ onTranscript, className = '' }) => {
     }
   };
 
-  const startNativeListening = async () => {
-    let resultReceived = false;
-    
-    const handleResult = async (data) => {
-      if (resultReceived) return;
-      resultReceived = true;
-      
-      if (data.matches && data.matches.length > 0) {
-        await handleTranscript(data.matches[0]);
-      }
-      setIsListening(false);
-      await cleanup();
-    };
-
-    const handleStateChange = (state) => {
-      if (state.status === 'stopped' && !resultReceived) {
-        setIsListening(false);
-        cleanup();
-      }
-    };
-
-    const cleanup = async () => {
-      try {
-        await SpeechRecognition.removeAllListeners();
-      } catch (e) {
-        console.error('[BilingualVoice] Cleanup error:', e);
-      }
-    };
-
+  const startRecording = async () => {
     try {
-      await SpeechRecognition.removeAllListeners();
-      
-      await SpeechRecognition.addListener('listeningState', handleStateChange);
-      await SpeechRecognition.addListener('finalResults', handleResult);
-
+      await recorder.startRecording();
       setIsListening(true);
-
-      await SpeechRecognition.start({
-        language: 'te-IN',
-        maxResults: 5,
-        prompt: 'మాట్లాడండి...',
-        partialResults: false,
-        popup: true
-      });
-
     } catch (error) {
-      console.error('[BilingualVoice] Error:', error);
-      setIsListening(false);
-      await cleanup();
+      console.error('[BilingualVoiceInput] Recording error:', error);
+      alert('Please allow microphone access');
     }
   };
 
-  const startWebListening = async () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert('Speech recognition not supported in this browser. Please use Chrome or Edge.');
-      return;
+  const stopRecording = async () => {
+    try {
+      const audioBlob = await recorder.stopRecording();
+      const audioBase64 = await recorder.blobToBase64(audioBlob);
+      
+      const transcribedText = await transcribeAudio(audioBase64, audioBlob.type);
+      await handleTranscript(transcribedText);
+      
+    } catch (error) {
+      console.error('[BilingualVoiceInput] Transcription error:', error);
+      alert('Voice input failed. Please try again');
+    } finally {
+      setIsListening(false);
     }
-
-    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognitionAPI();
-    
-    recognition.lang = 'te-IN';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    recognition.onstart = () => {
-      setIsListening(true);
-    };
-
-    recognition.onresult = async (event) => {
-      const transcript = event.results[0][0].transcript;
-      await handleTranscript(transcript);
-    };
-
-    recognition.onerror = (event) => {
-      console.error('[BilingualVoice] Web recognition error:', event.error);
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognition.start();
   };
 
-  const startListening = async () => {
-    if (isNative) {
-      await startNativeListening();
+  const toggleRecording = async () => {
+    if (isListening) {
+      await stopRecording();
     } else {
-      await startWebListening();
+      await startRecording();
     }
   };
-
-  if (!isAvailable) return null;
 
   return (
     <button
       type="button"
-      onClick={startListening}
+      onClick={toggleRecording}
       className={`voice-input-btn ${isListening ? 'listening' : ''} ${className}`}
-      title="Click to speak (auto-translates to both languages)"
+      title={isListening 
+        ? 'Tap to stop recording' 
+        : 'Tap and speak (auto-translates to both languages)'}
     >
-      <Mic className="w-4 h-4" />
+      {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
     </button>
   );
 };

@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Mic, MicOff } from 'lucide-react';
-import { Capacitor } from '@capacitor/core';
-import { SpeechRecognition } from '@capacitor-community/speech-recognition';
-import { translateToProductName, semanticProductSearch } from '../../services/gemini';
+import { AudioRecorder } from '../../utils/audioRecorder';
+import { transcribeAudio, translateToProductName, semanticProductSearch } from '../../services/gemini';
 import { buildProductContext } from '../../constants/productSynonyms';
 
 export default function VoiceSearch({ 
@@ -14,34 +13,7 @@ export default function VoiceSearch({
 }) {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isAvailable, setIsAvailable] = useState(false);
-  const isNative = Capacitor.isNativePlatform();
-
-  useEffect(() => {
-    checkAvailability();
-  }, []);
-
-  const checkAvailability = async () => {
-    if (isNative) {
-      try {
-        const { available } = await SpeechRecognition.available();
-        setIsAvailable(available);
-        
-        if (available) {
-          const { speechRecognition } = await SpeechRecognition.checkPermissions();
-          if (speechRecognition !== 'granted') {
-            await SpeechRecognition.requestPermissions();
-          }
-        }
-      } catch (error) {
-        console.error('[VoiceSearch] Availability check failed:', error);
-        setIsAvailable(false);
-      }
-    } else {
-      const webSupport = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
-      setIsAvailable(webSupport);
-    }
-  };
+  const [recorder] = useState(() => new AudioRecorder());
 
   const handleVoiceSearch = async (text) => {
     setIsProcessing(true);
@@ -75,141 +47,63 @@ export default function VoiceSearch({
     }
   };
 
-  const startNativeListening = async () => {
-    let resultReceived = false;
-    
-    const handleResult = async (data) => {
-      if (resultReceived) return;
-      resultReceived = true;
-      
-      console.log('[VoiceSearch] Results received:', data);
-      if (data.matches && data.matches.length > 0) {
-        const text = data.matches[0];
-        console.log('[VoiceSearch] Recognized:', text);
-        await handleVoiceSearch(text);
-      }
-      setIsListening(false);
-      onVoiceEnd?.();
-      await cleanup();
-    };
-
-    const handleStateChange = (state) => {
-      console.log('[VoiceSearch] State:', state.status);
-      if (state.status === 'stopped' && !resultReceived) {
-        setIsListening(false);
-        onVoiceEnd?.();
-        cleanup();
-      }
-    };
-
-    const cleanup = async () => {
-      try {
-        await SpeechRecognition.removeAllListeners();
-      } catch (e) {
-        console.error('[VoiceSearch] Cleanup error:', e);
-      }
-    };
-
+  const startRecording = async () => {
     try {
-      await SpeechRecognition.removeAllListeners();
-      
-      await SpeechRecognition.addListener('listeningState', handleStateChange);
-      await SpeechRecognition.addListener('partialResults', (data) => {
-        console.log('[VoiceSearch] Partial:', data.matches);
-      });
-      await SpeechRecognition.addListener('finalResults', handleResult);
-
-      const lang = language === 'te' ? 'te-IN' : 'en-IN';
-      
+      await recorder.startRecording();
       setIsListening(true);
       onVoiceStart?.();
-
-      await SpeechRecognition.start({
-        language: lang,
-        maxResults: 5,
-        prompt: language === 'te' ? 'వెతకండి...' : 'Speak to search...',
-        partialResults: true,
-        popup: true
-      });
-
     } catch (error) {
-      console.error('[VoiceSearch] Error:', error);
-      alert('Voice search failed. Please try again.');
-      setIsListening(false);
-      setIsProcessing(false);
-      onVoiceEnd?.();
-      await cleanup();
+      console.error('[VoiceSearch] Recording error:', error);
+      alert(language === 'te' 
+        ? 'మైక్రోఫోన్ యాక్సెస్ అనుమతించండి' 
+        : 'Please allow microphone access');
     }
   };
 
-  const startWebListening = () => {
-    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognitionAPI();
-    
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = language === 'te' ? 'te-IN' : 'en-IN';
-
-    recognition.onstart = () => {
-      setIsListening(true);
-      onVoiceStart?.();
-    };
-
-    recognition.onresult = async (event) => {
-      const transcriptText = event.results[0][0].transcript;
-      await handleVoiceSearch(transcriptText);
-    };
-
-    recognition.onerror = (event) => {
-      console.error('[VoiceSearch] Web recognition error:', event.error);
+  const stopRecording = async () => {
+    try {
       setIsListening(false);
+      setIsProcessing(true);
+
+      const audioBlob = await recorder.stopRecording();
+      const audioBase64 = await recorder.blobToBase64(audioBlob);
+      
+      console.log('[VoiceSearch] Audio recorded, sending to Gemini...');
+      
+      const transcribedText = await transcribeAudio(audioBase64, audioBlob.type);
+      console.log('[VoiceSearch] Transcribed:', transcribedText);
+      
+      await handleVoiceSearch(transcribedText);
+      
+    } catch (error) {
+      console.error('[VoiceSearch] Transcription error:', error);
+      alert(language === 'te' 
+        ? 'వాయిస్ విఫలమైంది. మళ్లీ ప్రయత్నించండి' 
+        : 'Voice search failed. Please try again');
+      onProductsFound([], '');
+    } finally {
       setIsProcessing(false);
       onVoiceEnd?.();
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-      setIsProcessing(false);
-      onVoiceEnd?.();
-    };
-
-    recognition.start();
-  };
-
-  const stopListening = async () => {
-    if (isNative) {
-      try {
-        await SpeechRecognition.stop();
-        await SpeechRecognition.removeAllListeners();
-      } catch (error) {
-        console.error('[VoiceSearch] Stop error:', error);
-      }
     }
-    setIsListening(false);
-    setIsProcessing(false);
-    onVoiceEnd?.();
   };
 
-  const toggleListening = async () => {
+  const toggleRecording = async () => {
     if (isListening) {
-      await stopListening();
+      await stopRecording();
     } else {
-      if (isNative) {
-        await startNativeListening();
-      } else {
-        startWebListening();
-      }
+      await startRecording();
     }
   };
-
-  if (!isAvailable) return null;
 
   return (
     <button
-      onClick={toggleListening}
+      onClick={toggleRecording}
       className={`voice-search-btn ${isListening ? 'listening' : ''} ${isProcessing ? 'processing' : ''}`}
       disabled={isProcessing}
       aria-label={language === 'te' ? 'వాయిస్ సెర్చ్' : 'Voice Search'}
+      title={isListening 
+        ? (language === 'te' ? 'ఆపండి' : 'Tap to stop') 
+        : (language === 'te' ? 'వెతకండి' : 'Tap and speak')}
     >
       {isListening ? <MicOff size={20} /> : <Mic size={20} />}
     </button>

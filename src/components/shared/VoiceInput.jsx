@@ -1,154 +1,59 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Mic, MicOff } from 'lucide-react';
-import { Capacitor } from '@capacitor/core';
-import { SpeechRecognition } from '@capacitor-community/speech-recognition';
+import { AudioRecorder } from '../../utils/audioRecorder';
+import { transcribeAudio } from '../../services/gemini';
 
 export default function VoiceInput({ onTranscript, language = 'en', className = '' }) {
   const [isListening, setIsListening] = useState(false);
-  const [isAvailable, setIsAvailable] = useState(false);
-  const isNative = Capacitor.isNativePlatform();
+  const [recorder] = useState(() => new AudioRecorder());
 
-  useEffect(() => {
-    checkAvailability();
-  }, []);
-
-  const checkAvailability = async () => {
-    if (isNative) {
-      try {
-        const { available } = await SpeechRecognition.available();
-        setIsAvailable(available);
-        
-        if (available) {
-          const { speechRecognition } = await SpeechRecognition.checkPermissions();
-          if (speechRecognition !== 'granted') {
-            await SpeechRecognition.requestPermissions();
-          }
-        }
-      } catch (error) {
-        console.error('[VoiceInput] Availability check failed:', error);
-        setIsAvailable(false);
-      }
-    } else {
-      const webSupport = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
-      setIsAvailable(webSupport);
-    }
-  };
-
-  const startNativeListening = async () => {
-    let resultReceived = false;
-    
-    const handleResult = async (data) => {
-      if (resultReceived) return;
-      resultReceived = true;
-      
-      if (data.matches && data.matches.length > 0) {
-        onTranscript(data.matches[0]);
-      }
-      setIsListening(false);
-      await cleanup();
-    };
-
-    const handleStateChange = (state) => {
-      if (state.status === 'stopped' && !resultReceived) {
-        setIsListening(false);
-        cleanup();
-      }
-    };
-
-    const cleanup = async () => {
-      try {
-        await SpeechRecognition.removeAllListeners();
-      } catch (e) {
-        console.error('[VoiceInput] Cleanup error:', e);
-      }
-    };
-
+  const startRecording = async () => {
     try {
-      await SpeechRecognition.removeAllListeners();
-      
-      await SpeechRecognition.addListener('listeningState', handleStateChange);
-      await SpeechRecognition.addListener('finalResults', handleResult);
-
-      const lang = language === 'te' ? 'te-IN' : 'en-IN';
-      
+      await recorder.startRecording();
       setIsListening(true);
-
-      await SpeechRecognition.start({
-        language: lang,
-        maxResults: 5,
-        prompt: language === 'te' ? 'మాట్లాడండి...' : 'Speak now...',
-        partialResults: false,
-        popup: true
-      });
-
     } catch (error) {
-      console.error('[VoiceInput] Error:', error);
-      setIsListening(false);
-      await cleanup();
+      console.error('[VoiceInput] Recording error:', error);
+      alert(language === 'te' 
+        ? 'మైక్రోఫోన్ యాక్సెస్ అనుమతించండి' 
+        : 'Please allow microphone access');
     }
   };
 
-  const startWebListening = () => {
-    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognitionAPI();
-    
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = language === 'te' ? 'te-IN' : 'en-IN';
-
-    recognition.onstart = () => {
-      setIsListening(true);
-    };
-
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      onTranscript(transcript);
-    };
-
-    recognition.onerror = (event) => {
-      console.error('[VoiceInput] Web recognition error:', event.error);
+  const stopRecording = async () => {
+    try {
+      const audioBlob = await recorder.stopRecording();
+      const audioBase64 = await recorder.blobToBase64(audioBlob);
+      
+      const transcribedText = await transcribeAudio(audioBase64, audioBlob.type);
+      onTranscript(transcribedText);
+      
+    } catch (error) {
+      console.error('[VoiceInput] Transcription error:', error);
+      alert(language === 'te' 
+        ? 'వాయిస్ విఫలమైంది. మళ్లీ ప్రయత్నించండి' 
+        : 'Voice input failed. Please try again');
+    } finally {
       setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognition.start();
-  };
-
-  const stopListening = async () => {
-    if (isNative) {
-      try {
-        await SpeechRecognition.stop();
-        await SpeechRecognition.removeAllListeners();
-      } catch (error) {
-        console.error('[VoiceInput] Stop error:', error);
-      }
     }
-    setIsListening(false);
   };
 
-  const toggleListening = async () => {
+  const toggleRecording = async () => {
     if (isListening) {
-      await stopListening();
+      await stopRecording();
     } else {
-      if (isNative) {
-        await startNativeListening();
-      } else {
-        startWebListening();
-      }
+      await startRecording();
     }
   };
-
-  if (!isAvailable) return null;
 
   return (
     <button
       type="button"
-      onClick={toggleListening}
+      onClick={toggleRecording}
       className={`voice-input-btn ${isListening ? 'listening' : ''} ${className}`}
       aria-label={language === 'te' ? 'వాయిస్ ఇన్‌పుట్' : 'Voice Input'}
+      title={isListening 
+        ? (language === 'te' ? 'ఆపండి' : 'Tap to stop') 
+        : (language === 'te' ? 'మాట్లాడండి' : 'Tap and speak')}
     >
       {isListening ? <MicOff size={18} /> : <Mic size={18} />}
     </button>
