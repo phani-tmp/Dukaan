@@ -84,6 +84,13 @@ The application features a modern, mobile-first design with a professional, emoj
 - **Web Speech API**: Browser-native speech recognition.
 - **lucide-react**: For vector icons.
 
+## Recent Updates (Nov 6, 2025)
+
+### UI/UX Improvements
+- **Header Optimization**: DUKAAN logo enlarged (22px, bold 700) with improved letter spacing for better mobile visibility.
+- **ProfileSetupModal Mobile Enhancement**: Wider modal (90% screen width, max 500px), larger input fields (16px font, 14-16px padding), improved spacing and readability for mobile users.
+- **Profile Loading Enhancement**: Added comprehensive logging to track profile loading issues and ensure userProfile state updates correctly after authentication.
+
 ## Android-Specific Configuration
 
 ### Firebase Phone Authentication Fix (Nov 3, 2025)

@@ -56,6 +56,7 @@ const ProfileView = ({
       await updateDoc(userRef, {
         name: editForm.name.trim(),
         email: editForm.email.trim(),
+        profileCompleted: true,
         updatedAt: new Date().toISOString()
       });
       

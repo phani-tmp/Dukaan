@@ -54,23 +54,24 @@ const ProfileSetupModal = ({ onSave, onClose }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px', padding: '0' }}>
-        <div className="modal-header" style={{ background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)', color: 'white', padding: '24px', borderRadius: '16px 16px 0 0' }}>
-          <h3 className="modal-title" style={{ color: 'white', margin: 0 }}>Welcome! 👋</h3>
-          <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.9)', marginTop: '8px', margin: 0 }}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px', width: '90%', padding: '0', margin: '20px auto' }}>
+        <div className="modal-header" style={{ background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)', color: 'white', padding: '28px 24px', borderRadius: '16px 16px 0 0' }}>
+          <h3 className="modal-title" style={{ color: 'white', margin: 0, fontSize: '24px', fontWeight: '700' }}>Welcome! 👋</h3>
+          <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.95)', marginTop: '10px', margin: 0 }}>
             Just tell us your name to get started
           </p>
         </div>
         
-        <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
-          <div className="form-group" style={{ marginBottom: '20px' }}>
-            <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontWeight: '600' }}>
-              <User className="w-4 h-4" />
+        <form onSubmit={handleSubmit} style={{ padding: '28px 24px' }}>
+          <div className="form-group" style={{ marginBottom: '22px' }}>
+            <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', fontWeight: '600', fontSize: '15px' }}>
+              <User className="w-5 h-5" />
               Your Name *
             </label>
             <input
               type="text"
               className="form-input"
+              style={{ fontSize: '16px', padding: '14px 16px' }}
               placeholder="Enter your full name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -79,33 +80,35 @@ const ProfileSetupModal = ({ onSave, onClose }) => {
             />
           </div>
 
-          <div style={{ background: '#f5f5f5', padding: '16px', borderRadius: '12px', marginBottom: '20px' }}>
-            <p style={{ fontSize: '13px', color: '#666', margin: '0 0 12px 0', fontWeight: '600' }}>
+          <div style={{ background: '#f5f5f5', padding: '18px', borderRadius: '12px', marginBottom: '24px' }}>
+            <p style={{ fontSize: '14px', color: '#666', margin: '0 0 16px 0', fontWeight: '600' }}>
               Optional (for future logins)
             </p>
             
-            <div className="form-group" style={{ marginBottom: '12px' }}>
-              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', fontSize: '13px' }}>
-                <Mail className="w-4 h-4" />
+            <div className="form-group" style={{ marginBottom: '14px' }}>
+              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '14px' }}>
+                <Mail className="w-5 h-5" />
                 Email Address
               </label>
               <input
                 type="email"
                 className="form-input"
+                style={{ fontSize: '16px', padding: '14px 16px' }}
                 placeholder="your@email.com (optional)"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </div>
 
-            <div className="form-group" style={{ marginBottom: '12px' }}>
-              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', fontSize: '13px' }}>
-                <Lock className="w-4 h-4" />
+            <div className="form-group" style={{ marginBottom: '14px' }}>
+              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '14px' }}>
+                <Lock className="w-5 h-5" />
                 Password
               </label>
               <input
                 type="password"
                 className="form-input"
+                style={{ fontSize: '16px', padding: '14px 16px' }}
                 placeholder="Minimum 6 characters (optional)"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -114,13 +117,14 @@ const ProfileSetupModal = ({ onSave, onClose }) => {
 
             {formData.password && (
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', fontSize: '13px' }}>
-                  <Lock className="w-4 h-4" />
+                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '14px' }}>
+                  <Lock className="w-5 h-5" />
                   Confirm Password
                 </label>
                 <input
                   type="password"
                   className="form-input"
+                  style={{ fontSize: '16px', padding: '14px 16px' }}
                   placeholder="Re-enter password"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}

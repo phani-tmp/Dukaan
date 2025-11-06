@@ -18,7 +18,7 @@ const AppHeader = ({ searchTerm, setSearchTerm, location, language, toggleLangua
           <span className="location-text">{location || 'Ponnur, AP'}</span>
         </div>
         
-        <h1 className="app-title-inline">{t.appName}</h1>
+        <h1 className="app-title-inline" style={{ fontSize: '22px', fontWeight: '700', letterSpacing: '0.5px' }}>{t.appName}</h1>
         
         <button onClick={toggleLanguage} className="language-toggle">
           {language === 'en' ? 'EN' : 'తె'}

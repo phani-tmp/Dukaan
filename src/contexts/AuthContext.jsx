@@ -55,10 +55,12 @@ export const AuthProvider = ({ children }) => {
 
   const loadUserProfile = useCallback(async (uid) => {
     try {
+      console.log('[Auth] Loading profile for UID:', uid);
       const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid);
       const userDoc = await getDoc(userDocRef);
       if (userDoc.exists()) {
         const profileData = { id: userDoc.id, ...userDoc.data() };
+        console.log('[Auth] Profile loaded:', profileData.name, 'Role:', profileData.role);
         setUserProfile(profileData);
         setShowProfileSetup(false); // Hide profile setup for existing users
         
@@ -81,12 +83,13 @@ export const AuthProvider = ({ children }) => {
       } else {
         // User is authenticated but has no profile
         // Only show profile setup if they're in the registration step
-        console.log('[Auth] User authenticated but no profile found');
+        console.log('[Auth] User authenticated but no profile found for UID:', uid);
         setUserProfile(null);
         // Don't automatically show profile setup here - let the auth flow control it
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
+      setUserProfile(null);
     }
   }, [db]);
 
@@ -376,14 +379,17 @@ export const AuthProvider = ({ children }) => {
       });
       
       setShowProfileSetup(false);
-      setUserProfile({ 
+      const updatedProfile = { 
         id: user.uid, 
         name: userName,
         phoneNumber: user.phoneNumber || phoneNum,
         email: profileData.email || null,
         role: existingRole || 'customer',
         profileCompleted: profileData.profileCompleted || false
-      });
+      };
+      
+      console.log('[Auth] Profile saved successfully:', updatedProfile);
+      setUserProfile(updatedProfile);
       
       if (profileData.profileCompleted) {
         alert('Welcome to DUKAAN! 🎉 You can now start shopping.');
