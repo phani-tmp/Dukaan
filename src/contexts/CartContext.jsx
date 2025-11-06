@@ -76,8 +76,8 @@ export const CartProvider = ({ children }) => {
 
     const orderData = {
       userId: user.uid,
-      userName: userProfile.name || 'Customer',
-      userPhone: userProfile.phoneNumber,
+      customerName: userProfile.name || 'Customer',
+      customerPhone: userProfile.phoneNumber,
       items: items.map(item => ({
         id: item.id,
         name: item.name,
@@ -89,7 +89,6 @@ export const CartProvider = ({ children }) => {
       })),
       total,
       status: 'pending',
-      phoneNumber: userProfile.phoneNumber,
       deliveryMethod: deliveryMethod,
       deliveryAddress: deliveryMethod === 'delivery' ? selectedAddress.fullAddress : 'Store Pickup',
       deliveryInstructions: deliveryMethod === 'delivery' ? (selectedAddress.deliveryInstructions || '') : '',
