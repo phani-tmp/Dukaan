@@ -118,6 +118,11 @@ The application features a modern, mobile-first design with a professional, emoj
   - Daily revenue calculation now only counts Completed and Delivered orders
   - Excludes pending, accepted, and cancelled orders from revenue totals
   - Provides accurate financial reporting for shopkeepers
+- **Rider Customer Contact Fix** (Nov 6, 2025):
+  - Fixed missing customer phone numbers in rider dashboard
+  - Changed order field names from `userName`/`userPhone` to `customerName`/`customerPhone` for consistency
+  - Riders can now see and call customers during delivery
+  - Note: Existing old orders may not show phone numbers until reordered
 
 ### Geolocation & Navigation Features
 - **Address Geolocation**: "Use My Location" button in AddressForm with browser geolocation API (high-accuracy mode).
