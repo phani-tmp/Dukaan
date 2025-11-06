@@ -14,11 +14,11 @@ const LoadingSpinner = () => {
         if (settingsDoc.exists() && settingsDoc.data().logoUrl) {
           setLogoUrl(settingsDoc.data().logoUrl);
         } else {
-          setLogoUrl('/dukaan-logo.png');
+          setLogoUrl('https://i.ibb.co/G396RS1v/Gemini-Generated-Image-rprpccrprpccrprp.png');
         }
       } catch (error) {
         console.log('Using default logo');
-        setLogoUrl('/dukaan-logo.png');
+        setLogoUrl('https://i.ibb.co/G396RS1v/Gemini-Generated-Image-rprpccrprpccrprp.png');
       }
     };
     

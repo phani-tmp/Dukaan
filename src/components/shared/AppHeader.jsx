@@ -5,24 +5,23 @@ import VoiceSearch from './VoiceSearch';
 
 const AppHeader = ({ searchTerm, setSearchTerm, language, toggleLanguage, logoUrl, products, onVoiceSearch }) => {
   const t = translations[language];
-  const defaultLogo = '/dukaan-logo.png';
+  const fallbackLogo = 'https://i.ibb.co/G396RS1v/Gemini-Generated-Image-rprpccrprpccrprp.png';
   
   return (
     <div className="app-header-modern">
       <div className="header-top">
         <div className="brand-section">
           <img 
-            src={logoUrl || defaultLogo} 
+            src={logoUrl || fallbackLogo} 
             alt="DUKAAN Logo" 
             className="header-logo"
           />
-          <div className="brand-text">
-            <h1 className="brand-name">DUKAAN</h1>
-            <p className="brand-name-telugu">దుకాణ్</p>
-          </div>
+          <h1 className="brand-name">
+            {language === 'en' ? 'DUKAAN' : 'దుకాణ్'}
+          </h1>
         </div>
         <button onClick={toggleLanguage} className="language-toggle-modern">
-          {language === 'en' ? 'EN' : 'తె'}
+          తెలుగు/EN
         </button>
       </div>
 
