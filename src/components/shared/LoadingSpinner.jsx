@@ -13,9 +13,12 @@ const LoadingSpinner = () => {
         const settingsDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'branding'));
         if (settingsDoc.exists() && settingsDoc.data().logoUrl) {
           setLogoUrl(settingsDoc.data().logoUrl);
+        } else {
+          setLogoUrl('/dukaan-logo.png');
         }
       } catch (error) {
-        console.log('Logo not loaded for spinner');
+        console.log('Using default logo');
+        setLogoUrl('/dukaan-logo.png');
       }
     };
     

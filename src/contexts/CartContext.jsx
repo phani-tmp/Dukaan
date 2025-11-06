@@ -94,6 +94,8 @@ export const CartProvider = ({ children }) => {
       deliveryAddress: deliveryMethod === 'delivery' ? selectedAddress.fullAddress : 'Store Pickup',
       deliveryInstructions: deliveryMethod === 'delivery' ? (selectedAddress.deliveryInstructions || '') : '',
       selectedAddressId: deliveryMethod === 'delivery' ? selectedAddress.id : null,
+      deliveryLatitude: deliveryMethod === 'delivery' && selectedAddress?.latitude ? selectedAddress.latitude : null,
+      deliveryLongitude: deliveryMethod === 'delivery' && selectedAddress?.longitude ? selectedAddress.longitude : null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

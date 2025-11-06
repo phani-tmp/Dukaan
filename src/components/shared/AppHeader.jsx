@@ -5,24 +5,49 @@ import VoiceSearch from './VoiceSearch';
 
 const AppHeader = ({ searchTerm, setSearchTerm, location, language, toggleLanguage, logoUrl, products, onVoiceSearch }) => {
   const t = translations[language];
+  const defaultLogo = '/dukaan-logo.png';
   
   return (
     <div className="app-header-modern">
-      <div className="location-bar">
-        <div className="location-info">
-          {logoUrl ? (
-            <img src={logoUrl} alt="Logo" className="app-logo" />
-          ) : (
-            <MapPin className="w-4 h-4" />
-          )}
-          <span className="location-text">{location || 'Ponnur, AP'}</span>
+      <div className="location-bar" style={{ flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '12px 16px' }}>
+        <div className="location-info" style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1 }}>
+            <MapPin className="w-4 h-4" style={{ flexShrink: 0 }} />
+            <span className="location-text" style={{ fontSize: '13px', flex: 1 }}>{location || 'Getting location...'}</span>
+          </div>
+          <button onClick={toggleLanguage} className="language-toggle" style={{ fontSize: '14px', fontWeight: '600', padding: '4px 12px' }}>
+            {language === 'en' ? 'EN' : 'తె'}
+          </button>
         </div>
         
-        <h1 className="app-title-inline" style={{ fontSize: '22px', fontWeight: '700', letterSpacing: '0.5px' }}>{t.appName}</h1>
-        
-        <button onClick={toggleLanguage} className="language-toggle">
-          {language === 'en' ? 'EN' : 'తె'}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center', width: '100%' }}>
+          <img 
+            src={logoUrl || defaultLogo} 
+            alt="DUKAAN Logo" 
+            style={{ 
+              width: '40px', 
+              height: '40px', 
+              objectFit: 'contain',
+              borderRadius: '8px'
+            }} 
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'block';
+            }}
+          />
+          <h1 
+            style={{ 
+              display: 'none',
+              fontSize: '24px', 
+              fontWeight: '700', 
+              letterSpacing: '0.5px',
+              color: 'white',
+              margin: 0
+            }}
+          >
+            {t.appName}
+          </h1>
+        </div>
       </div>
 
       <div className="search-bar-modern">

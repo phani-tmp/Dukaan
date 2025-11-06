@@ -1,12 +1,64 @@
 import React, { useState } from 'react';
-import { Save, X } from 'lucide-react';
+import { Save, X, MapPin, Navigation } from 'lucide-react';
 
 const AddressForm = ({ onSave, onClose, editingAddress }) => {
   const [formData, setFormData] = useState({
     label: editingAddress?.label || 'Home',
     fullAddress: editingAddress?.fullAddress || '',
-    deliveryInstructions: editingAddress?.deliveryInstructions || ''
+    deliveryInstructions: editingAddress?.deliveryInstructions || '',
+    latitude: editingAddress?.latitude || null,
+    longitude: editingAddress?.longitude || null
   });
+  const [loadingLocation, setLoadingLocation] = useState(false);
+
+  const handleGetLocation = () => {
+    if ('geolocation' in navigator) {
+      setLoadingLocation(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+            );
+            const data = await response.json();
+            
+            const address = data.display_name || `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            
+            setFormData({
+              ...formData,
+              fullAddress: address,
+              latitude,
+              longitude
+            });
+            setLoadingLocation(false);
+          } catch (error) {
+            console.error('Error getting address:', error);
+            setFormData({
+              ...formData,
+              fullAddress: `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+              latitude,
+              longitude
+            });
+            setLoadingLocation(false);
+          }
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          alert('Unable to get your location. Please enter address manually or check location permissions.');
+          setLoadingLocation(false);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    } else {
+      alert('Geolocation is not supported by your device.');
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -45,15 +97,47 @@ const AddressForm = ({ onSave, onClose, editingAddress }) => {
           
           <div className="form-group">
             <label className="form-label">Full Address</label>
-            <textarea
-              className="form-input"
-              rows="3"
-              placeholder="Enter complete delivery address"
-              value={formData.fullAddress}
-              onChange={(e) => setFormData({ ...formData, fullAddress: e.target.value })}
-              required
-            />
-            <p className="form-hint">In Phase 2, this will use Google Maps for easy address selection</p>
+            <div style={{ position: 'relative' }}>
+              <textarea
+                className="form-input"
+                rows="3"
+                placeholder="Enter complete delivery address"
+                value={formData.fullAddress}
+                onChange={(e) => setFormData({ ...formData, fullAddress: e.target.value })}
+                required
+              />
+              <button
+                type="button"
+                onClick={handleGetLocation}
+                disabled={loadingLocation}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '12px',
+                  background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                  cursor: loadingLocation ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  opacity: loadingLocation ? 0.6 : 1
+                }}
+              >
+                <Navigation className="w-4 h-4" />
+                {loadingLocation ? 'Getting...' : 'Use My Location'}
+              </button>
+            </div>
+            {formData.latitude && formData.longitude && (
+              <p className="form-hint" style={{ color: '#4CAF50', marginTop: '8px' }}>
+                <MapPin className="w-3 h-3" style={{ display: 'inline', marginRight: '4px' }} />
+                Coordinates: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
+              </p>
+            )}
           </div>
           
           <div className="form-group">
