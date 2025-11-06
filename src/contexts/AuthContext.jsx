@@ -7,7 +7,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, collection, addDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, addDoc, getDocs } from 'firebase/firestore';
 import { getFirebaseInstances, appId } from '../services/firebase';
 
 const AuthContext = createContext(null);
