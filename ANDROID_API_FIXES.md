@@ -40,10 +40,13 @@ const isAndroidWebView = () => {
 if (isAndroidWebView()) return null;
 ```
 
-### Current Status
+### Current Status (FIXED - Nov 6, 2025)
 - ✅ RECORD_AUDIO permission already added in AndroidManifest.xml
-- ❌ Web Speech API doesn't work in WebView (browser-only feature)
-- 🔧 Needs native Capacitor plugin or alternative solution
+- ✅ Capacitor Speech Recognition plugin installed (@capacitor-community/speech-recognition@7.0.1)
+- ✅ All voice components updated to use native plugin on Android
+- ✅ Hybrid implementation: Web Speech API on browsers, native plugin on Android
+- ✅ Components updated: VoiceInput.jsx, VoiceSearch.jsx, BilingualVoiceInput.jsx
+- ✅ Automatic permission handling on first use
 
 ---
 

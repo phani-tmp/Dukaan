@@ -141,6 +141,17 @@ The application features a modern, mobile-first design with a professional, emoj
 
 ## Android-Specific Configuration
 
+### Voice Recognition Fix (Nov 6, 2025)
+- **Issue**: Web Speech API doesn't work in Android WebViews (Capacitor apps), only in Chrome browser.
+- **Solution**: 
+  - Installed native Capacitor plugin `@capacitor-community/speech-recognition@7.0.1`
+  - Updated all voice components with hybrid implementation: native plugin on Android, Web Speech API on browsers
+  - Components updated: `VoiceInput.jsx`, `VoiceSearch.jsx`, `BilingualVoiceInput.jsx`
+  - Automatic permission handling and language detection (Telugu/English/Hindi)
+- **Permissions**: `RECORD_AUDIO` already configured in AndroidManifest.xml
+- **Rebuild Required**: Run `npm run build && npx cap sync android` to apply changes to APK
+- **Documentation**: See `ANDROID_API_FIXES.md` for complete guide.
+
 ### Firebase Phone Authentication Fix (Nov 3, 2025)
 - **Issue**: reCAPTCHA fails in Android WebView, causing `auth/operation-not-allowed` errors.
 - **Solution**: 

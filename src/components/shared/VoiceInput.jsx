@@ -1,57 +1,148 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mic, MicOff } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
+import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 
 export default function VoiceInput({ onTranscript, language = 'en', className = '' }) {
   const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef(null);
+  const [isAvailable, setIsAvailable] = useState(false);
+  const isNative = Capacitor.isNativePlatform();
 
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = language === 'te' ? 'te-IN' : 'en-IN';
+    checkAvailability();
+  }, []);
 
-      recognitionRef.current.onstart = () => {
-        setIsListening(true);
-      };
-
-      recognitionRef.current.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        onTranscript(transcript);
-      };
-
-      recognitionRef.current.onerror = (event) => {
-        console.error('[Voice] Recognition error:', event.error);
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
-    }
-
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
+  const checkAvailability = async () => {
+    if (isNative) {
+      try {
+        const { available } = await SpeechRecognition.available();
+        setIsAvailable(available);
+        
+        if (available) {
+          const { granted } = await SpeechRecognition.checkPermissions();
+          if (!granted) {
+            await SpeechRecognition.requestPermissions();
+          }
+        }
+      } catch (error) {
+        console.error('[Voice] Capacitor availability check failed:', error);
+        setIsAvailable(false);
       }
-    };
-  }, [language, onTranscript]);
-
-  const toggleListening = () => {
-    if (!recognitionRef.current) return;
-
-    if (isListening) {
-      recognitionRef.current.stop();
     } else {
-      recognitionRef.current.start();
+      const webSupport = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+      setIsAvailable(webSupport);
     }
   };
 
-  const supportsVoice = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+  const startNativeListening = async () => {
+    try {
+      const lang = language === 'te' ? 'te-IN' : 'en-IN';
+      
+      await SpeechRecognition.start({
+        language: lang,
+        maxResults: 1,
+        prompt: language === 'te' ? 'మాట్లాడండి...' : 'Speak now...',
+        partialResults: false,
+        popup: true
+      });
 
-  if (!supportsVoice) return null;
+      setIsListening(true);
+
+      SpeechRecognition.addListener('partialResults', (data) => {
+        console.log('[Voice] Partial results:', data.matches);
+      });
+
+      const result = await new Promise((resolve, reject) => {
+        SpeechRecognition.addListener('listeningState', (state) => {
+          if (state.status === 'stopped') {
+            setIsListening(false);
+          }
+        });
+
+        let hasResolved = false;
+        SpeechRecognition.addListener('finalResults', (data) => {
+          if (!hasResolved && data.matches && data.matches.length > 0) {
+            hasResolved = true;
+            resolve(data.matches[0]);
+          }
+        });
+
+        setTimeout(() => {
+          if (!hasResolved) {
+            reject(new Error('Timeout'));
+          }
+        }, 10000);
+      });
+
+      if (result) {
+        onTranscript(result);
+      }
+      
+      await SpeechRecognition.stop();
+      setIsListening(false);
+      SpeechRecognition.removeAllListeners();
+    } catch (error) {
+      console.error('[Voice] Native recognition error:', error);
+      setIsListening(false);
+      await SpeechRecognition.stop();
+      SpeechRecognition.removeAllListeners();
+    }
+  };
+
+  const startWebListening = () => {
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognitionAPI();
+    
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = language === 'te' ? 'te-IN' : 'en-IN';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      onTranscript(transcript);
+    };
+
+    recognition.onerror = (event) => {
+      console.error('[Voice] Web recognition error:', event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
+
+  const stopListening = async () => {
+    if (isNative) {
+      try {
+        await SpeechRecognition.stop();
+        SpeechRecognition.removeAllListeners();
+      } catch (error) {
+        console.error('[Voice] Stop error:', error);
+      }
+    }
+    setIsListening(false);
+  };
+
+  const toggleListening = async () => {
+    if (isListening) {
+      await stopListening();
+    } else {
+      if (isNative) {
+        await startNativeListening();
+      } else {
+        startWebListening();
+      }
+    }
+  };
+
+  if (!isAvailable) return null;
 
   return (
     <button
