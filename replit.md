@@ -94,7 +94,7 @@ The application features a modern, mobile-first design with a professional, emoj
   - Gray search bar background for modern aesthetic
   - Language toggle always displays "తెలుగు/EN" for clarity
   - Lightweight shadow for subtle depth
-  - External logo fallback (imgbb) when no custom Firebase logo uploaded
+  - Local logo file (/dukaan-logo.png) as fallback when no custom Firebase logo uploaded
 - **Fixed Cart Footer**: Checkout footer now stays fixed at bottom of screen with z-index:101 and safe-area-inset support for better UX on all devices. Users don't need to scroll to find checkout button.
 - **ProfileSetupModal Mobile Enhancement**: Wider modal (90% screen width, max 500px), larger input fields (16px font, 14-16px padding), improved spacing and readability for mobile users.
 - **Profile Loading Enhancement**: Added comprehensive logging to track profile loading issues and ensure userProfile state updates correctly after authentication.

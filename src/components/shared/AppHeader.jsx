@@ -5,7 +5,7 @@ import VoiceSearch from './VoiceSearch';
 
 const AppHeader = ({ searchTerm, setSearchTerm, language, toggleLanguage, logoUrl, products, onVoiceSearch }) => {
   const t = translations[language];
-  const fallbackLogo = 'https://i.ibb.co/G396RS1v/Gemini-Generated-Image-rprpccrprpccrprp.png';
+  const fallbackLogo = '/dukaan-logo.png';
   
   return (
     <div className="app-header-modern">
