@@ -260,3 +260,41 @@ Translation:`;
     return text;
   }
 }
+
+export async function transcribeAudio(audioBase64, mimeType = 'audio/webm') {
+  try {
+    console.log('[Gemini] Starting audio transcription...');
+    
+    const result = await genAI.models.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            {
+              text: 'Listen to this audio and transcribe exactly what was said. The audio may be in Telugu, English, Hindi, or a mix. Return ONLY the transcribed text, no explanations or additional commentary.'
+            },
+            {
+              inlineData: {
+                mimeType: mimeType,
+                data: audioBase64
+              }
+            }
+          ]
+        }
+      ]
+    });
+    
+    const transcribedText = (result.text || '').trim();
+    console.log('[Gemini] Transcription result:', transcribedText);
+    
+    if (!transcribedText) {
+      throw new Error('No speech detected in audio');
+    }
+    
+    return transcribedText;
+  } catch (error) {
+    console.error('[Gemini] Audio transcription error:', error);
+    throw error;
+  }
+}
