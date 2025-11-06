@@ -125,6 +125,11 @@ The application features a modern, mobile-first design with a professional, emoj
   - Changed order field names from `userName`/`userPhone` to `customerName`/`customerPhone` for consistency
   - Riders can now see and call customers during delivery
   - Added backward compatibility: RiderDashboard now displays phone numbers from both old orders (userName/userPhone) and new orders (customerName/customerPhone)
+- **Modal Footer & Toast Fixes** (Nov 6, 2025):
+  - **Sticky Modal Footers**: Action buttons (Place Order, Confirm, etc.) now fixed at bottom of all popups - no scrolling required to find buttons
+  - **Modal Structure**: modal-content uses flexbox column, modal-body scrolls independently with flex:1 and overflow-y:auto
+  - **Toast Notifications**: z-index increased to 1001 to appear above modal overlays (was 1000, now properly visible above popups)
+  - All modals now have proper sticky footers: CheckoutConfirmationModal, ChangeOrderTypeModal, OrderDetailsModal, AddressForm
 
 ### Geolocation & Navigation Features
 - **Address Geolocation**: "Use My Location" button in AddressForm with browser geolocation API (high-accuracy mode).

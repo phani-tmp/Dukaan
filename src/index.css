@@ -1205,10 +1205,12 @@ body {
   max-width: 500px;
   width: calc(100% - 32px);
   max-height: calc(100vh - 32px);
-  overflow-y: auto;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   animation: modalSlideIn 0.3s ease-out;
   margin: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* ProfileSetupModal specific styles */
@@ -1313,6 +1315,9 @@ body {
 
 .modal-body {
   padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .modal-order-info {
@@ -2174,7 +2179,7 @@ body {
   background: white;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
+  z-index: 1001;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2632,6 +2637,9 @@ body {
 
 .modal-body {
   padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .modal-order-info {
@@ -3787,6 +3795,10 @@ body {
   padding: 20px;
   border-top: 1px solid #f0f0f0;
   background: #fafafa;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
 }
 
 .cancel-btn {
@@ -4241,6 +4253,11 @@ body {
   margin-top: 24px;
   padding-top: 20px;
   border-top: 2px solid #e9ecef;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  background: white;
+  z-index: 10;
 }
 
 .cancel-btn,
