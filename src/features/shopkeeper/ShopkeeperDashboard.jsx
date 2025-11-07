@@ -836,11 +836,11 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                           <Clock className="w-4 h-4 text-gray-400" />
                           <span className="order-timestamp">{new Date(order.createdAt).toLocaleString()}</span>
                         </div>
-                        {order.phoneNumber && (
+                        {order.customerPhone && (
                           <div className="order-phone-row">
                             <Phone className="w-4 h-4 text-green-600" />
-                            <a href={`tel:${order.phoneNumber}`} className="order-phone-link">
-                              {order.phoneNumber}
+                            <a href={`tel:${order.customerPhone}`} className="order-phone-link">
+                              {order.customerPhone}
                             </a>
                           </div>
                         )}
