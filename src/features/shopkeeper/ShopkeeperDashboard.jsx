@@ -990,16 +990,14 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
 
             {showForm && (
               <form onSubmit={handleSubmitProduct} className="product-form">
-                <div className="input-with-voice">
-                  <input
-                    type="text"
-                    placeholder={t.productNameEn}
-                    value={formData.nameEn}
-                    onChange={(e) => setFormData({ ...formData, nameEn: e.target.value })}
-                    required
-                    className="form-input"
-                  />
-                </div>
+                <input
+                  type="text"
+                  placeholder={t.productNameEn}
+                  value={formData.nameEn}
+                  onChange={(e) => setFormData({ ...formData, nameEn: e.target.value })}
+                  required
+                  className="form-input"
+                />
                 <div className="input-with-voice">
                   <input
                     type="text"
