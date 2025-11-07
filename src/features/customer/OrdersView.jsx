@@ -3,7 +3,7 @@ import { Package, IndianRupee, CheckCircle, Clock, Truck, XCircle, ShoppingBag, 
 import { translations } from '../../constants/translations';
 import ChangeOrderTypeModal from '../../components/shared/ChangeOrderTypeModal';
 
-const OrdersView = ({ orders, language, setSelectedOrder, onChangeDeliveryMethod, userAddresses, onManageAddresses }) => {
+const OrdersView = ({ orders, language, setSelectedOrder, onChangeDeliveryMethod, onCancelOrder, userAddresses, onManageAddresses }) => {
   const t = translations[language];
   const [changeOrderModalOpen, setChangeOrderModalOpen] = useState(false);
   const [selectedOrderForChange, setSelectedOrderForChange] = useState(null);
@@ -159,15 +159,46 @@ const OrdersView = ({ orders, language, setSelectedOrder, onChangeDeliveryMethod
                   </>
                 )}
               </div>
-              {(order.status === 'pending' || order.status === 'accepted') && onChangeDeliveryMethod && (
-                <button 
-                  onClick={() => handleOpenChangeModal(order)}
-                  className="change-delivery-btn"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  Change Order Type
-                </button>
-              )}
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {(order.status === 'pending' || order.status === 'accepted') && onChangeDeliveryMethod && (
+                  <button 
+                    onClick={() => handleOpenChangeModal(order)}
+                    className="change-delivery-btn"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    {language === 'te' ? 'ఆర్డర్ రకం మార్చండి' : 'Change Order Type'}
+                  </button>
+                )}
+                {order.status === 'pending' && onCancelOrder && (
+                  <button 
+                    onClick={() => {
+                      if (window.confirm(language === 'te' 
+                        ? 'మీరు ఈ ఆర్డర్‌ను రద్దు చేయాలనుకుంటున్నారా?' 
+                        : 'Are you sure you want to cancel this order?')) {
+                        onCancelOrder(order.id, language === 'te' ? 'కస్టమర్ రద్దు చేసారు' : 'Customer cancelled');
+                      }
+                    }}
+                    className="cancel-order-btn"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '8px 16px',
+                      background: '#fff',
+                      border: '1px solid #f44336',
+                      borderRadius: '8px',
+                      color: '#f44336',
+                      fontSize: '13px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <XCircle className="w-4 h-4" />
+                    {language === 'te' ? 'ఆర్డర్ రద్దు చేయండి' : 'Cancel Order'}
+                  </button>
+                )}
+              </div>
             </div>
 
             {order.riderPhone && (order.status === 'out_for_delivery' || order.status === 'delivered') && (

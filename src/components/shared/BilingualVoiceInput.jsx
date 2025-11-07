@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Mic, MicOff } from 'lucide-react';
 import { AudioRecorder } from '../../utils/audioRecorder';
-import { transcribeAudio, translateText } from '../../services/gemini';
+import { transcribeAudio, generateBilingualProductName } from '../../services/gemini';
 
 const BilingualVoiceInput = ({ onTranscript, className = '' }) => {
   const [isListening, setIsListening] = useState(false);
@@ -16,14 +16,13 @@ const BilingualVoiceInput = ({ onTranscript, className = '' }) => {
     console.log('[BilingualVoiceInput] Recognized:', transcript);
 
     try {
-      const englishText = await translateText(transcript, 'English');
-      const teluguText = await translateText(transcript, 'Telugu');
+      const { english, telugu } = await generateBilingualProductName(transcript);
       
-      console.log('[BilingualVoiceInput] Translated EN:', englishText, 'TE:', teluguText);
+      console.log('[BilingualVoiceInput] Generated EN:', english, 'TE:', telugu);
       
       onTranscript({
-        english: englishText || '',
-        telugu: teluguText || '',
+        english: english || '',
+        telugu: telugu || '',
         original: transcript || ''
       });
     } catch (error) {

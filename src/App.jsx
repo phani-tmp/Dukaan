@@ -73,7 +73,8 @@ function App() {
     allOrders,
     allRiders,
     loading: dataLoading,
-    handleChangeDeliveryMethod
+    handleChangeDeliveryMethod,
+    handleCancelOrder
   } = useData();
 
   const {
@@ -383,6 +384,7 @@ function App() {
             language={language}
             onSelectOrder={setSelectedOrder}
             onChangeDeliveryMethod={handleChangeDeliveryMethod}
+            onCancelOrder={handleCancelOrder}
             userAddresses={userAddresses}
             onManageAddresses={() => setShowAddressManager(true)}
           />

@@ -426,15 +426,15 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
         ...formData,
         price: parseFloat(formData.price),
         discountedPrice: formData.discountedPrice ? parseFloat(formData.discountedPrice) : null,
-        isPopular: formData.isPopular || false,
-        sortOrder: editingId ? undefined : products.length,
-        createdAt: new Date().toISOString()
+        isPopular: formData.isPopular || false
       };
 
       if (editingId) {
         await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', editingId), productData);
         alert('Product updated successfully!');
       } else {
+        productData.sortOrder = products.length;
+        productData.createdAt = new Date().toISOString();
         await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'products'), productData);
         alert('Product added successfully!');
       }

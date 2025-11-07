@@ -266,6 +266,60 @@ Translation:`;
   }
 }
 
+export async function generateBilingualProductName(text) {
+  try {
+    const prompt = `You are helping a shopkeeper add products to their inventory. They spoke this product name: "${text}"
+
+Generate both English and Telugu names for this product:
+
+Rules:
+- If they spoke in Telugu, provide the proper English translation
+- If they spoke in English, provide the proper Telugu translation
+- If it's a mix, identify the product and provide both proper names
+- Use commonly used names in Indian commerce
+- Keep names simple and accurate
+
+Return your response in this exact format:
+ENGLISH: [English name]
+TELUGU: [Telugu name]
+
+Example input: "టమాటా"
+Example output:
+ENGLISH: Tomato
+TELUGU: టమాటా
+
+Example input: "onion"
+Example output:
+ENGLISH: Onion
+TELUGU: ఉల్లిపాయ
+
+Now generate for: "${text}"`;
+
+    const result = await genAI.models.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: prompt }]
+        }
+      ]
+    });
+    
+    const responseText = (result.text || '').trim();
+    
+    const englishMatch = responseText.match(/ENGLISH:\s*(.+)/i);
+    const teluguMatch = responseText.match(/TELUGU:\s*(.+)/i);
+    
+    return {
+      english: englishMatch ? englishMatch[1].trim() : text,
+      telugu: teluguMatch ? teluguMatch[1].trim() : text
+    };
+  } catch (error) {
+    console.error('[Gemini] Bilingual generation error:', error);
+    return { english: text, telugu: text };
+  }
+}
+
 export async function transcribeAudio(audioBase64, mimeType = 'audio/webm') {
   try {
     console.log('[Gemini] Starting audio transcription...');

@@ -167,6 +167,23 @@ export const DataProvider = ({ children }) => {
     }
   }, [db]);
 
+  const handleCancelOrder = useCallback(async (orderId, cancellationReason) => {
+    try {
+      const orderRef = doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId);
+      
+      await updateDoc(orderRef, {
+        status: 'cancelled',
+        cancellationReason: cancellationReason || 'Customer cancelled',
+        updatedAt: new Date().toISOString()
+      });
+      
+      alert('Order cancelled successfully!');
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      alert('Failed to cancel order. Please try again.');
+    }
+  }, [db]);
+
   const value = {
     products,
     categoriesData,
@@ -176,7 +193,8 @@ export const DataProvider = ({ children }) => {
     allUsers,
     allRiders,
     loading,
-    handleChangeDeliveryMethod
+    handleChangeDeliveryMethod,
+    handleCancelOrder
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
