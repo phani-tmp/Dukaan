@@ -990,25 +990,35 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
 
             {showForm && (
               <form onSubmit={handleSubmitProduct} className="product-form">
-                <input
-                  type="text"
-                  placeholder={t.productNameEn}
-                  value={formData.nameEn}
-                  onChange={(e) => setFormData({ ...formData, nameEn: e.target.value })}
-                  required
-                  className="form-input"
-                />
-                <div className="input-with-voice">
-                  <input
-                    type="text"
-                    placeholder={t.productNameTe}
-                    value={formData.nameTe}
-                    onChange={(e) => setFormData({ ...formData, nameTe: e.target.value })}
-                    required
-                    className="form-input"
-                  />
+                <div className="bilingual-input-group">
+                  <div className="input-with-voice">
+                    <input
+                      type="text"
+                      placeholder={t.productNameEn}
+                      value={formData.nameEn}
+                      onChange={(e) => setFormData({ ...formData, nameEn: e.target.value })}
+                      required
+                      className="form-input"
+                    />
+                  </div>
+                  <div className="input-with-voice">
+                    <input
+                      type="text"
+                      placeholder={t.productNameTe}
+                      value={formData.nameTe}
+                      onChange={(e) => setFormData({ ...formData, nameTe: e.target.value })}
+                      required
+                      className="form-input"
+                    />
+                  </div>
                   <BilingualVoiceInput
-                    onTranscript={({ en, te }) => setFormData({ ...formData, nameEn: en, nameTe: te })}
+                    onTranscript={({ english, telugu }) => {
+                      setFormData({
+                        ...formData,
+                        nameEn: english || '',
+                        nameTe: telugu || ''
+                      });
+                    }}
                   />
                 </div>
                 <div className="input-with-voice">

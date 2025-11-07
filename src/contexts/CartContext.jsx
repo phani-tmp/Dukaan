@@ -73,7 +73,13 @@ export const CartProvider = ({ children }) => {
     }
 
     const items = Object.values(cartItems);
-    const total = items.reduce((sum, item) => sum + (item.discountedPrice ?? item.price) * item.quantity, 0);
+    const total = items.reduce((sum, item) => {
+      const discounted = item.discountedPrice !== '' && item.discountedPrice != null ? Number(item.discountedPrice) : null;
+      const original = Number(item.price) || 0;
+      const price = discounted != null ? discounted : original;
+      const quantity = Number(item.quantity) || 0;
+      return sum + (price * quantity);
+    }, 0);
 
     try {
       const orderNumber = await generateOrderNumber(db, appId);
@@ -82,32 +88,41 @@ export const CartProvider = ({ children }) => {
         orderNumber,
         userId: user.uid,
         customerName: userProfile.name || 'Customer',
-        customerPhone: userProfile.phoneNumber,
-        items: items.map(item => ({
-          id: item.id,
-          name: item.name,
-          nameEn: item.nameEn || item.name,
-          nameTe: item.nameTe || item.name,
-          originalPrice: item.price,
-          discountedPrice: item.discountedPrice || null,
-          price: item.discountedPrice ?? item.price,
-          quantity: item.quantity,
-          imageUrl: item.imageUrl || '',
-          weight: item.weight || '',
-          category: item.category || ''
-        })),
+        customerPhone: userProfile.phoneNumber || '',
+        items: items.map(item => {
+          const originalPrice = Number(item.price) || 0;
+          const discountedPrice = item.discountedPrice !== '' && item.discountedPrice != null ? Number(item.discountedPrice) : null;
+          const finalPrice = discountedPrice != null ? discountedPrice : originalPrice;
+          
+          return {
+            id: item.id || '',
+            name: item.name || '',
+            nameEn: item.nameEn || item.name || '',
+            nameTe: item.nameTe || item.name || '',
+            originalPrice: originalPrice,
+            discountedPrice: discountedPrice,
+            price: finalPrice,
+            quantity: Number(item.quantity) || 0,
+            imageUrl: item.imageUrl || '',
+            weight: item.weight || '',
+            category: item.category || ''
+          };
+        }),
         total,
         totalSavings: items.reduce((sum, item) => {
-          if (item.discountedPrice && item.discountedPrice < item.price) {
-            return sum + ((item.price - item.discountedPrice) * item.quantity);
+          const originalPrice = Number(item.price) || 0;
+          const discountedPrice = item.discountedPrice !== '' && item.discountedPrice != null ? Number(item.discountedPrice) : null;
+          const quantity = Number(item.quantity) || 0;
+          if (discountedPrice != null && discountedPrice < originalPrice) {
+            return sum + ((originalPrice - discountedPrice) * quantity);
           }
           return sum;
         }, 0),
         status: 'pending',
-        deliveryMethod: deliveryMethod,
-        deliveryAddress: deliveryMethod === 'delivery' ? selectedAddress.fullAddress : 'Store Pickup',
-        deliveryInstructions: deliveryMethod === 'delivery' ? (selectedAddress.deliveryInstructions || '') : '',
-        selectedAddressId: deliveryMethod === 'delivery' ? selectedAddress.id : null,
+        deliveryMethod: deliveryMethod || 'delivery',
+        deliveryAddress: deliveryMethod === 'delivery' ? (selectedAddress?.fullAddress || '') : 'Store Pickup',
+        deliveryInstructions: deliveryMethod === 'delivery' ? (selectedAddress?.deliveryInstructions || '') : '',
+        selectedAddressId: deliveryMethod === 'delivery' && selectedAddress?.id ? selectedAddress.id : null,
         deliveryLatitude: deliveryMethod === 'delivery' && selectedAddress?.latitude ? selectedAddress.latitude : null,
         deliveryLongitude: deliveryMethod === 'delivery' && selectedAddress?.longitude ? selectedAddress.longitude : null,
         createdAt: new Date().toISOString(),
