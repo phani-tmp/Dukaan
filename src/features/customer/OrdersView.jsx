@@ -16,7 +16,7 @@ const OrdersView = ({ orders, language, setSelectedOrder, onChangeDeliveryMethod
     return (
       <div className="empty-state">
         <Package className="empty-icon" />
-        <p className="empty-text">No active orders</p>
+        <p className="empty-text">{t.noActiveOrders}</p>
       </div>
     );
   }
@@ -71,14 +71,15 @@ const OrdersView = ({ orders, language, setSelectedOrder, onChangeDeliveryMethod
 
   return (
     <div className="orders-view">
-      <h2 className="view-title">Active Orders</h2>
+      <h2 className="view-title">{t.activeOrders}</h2>
       <div className="orders-list">
-        {activeOrders.map(order => (
+        {activeOrders.map(order => {
+          return (
           <div key={order.id} className="order-card-detailed">
             <div className="order-header-detailed">
               <div className="order-info-row">
                 <div className="order-meta">
-                  <span className="order-date-label">Order Date</span>
+                  <span className="order-date-label">{t.orderDate}</span>
                   <span className="order-date-value">
                     {new Date(order.createdAt).toLocaleDateString('en-IN', { 
                       day: 'numeric', 
@@ -115,13 +116,13 @@ const OrdersView = ({ orders, language, setSelectedOrder, onChangeDeliveryMethod
                       />
                     </div>
                     <div className="order-item-details">
-                      <h4 className="order-item-name">{item.name}</h4>
+                      <h4 className="order-item-name">{language === 'te' ? (item.nameTe || item.nameEn || item.name) : (item.nameEn || item.name)}</h4>
                       <p className="order-item-weight">{item.weight || 'N/A'}</p>
                       <div className="order-item-pricing">
-                        <span className="order-item-quantity">Qty: {item.quantity}</span>
+                        <span className="order-item-quantity">{t.qty}: {item.quantity}</span>
                         <span className="order-item-price">
                           <IndianRupee className="w-3 h-3" />
-                          {(item.discountedPrice ?? item.price).toFixed(0)} each
+                          {(item.discountedPrice ?? item.price).toFixed(0)} {t.each}
                         </span>
                       </div>
                     </div>
@@ -138,7 +139,7 @@ const OrdersView = ({ orders, language, setSelectedOrder, onChangeDeliveryMethod
               <div className="order-cancellation-section">
                 <div className="cancellation-badge">
                   <XCircle className="w-4 h-4 text-red-600" />
-                  <span className="cancellation-label">Cancellation Reason:</span>
+                  <span className="cancellation-label">{t.cancellationReason}:</span>
                 </div>
                 <p className="cancellation-reason-text">{order.cancellationReason}</p>
               </div>
@@ -149,12 +150,12 @@ const OrdersView = ({ orders, language, setSelectedOrder, onChangeDeliveryMethod
                 {order.deliveryMethod === 'delivery' ? (
                   <>
                     <Truck className="w-4 h-4" />
-                    <span>Home Delivery</span>
+                    <span>{t.homeDelivery}</span>
                   </>
                 ) : (
                   <>
                     <ShoppingBag className="w-4 h-4" />
-                    <span>Store Pickup</span>
+                    <span>{t.storePickup}</span>
                   </>
                 )}
               </div>
@@ -202,7 +203,7 @@ const OrdersView = ({ orders, language, setSelectedOrder, onChangeDeliveryMethod
 
             <div className="order-footer-detailed">
               <div className="order-total-row">
-                <span className="order-total-label">Order Total</span>
+                <span className="order-total-label">{t.orderTotal}</span>
                 <span className="order-total-amount">
                   <IndianRupee className="w-5 h-5" />
                   {order.total.toFixed(0)}
@@ -210,7 +211,8 @@ const OrdersView = ({ orders, language, setSelectedOrder, onChangeDeliveryMethod
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {changeOrderModalOpen && selectedOrderForChange && (

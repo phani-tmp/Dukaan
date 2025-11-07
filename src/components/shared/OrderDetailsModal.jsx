@@ -7,24 +7,37 @@ const OrderDetailsModal = ({ order, onClose, language }) => {
 
   const getStatusText = (status) => {
     const statusMap = {
-      pending: t.orderPlaced,
+      pending: t.pending,
+      accepted: t.accepted,
       processing: t.processing,
-      delivered: t.delivered
+      ready_for_pickup: t.readyForPickup,
+      out_for_delivery: t.outForDelivery,
+      delivered: t.delivered,
+      completed: t.completed,
+      cancelled: t.cancelled
     };
     return statusMap[status] || status;
   };
 
   const getStatusColor = (status) => {
-    if (status === 'delivered') return '#4CAF50';
-    if (status === 'processing') return '#2196F3';
-    return '#FF9800';
+    switch (status) {
+      case 'pending': return '#9E9E9E';
+      case 'accepted': return '#2196F3';
+      case 'processing': return '#2196F3';
+      case 'ready_for_pickup': return '#9C27B0';
+      case 'out_for_delivery': return '#FF9800';
+      case 'delivered': return '#4CAF50';
+      case 'completed': return '#4CAF50';
+      case 'cancelled': return '#F44336';
+      default: return '#9E9E9E';
+    }
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h3 className="modal-title">Order Details</h3>
+          <h3 className="modal-title">{t.orderDetails}</h3>
           <button onClick={onClose} className="modal-close-btn">
             <X className="w-6 h-6" />
           </button>
@@ -33,11 +46,11 @@ const OrderDetailsModal = ({ order, onClose, language }) => {
         <div className="modal-body">
           <div className="modal-order-info">
             <div className="modal-info-row">
-              <span className="modal-label">Order ID</span>
+              <span className="modal-label">{t.orderID}</span>
               <span className="modal-value">#{order.id.substring(0, 12)}</span>
             </div>
             <div className="modal-info-row">
-              <span className="modal-label">Order Date</span>
+              <span className="modal-label">{t.orderDate}</span>
               <span className="modal-value">
                 {new Date(order.createdAt).toLocaleDateString('en-IN', { 
                   day: 'numeric', 
@@ -49,14 +62,14 @@ const OrderDetailsModal = ({ order, onClose, language }) => {
               </span>
             </div>
             <div className="modal-info-row">
-              <span className="modal-label">Status</span>
+              <span className="modal-label">{t.status}</span>
               <span className="modal-status-badge" style={{ backgroundColor: getStatusColor(order.status) }}>
                 {getStatusText(order.status)}
               </span>
             </div>
             {order.phoneNumber && (
               <div className="modal-info-row">
-                <span className="modal-label">Customer Phone</span>
+                <span className="modal-label">{t.customerPhone}</span>
                 <a href={`tel:${order.phoneNumber}`} className="modal-phone-link">
                   <Phone className="w-4 h-4" />
                   {order.phoneNumber}
@@ -67,14 +80,14 @@ const OrderDetailsModal = ({ order, onClose, language }) => {
 
           {order.deliveryAddress && (
             <div className="modal-delivery-section">
-              <h4 className="modal-section-title">Delivery Details</h4>
+              <h4 className="modal-section-title">{t.deliveryDetails}</h4>
               <div className="modal-address-card">
                 <MapPin className="w-5 h-5 text-green-600" />
                 <div className="modal-address-content">
                   <p className="modal-address-text">{order.deliveryAddress}</p>
                   {order.deliveryInstructions && (
                     <p className="modal-instructions-text">
-                      <strong>Instructions:</strong> {order.deliveryInstructions}
+                      <strong>{t.instructions}:</strong> {order.deliveryInstructions}
                     </p>
                   )}
                 </div>
@@ -83,33 +96,36 @@ const OrderDetailsModal = ({ order, onClose, language }) => {
           )}
 
           <div className="modal-items-section">
-            <h4 className="modal-section-title">Items Ordered</h4>
+            <h4 className="modal-section-title">{t.itemsOrdered}</h4>
             <div className="modal-items-list">
-              {order.items.map((item, idx) => (
+              {order.items.map((item, idx) => {
+                const itemName = language === 'te' ? (item.nameTe || item.nameEn || item.name) : (item.nameEn || item.name);
+                return (
                 <div key={idx} className="modal-item-card">
                   <div className="modal-item-image">
                     <img 
                       src={item.imageUrl || 'https://via.placeholder.com/60'} 
-                      alt={item.name}
+                      alt={itemName}
                       onError={(e) => e.target.src = 'https://via.placeholder.com/60'}
                     />
                   </div>
                   <div className="modal-item-details">
-                    <h5 className="modal-item-name">{item.name}</h5>
+                    <h5 className="modal-item-name">{itemName}</h5>
                     <p className="modal-item-weight">{item.weight}</p>
-                    <p className="modal-item-quantity">Qty: {item.quantity}</p>
+                    <p className="modal-item-quantity">{t.qty}: {item.quantity}</p>
                   </div>
                   <div className="modal-item-price">
                     <IndianRupee className="w-4 h-4" />
                     {(item.price * item.quantity).toFixed(0)}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
           <div className="modal-total-section">
-            <span className="modal-total-label">Order Total</span>
+            <span className="modal-total-label">{t.orderTotal}</span>
             <span className="modal-total-amount">
               <IndianRupee className="w-5 h-5" />
               {order.total.toFixed(0)}

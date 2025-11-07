@@ -39,12 +39,13 @@ const ProductCard = ({ product, onAddToCart, cartItems, language }) => {
   const t = translations[language];
   const quantity = cartItems[product.id]?.quantity || 0;
   const isOutOfStock = product.outOfStock === true;
+  const productName = language === 'te' ? (product.nameTe || product.nameEn || product.name) : (product.nameEn || product.name);
 
   return (
     <div className={`product-card-modern ${isOutOfStock ? 'out-of-stock-card' : ''}`}>
       <img 
         src={product.imageUrl || 'https://via.placeholder.com/150'} 
-        alt={product.name}
+        alt={productName}
         className="product-image"
       />
       {isOutOfStock && (
@@ -53,7 +54,7 @@ const ProductCard = ({ product, onAddToCart, cartItems, language }) => {
         </div>
       )}
       <div className="product-info">
-        <h3 className="product-name">{product.name}</h3>
+        <h3 className="product-name">{productName}</h3>
         <p className="product-weight">{product.weight}</p>
         <div className="product-price-row">
           <span className="product-price">

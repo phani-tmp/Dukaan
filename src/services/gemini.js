@@ -141,19 +141,24 @@ Only return the language code, nothing else.`;
 
 export async function semanticProductSearch(query, products) {
   try {
-    const productList = products.map(p => `${p.id}: ${p.name} (${p.category})`).join('\n');
+    const productList = products.map(p => {
+      const nameEn = p.nameEn || p.name || '';
+      const nameTe = p.nameTe || '';
+      const displayName = nameTe ? `${nameEn} / ${nameTe}` : nameEn;
+      return `${p.id}: ${displayName} (${p.category})`;
+    }).join('\n');
 
     const prompt = `You are a smart product search assistant for a quick commerce app.
 
 User query: "${query}"
 
-Available products (format: id: name (category)):
+Available products (format: id: English Name / Telugu Name (category)):
 ${productList}
 
 Find products that match the user's intent. Consider:
 - Synonyms (e.g., "vegetables" includes tomato, onion, etc.)
 - Category matches (e.g., "breakfast items" includes milk, bread, etc.)
-- Telugu/Hindi/English variations
+- Telugu/Hindi/English variations (e.g., పాలు = Milk, doodh = milk)
 - Common misspellings
 
 Return a JSON array of matching product IDs ordered by relevance:

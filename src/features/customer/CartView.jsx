@@ -32,11 +32,13 @@ const CartView = ({
       </div>
 
       <div className="cart-items" style={{ paddingBottom: '140px' }}>
-        {items.map(item => (
+        {items.map(item => {
+          const itemName = language === 'te' ? (item.nameTe || item.nameEn || item.name) : (item.nameEn || item.name);
+          return (
           <div key={item.id} className="cart-item">
-            <img src={item.imageUrl || 'https://via.placeholder.com/80'} alt={item.name} className="cart-item-image" />
+            <img src={item.imageUrl || 'https://via.placeholder.com/80'} alt={itemName} className="cart-item-image" />
             <div className="cart-item-info">
-              <h3 className="cart-item-name">{item.name}</h3>
+              <h3 className="cart-item-name">{itemName}</h3>
               <p className="cart-item-weight">{item.weight}</p>
               <p className="cart-item-price">
                 <IndianRupee className="w-4 h-4" />
@@ -53,7 +55,8 @@ const CartView = ({
               </button>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="cart-footer-fixed">
@@ -65,7 +68,7 @@ const CartView = ({
           </span>
         </div>
         <button onClick={onCheckout} className="checkout-button">
-          Proceed to Checkout
+          {t.proceedToCheckout}
         </button>
       </div>
     </div>

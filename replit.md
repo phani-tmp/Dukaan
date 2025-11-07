@@ -15,7 +15,7 @@ The application features a modern, mobile-first design with a professional, emoj
 - **Frontend**: React with Vite.
 - **Backend/Database**: Firebase (Firestore, Authentication).
 - **Styling**: Custom CSS with `lucide-react` for icons.
-- **Bilingual Support**: Comprehensive translation dictionary and language toggle.
+- **Comprehensive Bilingual Support**: Translation dictionary for all UI text, bilingual product/category/subcategory names (`nameEn`, `nameTe`), and language toggle. All hardcoded English text replaced with translation keys for complete Telugu support.
 - **Image Handling**: Supports direct image upload (Base64) and URL-based images.
 - **Search**: Production-ready product search functionality, enhanced with AI semantic search.
 - **State Management**: React's Context API (AuthContext, DataContext, CartContext, AddressContext).
@@ -25,7 +25,8 @@ The application features a modern, mobile-first design with a professional, emoj
 ### Feature Specifications
 - **Authentication & Role-Based Access Control**: Village-friendly OTP-first login with intelligent user detection, profile setup flexibility (skip option), and distinct roles (customer, shopkeeper, rider) with strict isolation.
 - **Address Management**: CRUD operations, labels, default selection, delivery instructions, and storage of geographical coordinates.
-- **Three-Level Category Hierarchy**: Home → Subcategories → Products.
+- **Three-Level Category Hierarchy**: Home → Subcategories → Products. All levels support bilingual names (English and Telugu).
+- **Bilingual Product Names**: Products, categories, and subcategories all have `nameEn` and `nameTe` fields. UI automatically displays the appropriate language based on user selection, with backward compatibility for legacy products with single `name` field.
 - **Triple Interface Architecture**: Separate customer app, shopkeeper dashboard, and rider dashboard.
 - **Comprehensive Order Management**: Simplified 4-status workflow (Pending → Accepted → (Ready for Pickup / Out for Delivery) → (Completed / Delivered)), customer-initiated delivery method changes, and order cancellation.
 - **Product Management**: CRUD for products, categories, subcategories (shopkeeper dashboard), including "out of stock" and "popular" toggles, and dual image input. Flexible item ordering via sortable fields.

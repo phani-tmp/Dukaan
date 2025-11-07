@@ -43,7 +43,8 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
   const [logoFile, setLogoFile] = useState(null);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    nameEn: '',
+    nameTe: '',
     price: '',
     discountedPrice: '',
     weight: '',
@@ -274,7 +275,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
         alert('Product added successfully!');
       }
 
-      setFormData({ name: '', price: '', discountedPrice: '', weight: '', imageUrl: '', category: '', subcategoryId: '', isPopular: false, outOfStock: false });
+      setFormData({ nameEn: '', nameTe: '', price: '', discountedPrice: '', weight: '', imageUrl: '', category: '', subcategoryId: '', isPopular: false, outOfStock: false });
       setImagePreview(null);
       setShowForm(false);
       setEditingId(null);
@@ -290,7 +291,8 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
 
   const handleEditProduct = (product) => {
     setFormData({
-      name: product.name,
+      nameEn: product.nameEn || product.name || '',
+      nameTe: product.nameTe || '',
       price: product.price.toString(),
       discountedPrice: product.discountedPrice?.toString() || '',
       weight: product.weight,
@@ -538,7 +540,10 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
   const sortedOrders = [...filteredOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   
   const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const productName = product.nameEn || product.nameTe || product.name || '';
+    const productNameTe = product.nameTe || '';
+    const matchesSearch = productName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         productNameTe.includes(searchTerm);
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -821,15 +826,29 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                 <div className="input-with-voice">
                   <input
                     type="text"
-                    placeholder={t.productName}
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder={t.productNameEn}
+                    value={formData.nameEn}
+                    onChange={(e) => setFormData({ ...formData, nameEn: e.target.value })}
                     required
                     className="form-input"
                   />
                   <VoiceInput
-                    onTranscript={(text) => setFormData({ ...formData, name: text })}
-                    language={language}
+                    onTranscript={(text) => setFormData({ ...formData, nameEn: text })}
+                    language="en"
+                  />
+                </div>
+                <div className="input-with-voice">
+                  <input
+                    type="text"
+                    placeholder={t.productNameTe}
+                    value={formData.nameTe}
+                    onChange={(e) => setFormData({ ...formData, nameTe: e.target.value })}
+                    required
+                    className="form-input"
+                  />
+                  <VoiceInput
+                    onTranscript={(text) => setFormData({ ...formData, nameTe: text })}
+                    language="te"
                   />
                 </div>
                 <div className="input-with-voice">
@@ -905,7 +924,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                   className="form-input"
                   required
                 >
-                  <option value="">Select Category</option>
+                  <option value="">{language === 'te' ? 'వర్గం ఎంచుకోండి' : 'Select Category'}</option>
                   {categoriesData.map(cat => (
                     <option key={cat.id} value={cat.id}>
                       {cat.nameEn} / {cat.nameTe || ''}
@@ -920,7 +939,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     className="form-input"
                     required
                   >
-                    <option value="">Select Subcategory</option>
+                    <option value="">{language === 'te' ? 'ఉప-వర్గం ఎంచుకోండి' : 'Select Subcategory'}</option>
                     {subcategoriesData
                       .filter(sc => sc.categoryId === formData.category)
                       .map(sc => (
@@ -937,7 +956,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     checked={formData.isPopular}
                     onChange={(e) => setFormData({ ...formData, isPopular: e.target.checked })}
                   />
-                  Mark as Popular Product
+                  {language === 'te' ? 'ప్రజాదరణ ఉత్పత్తిగా గుర్తించు' : 'Mark as Popular Product'}
                 </label>
 
                 <label className="checkbox-label">
@@ -946,7 +965,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     checked={formData.outOfStock}
                     onChange={(e) => setFormData({ ...formData, outOfStock: e.target.checked })}
                   />
-                  Out of Stock (unavailable for pickup/delivery)
+                  {t.outOfStock} ({t.unavailablePickupDelivery})
                 </label>
 
                 <div className="form-actions">
@@ -966,7 +985,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                 className={`filter-btn ${selectedCategory === 'all' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory('all')}
               >
-                All ({products.length})
+                {language === 'te' ? 'అన్నీ' : 'All'} ({products.length})
               </button>
               {categories.map(cat => {
                 const count = products.filter(p => p.category === cat.id).length;
@@ -986,12 +1005,19 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
               <h3 className="section-subtitle">{t.manageProducts} ({filteredProducts.length})</h3>
               {filteredProducts.map(product => (
                 <div key={product.id} className="admin-product-card">
-                  <img src={product.imageUrl || 'https://via.placeholder.com/60'} alt={product.name} className="admin-product-img" />
+                  <img src={product.imageUrl || 'https://via.placeholder.com/60'} alt={language === 'te' ? (product.nameTe || product.nameEn || product.name) : (product.nameEn || product.name)} className="admin-product-img" />
                   <div className="admin-product-info">
-                    <h4>{product.name}</h4>
+                    <h4>
+                      {language === 'te' 
+                        ? (product.nameTe || product.nameEn || product.name)
+                        : (product.nameEn || product.name)
+                      }
+                      {product.nameEn && product.nameTe && language === 'en' && <span className="name-alt"> / {product.nameTe}</span>}
+                      {product.nameEn && product.nameTe && language === 'te' && <span className="name-alt"> / {product.nameEn}</span>}
+                    </h4>
                     <p>{product.category} • {product.weight}</p>
                     <p className="admin-price">₹{product.discountedPrice || product.price}</p>
-                    {product.isPopular && <span className="popular-tag">⭐ Popular</span>}
+                    {product.isPopular && <span className="popular-tag">⭐ {language === 'te' ? 'ప్రజాదరణ' : 'Popular'}</span>}
                   </div>
                   <div className="admin-product-actions">
                     <button onClick={() => handleEditProduct(product)} className="edit-btn">
@@ -1323,9 +1349,14 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
             <div className="products-admin-list">
               {[...products].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map((product, index, arr) => (
                 <div key={product.id} className="admin-product-card">
-                  <img src={product.imageUrl || 'https://via.placeholder.com/60'} alt={product.name} className="admin-product-img" />
+                  <img src={product.imageUrl || 'https://via.placeholder.com/60'} alt={language === 'te' ? (product.nameTe || product.nameEn || product.name) : (product.nameEn || product.name)} className="admin-product-img" />
                   <div className="admin-product-info">
-                    <h4>{product.name}</h4>
+                    <h4>
+                      {language === 'te' 
+                        ? (product.nameTe || product.nameEn || product.name)
+                        : (product.nameEn || product.name)
+                      }
+                    </h4>
                     <p>{product.category} • {product.weight}</p>
                     <p className="admin-price">₹{product.discountedPrice || product.price}</p>
                   </div>

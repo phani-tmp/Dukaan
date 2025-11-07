@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Truck, ShoppingBag, MapPin, X, CheckCircle } from 'lucide-react';
+import { translations } from '../../constants/translations';
 
 const CheckoutConfirmationModal = ({ 
   isOpen, 
@@ -18,9 +19,11 @@ const CheckoutConfirmationModal = ({
 
   const cartTotal = cartItems.reduce((total, item) => total + ((item.discountedPrice ?? item.price) * item.quantity), 0);
 
+  const t = language === 'te' ? translations.te : translations.en;
+
   const handleConfirmOrder = () => {
     if (deliveryMethod === 'delivery' && !selectedAddress) {
-      alert('Please select a delivery address');
+      alert(t.selectDeliveryAddress);
       return;
     }
 
@@ -33,7 +36,7 @@ const CheckoutConfirmationModal = ({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2 className="modal-title">Confirm Order</h2>
+          <h2 className="modal-title">{t.confirmOrder}</h2>
           <button className="modal-close-btn" onClick={onClose}>
             <X className="w-6 h-6" />
           </button>
@@ -41,33 +44,33 @@ const CheckoutConfirmationModal = ({
 
         <div className="modal-body">
           <div className="checkout-section">
-            <h3 className="checkout-section-title">Choose Delivery Method</h3>
+            <h3 className="checkout-section-title">{t.chooseDeliveryMethod}</h3>
             <div className="delivery-options">
               <button 
                 className={`delivery-option-btn ${deliveryMethod === 'delivery' ? 'active' : ''}`}
                 onClick={() => setDeliveryMethod('delivery')}
               >
                 <Truck className="w-5 h-5" />
-                <span>Home Delivery</span>
+                <span>{t.homeDelivery}</span>
               </button>
               <button 
                 className={`delivery-option-btn ${deliveryMethod === 'pickup' ? 'active' : ''}`}
                 onClick={() => setDeliveryMethod('pickup')}
               >
                 <ShoppingBag className="w-5 h-5" />
-                <span>Store Pickup</span>
+                <span>{t.storePickup}</span>
               </button>
             </div>
           </div>
 
           {deliveryMethod === 'delivery' && (
             <div className="checkout-section">
-              <h3 className="checkout-section-title">Delivery Address</h3>
+              <h3 className="checkout-section-title">{t.deliveryAddress}</h3>
               {userAddresses.length === 0 ? (
                 <div className="no-address-msg">
-                  <p>No saved addresses.</p>
+                  <p>{t.noSavedAddresses}</p>
                   <button onClick={() => { onClose(); onManageAddresses(); }} className="add-address-btn">
-                    Add Address
+                    {t.addAddress}
                   </button>
                 </div>
               ) : (
@@ -84,18 +87,18 @@ const CheckoutConfirmationModal = ({
                             {address.label}
                           </span>
                           {address.isDefault && (
-                            <span className="default-badge">Default</span>
+                            <span className="default-badge">{t.default}</span>
                           )}
                         </div>
                         <p className="address-text">{address.fullAddress}</p>
                         {address.deliveryInstructions && (
-                          <p className="address-instructions">Note: {address.deliveryInstructions}</p>
+                          <p className="address-instructions">{t.note}: {address.deliveryInstructions}</p>
                         )}
                       </div>
                     ))}
                   </div>
                   <button onClick={() => { onClose(); onManageAddresses(); }} className="manage-addresses-link">
-                    Manage Addresses
+                    {t.manageAddresses}
                   </button>
                 </>
               )}
@@ -106,8 +109,8 @@ const CheckoutConfirmationModal = ({
             <div className="checkout-section">
               <div className="pickup-info-card">
                 <ShoppingBag className="w-12 h-12 pickup-icon" />
-                <h4>Store Pickup</h4>
-                <p>Your order will be ready for pickup at the store.</p>
+                <h4>{t.storePickup}</h4>
+                <p>{t.orderReadyPickup}</p>
                 <p className="pickup-location">📍 Ponnur, Andhra Pradesh</p>
               </div>
             </div>
@@ -115,17 +118,20 @@ const CheckoutConfirmationModal = ({
 
           <div className="checkout-section">
             <div className="order-summary">
-              <h3 className="checkout-section-title">Order Summary</h3>
+              <h3 className="checkout-section-title">{t.orderSummary}</h3>
               <div className="summary-items">
-                {cartItems.map(item => (
+                {cartItems.map(item => {
+                  const itemName = language === 'te' ? (item.nameTe || item.nameEn || item.name) : (item.nameEn || item.name);
+                  return (
                   <div key={item.id} className="summary-item">
-                    <span>{item.name} × {item.quantity}</span>
+                    <span>{itemName} × {item.quantity}</span>
                     <span>₹{((item.discountedPrice ?? item.price) * item.quantity).toFixed(2)}</span>
                   </div>
-                ))}
+                  );
+                })}
               </div>
               <div className="summary-total">
-                <span className="total-label">Total</span>
+                <span className="total-label">{t.total}</span>
                 <span className="total-amount">₹{cartTotal.toFixed(2)}</span>
               </div>
             </div>
@@ -134,7 +140,7 @@ const CheckoutConfirmationModal = ({
 
         <div className="modal-footer">
           <button onClick={onClose} className="cancel-btn">
-            Cancel
+            {t.cancel}
           </button>
           <button 
             onClick={handleConfirmOrder} 
@@ -142,7 +148,7 @@ const CheckoutConfirmationModal = ({
             disabled={deliveryMethod === 'delivery' && userAddresses.length === 0}
           >
             <CheckCircle className="w-5 h-5" />
-            Place Order - ₹{cartTotal.toFixed(2)}
+            {t.placeOrder} - ₹{cartTotal.toFixed(2)}
           </button>
         </div>
       </div>
