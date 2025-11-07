@@ -261,7 +261,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Receipt - ${order.id.substring(0, 8)}</title>
+          <title>Receipt - ${order.orderNumber || order.id.substring(0, 8)}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { 
@@ -361,7 +361,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
           </div>
           
           <div class="receipt-number">
-            RECEIPT # ${order.id.substring(0, 8).toUpperCase()}
+            ${order.orderNumber || `RECEIPT # ${order.id.substring(0, 8).toUpperCase()}`}
           </div>
 
           <div class="items-list">
@@ -824,7 +824,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                       <div className="order-info-section">
                         <div className="order-id-row">
                           <User className="w-4 h-4 text-gray-500" />
-                          <span className="order-customer">Order #{order.id.substring(0, 8)}</span>
+                          <span className="order-customer">{order.orderNumber || `Order #${order.id.substring(0, 8)}`}</span>
                         </div>
                         <div className="order-time-row">
                           <Clock className="w-4 h-4 text-gray-400" />
@@ -1753,7 +1753,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                           }}>
                             <div>
                               <div style={{ fontWeight: '600', marginBottom: '4px' }}>
-                                Order #{order.id.substring(0, 8)}
+                                {order.orderNumber || `Order #${order.id.substring(0, 8)}`}
                               </div>
                               <div style={{ fontSize: '13px', color: '#666' }}>
                                 {new Date(order.createdAt).toLocaleTimeString('en-IN')} • {order.items.length} items

@@ -168,7 +168,7 @@ const RiderDashboard = ({ rider, allOrders, language, onExit }) => {
               <div className="rider-order-header">
                 <div className="order-id-section">
                   <Package className="w-4 h-4" />
-                  <span className="order-id-text">Order #{order.id.slice(-6)}</span>
+                  <span className="order-id-text">{order.orderNumber || `Order #${order.id.slice(-6)}`}</span>
                 </div>
                 <div className="order-total-section">
                   <span className="total-label-small">Total</span>

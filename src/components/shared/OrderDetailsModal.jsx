@@ -47,7 +47,7 @@ const OrderDetailsModal = ({ order, onClose, language }) => {
           <div className="modal-order-info">
             <div className="modal-info-row">
               <span className="modal-label">{t.orderID}</span>
-              <span className="modal-value">#{order.id.substring(0, 12)}</span>
+              <span className="modal-value">{order.orderNumber || `#${order.id.substring(0, 12)}`}</span>
             </div>
             <div className="modal-info-row">
               <span className="modal-label">{t.orderDate}</span>
