@@ -245,6 +245,131 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
     setShowOrderDetails(true);
   };
 
+  const handlePrintBill = (order) => {
+    const printWindow = window.open('', '_blank');
+    const date = new Date(order.createdAt).toLocaleDateString('en-IN', { 
+      day: 'numeric', 
+      month: 'short', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    const billHTML = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Bill - Order #${order.id.substring(0, 12)}</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+            .header { text-center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+            .header h1 { font-size: 24px; margin-bottom: 5px; }
+            .header p { font-size: 14px; color: #666; }
+            .bill-info { margin-bottom: 20px; }
+            .bill-info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+            .bill-info-label { font-weight: 600; }
+            .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            .items-table th { background: #f5f5f5; padding: 10px; text-align: left; border-bottom: 2px solid #333; font-size: 14px; }
+            .items-table td { padding: 10px; border-bottom: 1px solid #ddd; font-size: 14px; }
+            .item-name { font-weight: 500; }
+            .item-name-secondary { color: #666; font-size: 12px; margin-top: 2px; }
+            .total-section { border-top: 2px solid #333; padding-top: 15px; margin-top: 20px; }
+            .total-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 16px; }
+            .total-row.grand { font-weight: bold; font-size: 20px; }
+            .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px dashed #999; font-size: 12px; color: #666; }
+            @media print {
+              body { padding: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>DUKAAN - దుకాణ్</h1>
+            <p>Bill / బిల్లు</p>
+          </div>
+          
+          <div class="bill-info">
+            <div class="bill-info-row">
+              <span class="bill-info-label">Order ID / ఆర్డర్ ID:</span>
+              <span>#${order.id.substring(0, 12)}</span>
+            </div>
+            <div class="bill-info-row">
+              <span class="bill-info-label">Date / తేదీ:</span>
+              <span>${date}</span>
+            </div>
+            <div class="bill-info-row">
+              <span class="bill-info-label">Customer / కస్టమర్:</span>
+              <span>${order.customerName || 'Customer'}</span>
+            </div>
+            <div class="bill-info-row">
+              <span class="bill-info-label">Phone / ఫోన్:</span>
+              <span>${order.customerPhone || order.phoneNumber || '-'}</span>
+            </div>
+            <div class="bill-info-row">
+              <span class="bill-info-label">Delivery / డెలివరీ:</span>
+              <span>${order.deliveryMethod === 'delivery' ? 'Home Delivery / హోం డెలివరీ' : 'Store Pickup / స్టోర్ పికప్'}</span>
+            </div>
+          </div>
+
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Item / వస్తువు</th>
+                <th style="text-align: center;">Qty / పరిమాణం</th>
+                <th style="text-align: right;">Price / ధర</th>
+                <th style="text-align: right;">Total / మొత్తం</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${order.items.map(item => `
+                <tr>
+                  <td>
+                    <div class="item-name">${item.nameEn || item.name}</div>
+                    <div class="item-name-secondary">${item.nameTe || item.name}</div>
+                  </td>
+                  <td style="text-align: center;">${item.quantity}</td>
+                  <td style="text-align: right;">₹${item.price?.toFixed(2) || '0.00'}</td>
+                  <td style="text-align: right;">₹${((item.price || 0) * item.quantity).toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <div class="total-section">
+            ${order.totalSavings && order.totalSavings > 0 ? `
+              <div class="total-row">
+                <span>Savings / సేవింగ్స్:</span>
+                <span style="color: #4CAF50; font-weight: 600;">₹${order.totalSavings.toFixed(2)}</span>
+              </div>
+            ` : ''}
+            <div class="total-row grand">
+              <span>Grand Total / మొత్తం:</span>
+              <span>₹${order.total.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div class="footer">
+            <p>Thank you for your order! / మీ ఆర్డర్‌కు ధన్యవాదాలు!</p>
+          </div>
+
+          <div class="no-print" style="text-align: center; margin-top: 20px;">
+            <button onclick="window.print()" style="background: #4CAF50; color: white; border: none; padding: 10px 30px; font-size: 16px; border-radius: 5px; cursor: pointer;">
+              Print / ప్రింట్
+            </button>
+            <button onclick="window.close()" style="background: #f44336; color: white; border: none; padding: 10px 30px; font-size: 16px; border-radius: 5px; cursor: pointer; margin-left: 10px;">
+              Close / మూసివేయండి
+            </button>
+          </div>
+        </body>
+      </html>
+    `;
+    
+    printWindow.document.write(billHTML);
+    printWindow.document.close();
+  };
+
   const handleSubmitProduct = async (e) => {
     e.preventDefault();
     
@@ -795,6 +920,15 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                             View Details
                           </button>
                           
+                          <button 
+                            onClick={() => handlePrintBill(order)}
+                            className="view-details-btn"
+                            style={{ background: '#2196F3' }}
+                          >
+                            <Package className="w-4 h-4" />
+                            {t.printBill}
+                          </button>
+                          
                           {order.status !== 'cancelled' && order.status !== 'delivered' && order.status !== 'completed' && (
                             <button 
                               onClick={() => handleCancelOrder(order.id)}
@@ -832,10 +966,6 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     required
                     className="form-input"
                   />
-                  <VoiceInput
-                    onTranscript={(text) => setFormData({ ...formData, nameEn: text })}
-                    language="en"
-                  />
                 </div>
                 <div className="input-with-voice">
                   <input
@@ -846,9 +976,8 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     required
                     className="form-input"
                   />
-                  <VoiceInput
-                    onTranscript={(text) => setFormData({ ...formData, nameTe: text })}
-                    language="te"
+                  <BilingualVoiceInput
+                    onTranscript={({ en, te }) => setFormData({ ...formData, nameEn: en, nameTe: te })}
                   />
                 </div>
                 <div className="input-with-voice">

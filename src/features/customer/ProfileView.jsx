@@ -22,6 +22,20 @@ const ProfileView = ({
 
   const totalOrders = orders.length;
   const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
+  const totalSavings = orders.reduce((sum, order) => {
+    if (order.totalSavings) {
+      return sum + order.totalSavings;
+    }
+    if (order.items) {
+      return sum + order.items.reduce((itemSum, item) => {
+        if (item.originalPrice && item.discountedPrice && item.discountedPrice < item.originalPrice) {
+          return itemSum + ((item.originalPrice - item.discountedPrice) * item.quantity);
+        }
+        return itemSum;
+      }, 0);
+    }
+    return sum;
+  }, 0);
 
   const handleEditClick = () => {
     setEditForm({
@@ -133,8 +147,8 @@ const ProfileView = ({
         <div className="stat-card">
           <IndianRupee className="w-6 h-6 text-green-600" />
           <div>
-            <p className="stat-value">{Math.round(totalSpent * 0.15)}</p>
-            <p className="stat-label">Money Saved</p>
+            <p className="stat-value">₹{Math.round(totalSavings)}</p>
+            <p className="stat-label">{t.moneySaved}</p>
           </div>
         </div>
       </div>

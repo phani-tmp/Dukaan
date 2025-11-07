@@ -106,7 +106,9 @@ export const translations = {
     default: 'Default',
     note: 'Note',
     orderSummary: 'Order Summary',
-    orderReadyPickup: 'Your order will be ready for pickup at the store.'
+    orderReadyPickup: 'Your order will be ready for pickup at the store.',
+    moneySaved: 'Money Saved',
+    printBill: 'Print Bill'
   },
   te: {
     appName: 'దుకాణ్',
@@ -215,6 +217,8 @@ export const translations = {
     default: 'డిఫాల్ట్',
     note: 'గమనిక',
     orderSummary: 'ఆర్డర్ సారాంశం',
-    orderReadyPickup: 'మీ ఆర్డర్ దుకాణంలో పికప్ కోసం సిద్ధంగా ఉంటుంది'
+    orderReadyPickup: 'మీ ఆర్డర్ దుకాణంలో పికప్ కోసం సిద్ధంగా ఉంటుంది',
+    moneySaved: 'సేవ్ చేసిన డబ్బు',
+    printBill: 'బిల్లు ప్రింట్ చేయండి'
   }
 };

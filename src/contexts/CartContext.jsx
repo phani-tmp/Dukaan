@@ -81,6 +81,10 @@ export const CartProvider = ({ children }) => {
       items: items.map(item => ({
         id: item.id,
         name: item.name,
+        nameEn: item.nameEn || item.name,
+        nameTe: item.nameTe || item.name,
+        originalPrice: item.price,
+        discountedPrice: item.discountedPrice || null,
         price: item.discountedPrice ?? item.price,
         quantity: item.quantity,
         imageUrl: item.imageUrl || '',
@@ -88,6 +92,12 @@ export const CartProvider = ({ children }) => {
         category: item.category || ''
       })),
       total,
+      totalSavings: items.reduce((sum, item) => {
+        if (item.discountedPrice && item.discountedPrice < item.price) {
+          return sum + ((item.price - item.discountedPrice) * item.quantity);
+        }
+        return sum;
+      }, 0),
       status: 'pending',
       deliveryMethod: deliveryMethod,
       deliveryAddress: deliveryMethod === 'delivery' ? selectedAddress.fullAddress : 'Store Pickup',
