@@ -2419,11 +2419,41 @@ body {
 }
 
 /* Enhanced order items list with images */
+.order-items-container {
+  margin: 12px 0;
+}
+
+.items-dropdown-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--color-gray-50);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-gray-700);
+}
+
+.items-dropdown-toggle:hover {
+  background: var(--color-gray-100);
+  border-color: var(--color-gray-300);
+}
+
+.items-count-text {
+  flex: 1;
+  text-align: left;
+}
+
 .order-items-list-enhanced {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin: 12px 0;
+  margin-top: 8px;
   padding: 12px;
   background: var(--color-gray-50);
   border-radius: 8px;
@@ -2460,9 +2490,13 @@ body {
   font-size: 14px;
   font-weight: 600;
   color: var(--color-gray-900);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.order-item-details .item-name-te {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-gray-600);
+  font-style: italic;
 }
 
 .order-item-details .item-weight {

@@ -83,6 +83,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
   const [orderTab, setOrderTab] = useState('active');
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [riderSortBy, setRiderSortBy] = useState('orders');
+  const [expandedOrders, setExpandedOrders] = useState(new Set());
 
   const categories = [
     { id: 'groceries', nameEn: 'Groceries', nameTe: 'వీరగాణ', imageUrl: 'https://images.unsplash.com/photo-1588964895597-cfccd6e2dbf9?w=100&h=100&fit=crop', color: '#4CAF50', gradient: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%)' },
@@ -856,22 +857,52 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                       </div>
                     )}
                     
-                    <div className="order-items-list-enhanced">
-                      {order.items.map((item, idx) => (
-                        <div key={idx} className="order-item-row-enhanced">
-                          <img 
-                            src={item.imageUrl || 'https://via.placeholder.com/50'} 
-                            alt={item.name} 
-                            className="order-item-image"
-                          />
-                          <div className="order-item-details">
-                            <span className="item-name">{item.name}</span>
-                            <span className="item-weight">{item.weight}</span>
-                          </div>
-                          <span className="item-quantity-badge">× {item.quantity}</span>
-                          <span className="item-price-bold">₹{(item.price * item.quantity).toFixed(0)}</span>
+                    <div className="order-items-container">
+                      <button
+                        onClick={() => {
+                          const newExpanded = new Set(expandedOrders);
+                          if (newExpanded.has(order.id)) {
+                            newExpanded.delete(order.id);
+                          } else {
+                            newExpanded.add(order.id);
+                          }
+                          setExpandedOrders(newExpanded);
+                        }}
+                        className="items-dropdown-toggle"
+                      >
+                        <Package className="w-4 h-4" />
+                        <span className="items-count-text">
+                          {order.items.length} {order.items.length === 1 ? 'Item' : 'Items'}
+                        </span>
+                        {expandedOrders.has(order.id) ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </button>
+                      
+                      {expandedOrders.has(order.id) && (
+                        <div className="order-items-list-enhanced">
+                          {order.items.map((item, idx) => (
+                            <div key={idx} className="order-item-row-enhanced">
+                              <img 
+                                src={item.imageUrl || 'https://via.placeholder.com/50'} 
+                                alt={item.nameEn || item.name} 
+                                className="order-item-image"
+                              />
+                              <div className="order-item-details">
+                                <span className="item-name">{item.nameEn || item.name}</span>
+                                {item.nameTe && item.nameTe !== item.nameEn && (
+                                  <span className="item-name-te">{item.nameTe}</span>
+                                )}
+                                <span className="item-weight">{item.weight}</span>
+                              </div>
+                              <span className="item-quantity-badge">× {item.quantity}</span>
+                              <span className="item-price-bold">₹{(item.price * item.quantity).toFixed(0)}</span>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      )}
                     </div>
                     
                     <div className="order-card-bottom">
