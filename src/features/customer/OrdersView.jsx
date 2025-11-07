@@ -23,13 +23,13 @@ const OrdersView = ({ orders, language, setSelectedOrder, onChangeDeliveryMethod
 
   const getStatusText = (status) => {
     const statusMap = {
-      pending: t.orderPlaced || 'Pending',
-      accepted: 'Accepted',
-      out_for_delivery: 'Out for Delivery',
-      ready_for_pickup: 'Ready for Pickup',
-      delivered: t.delivered || 'Delivered',
-      completed: 'Completed',
-      cancelled: 'Cancelled'
+      pending: t.pending,
+      accepted: t.accepted,
+      out_for_delivery: t.outForDelivery,
+      ready_for_pickup: t.readyForPickup,
+      delivered: t.delivered,
+      completed: t.completed,
+      cancelled: t.cancelled
     };
     return statusMap[status] || status;
   };

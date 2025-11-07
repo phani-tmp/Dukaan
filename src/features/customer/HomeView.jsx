@@ -49,7 +49,7 @@ const ProductCard = ({ product, onAddToCart, cartItems, language }) => {
       />
       {isOutOfStock && (
         <div className="out-of-stock-overlay">
-          <span className="out-of-stock-badge">OUT OF STOCK</span>
+          <span className="out-of-stock-badge">{t.outOfStock.toUpperCase()}</span>
         </div>
       )}
       <div className="product-info">
@@ -74,7 +74,7 @@ const ProductCard = ({ product, onAddToCart, cartItems, language }) => {
           className="add-to-cart-btn disabled-btn"
           disabled
         >
-          Out of Stock
+          {t.outOfStock}
         </button>
       ) : quantity === 0 ? (
         <button
@@ -363,8 +363,8 @@ const HomeView = ({
       {isShowingSearchResults ? (
         <div className="search-results-section">
           <h2 className="section-title">
-            {voiceSearchResults ? (language === 'te' ? 'వాయిస్ సెర్చ్ ఫలితాలు' : 'Voice Search Results') : (language === 'te' ? 'సెర్చ్ ఫలితాలు' : 'Search Results')} ({searchResults.length})
-            {isSearching && <span className="ai-searching"> 🔍 {language === 'te' ? 'AI వెతుకుతోంది...' : 'AI searching...'}</span>}
+            {voiceSearchResults ? t.voiceSearchResults : t.searchResults} ({searchResults.length})
+            {isSearching && <span className="ai-searching"> 🔍 {t.aiSearching}</span>}
           </h2>
           {searchResults.length > 0 ? (
             <div className="products-grid">
@@ -380,11 +380,11 @@ const HomeView = ({
             </div>
           ) : isSearching ? (
             <div className="empty-state">
-              <p>{language === 'te' ? 'ప్రోడక్ట్‌లు వెతుకుతోంది...' : 'Searching for products...'}</p>
+              <p>{t.searchingProducts}</p>
             </div>
           ) : (
             <div className="empty-state">
-              <p>{language === 'te' ? `"${searchTerm}" కోసం ఏ ప్రోడక్ట్‌లు కనుగొనబడలేదు` : `No products found for "${searchTerm}"`}</p>
+              <p>{t.noProductsFound} "{searchTerm}"</p>
             </div>
           )}
         </div>
@@ -405,7 +405,7 @@ const HomeView = ({
             </div>
           ) : (
             <div className="empty-state">
-              <p>No popular products yet. Visit Shopkeeper Dashboard to mark products as popular.</p>
+              <p>{t.noPopularProducts}</p>
             </div>
           )}
         </div>
