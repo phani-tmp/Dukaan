@@ -22,7 +22,12 @@ const ProfileView = ({
 
   const totalOrders = orders.length;
   const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
-  const totalSavings = orders.reduce((sum, order) => {
+  
+  const completedOrders = orders.filter(order => 
+    order.status === 'delivered' || order.status === 'completed'
+  );
+  
+  const totalSavings = completedOrders.reduce((sum, order) => {
     if (order.totalSavings) {
       return sum + order.totalSavings;
     }
