@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { ChevronLeft, Star, Plus, Minus, IndianRupee } from 'lucide-react';
 import { translations } from '../../constants/translations';
+import { semanticProductSearch } from '../../services/gemini';
 
 const CategoryGrid = ({ categoriesData, onCategoryClick, language }) => {
   const t = translations[language];
@@ -133,6 +134,8 @@ const HomeView = ({
   setVoiceSearchResults = () => {}
 }) => {
   const t = translations[language];
+  const [semanticResults, setSemanticResults] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
   
   console.log('[HomeView] Rendering with:', { 
     productsCount: products?.length, 
@@ -140,14 +143,52 @@ const HomeView = ({
     voiceSearchResults: voiceSearchResults?.length 
   });
 
-  const searchResults = useMemo(() => {
-    if (voiceSearchResults) return voiceSearchResults;
+  useEffect(() => {
+    if (!searchTerm || searchTerm.trim().length === 0) {
+      setSemanticResults(null);
+      return;
+    }
+
+    const performSemanticSearch = async () => {
+      setIsSearching(true);
+      try {
+        const results = await semanticProductSearch(searchTerm, products);
+        setSemanticResults(results);
+      } catch (error) {
+        console.error('[HomeView] Semantic search error:', error);
+        setSemanticResults(null);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      performSemanticSearch();
+    }, 500);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchTerm, products]);
+
+  const basicSearchResults = useMemo(() => {
     if (!searchTerm) return [];
     const term = searchTerm.toLowerCase();
     return products.filter(p => 
-      p.name.toLowerCase().includes(term)
+      p.name.toLowerCase().includes(term) ||
+      (p.nameTe && p.nameTe.includes(searchTerm)) ||
+      (p.category && p.category.toLowerCase().includes(term))
     );
-  }, [products, searchTerm, voiceSearchResults]);
+  }, [products, searchTerm]);
+
+  const searchResults = useMemo(() => {
+    if (voiceSearchResults) return voiceSearchResults;
+    if (!searchTerm) return [];
+    
+    if (semanticResults && semanticResults.length > 0) {
+      return semanticResults;
+    }
+    
+    return basicSearchResults;
+  }, [products, searchTerm, voiceSearchResults, semanticResults, basicSearchResults]);
 
   const popularProducts = useMemo(() => {
     return products
@@ -155,7 +196,7 @@ const HomeView = ({
       .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   }, [products]);
 
-  const isSearching = searchTerm.trim().length > 0 || voiceSearchResults !== null;
+  const isShowingSearchResults = searchTerm.trim().length > 0 || voiceSearchResults !== null;
 
 
   const categorySubcategories = useMemo(() => {
@@ -302,7 +343,7 @@ const HomeView = ({
 
   return (
     <div className="home-view">
-      {!isSearching && !selectedCategory && (
+      {!isShowingSearchResults && !selectedCategory && (
         <QuickCategoriesBar
           categoriesData={categoriesData}
           selectedCategory={selectedCategory}
@@ -311,7 +352,7 @@ const HomeView = ({
         />
       )}
       
-      {!isSearching && (
+      {!isShowingSearchResults && (
         <CategoryGrid 
           categoriesData={categoriesData}
           onCategoryClick={handleCategoryClick}
@@ -319,10 +360,11 @@ const HomeView = ({
         />
       )}
 
-      {isSearching ? (
+      {isShowingSearchResults ? (
         <div className="search-results-section">
           <h2 className="section-title">
-            {voiceSearchResults ? 'Voice Search Results' : 'Search Results'} ({searchResults.length})
+            {voiceSearchResults ? (language === 'te' ? 'వాయిస్ సెర్చ్ ఫలితాలు' : 'Voice Search Results') : (language === 'te' ? 'సెర్చ్ ఫలితాలు' : 'Search Results')} ({searchResults.length})
+            {isSearching && <span className="ai-searching"> 🔍 {language === 'te' ? 'AI వెతుకుతోంది...' : 'AI searching...'}</span>}
           </h2>
           {searchResults.length > 0 ? (
             <div className="products-grid">
@@ -336,9 +378,13 @@ const HomeView = ({
                 />
               ))}
             </div>
+          ) : isSearching ? (
+            <div className="empty-state">
+              <p>{language === 'te' ? 'ప్రోడక్ట్‌లు వెతుకుతోంది...' : 'Searching for products...'}</p>
+            </div>
           ) : (
             <div className="empty-state">
-              <p>No products found for "{searchTerm}"</p>
+              <p>{language === 'te' ? `"${searchTerm}" కోసం ఏ ప్రోడక్ట్‌లు కనుగొనబడలేదు` : `No products found for "${searchTerm}"`}</p>
             </div>
           )}
         </div>
