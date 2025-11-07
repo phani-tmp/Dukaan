@@ -44,7 +44,7 @@ export const CartProvider = ({ children }) => {
     setCartItems({});
   }, []);
 
-  const handleCheckout = useCallback(async (userAddresses, setCurrentView) => {
+  const handleCheckout = useCallback(async (userAddresses, setCurrentView, language = 'en') => {
     if (Object.keys(cartItems).length === 0) return;
 
     if (!userProfile || !userProfile.phoneNumber) {
@@ -89,6 +89,7 @@ export const CartProvider = ({ children }) => {
         userId: user.uid,
         customerName: userProfile.name || 'Customer',
         customerPhone: userProfile.phoneNumber || '',
+        customerLanguage: language,
         items: items.map(item => {
           const originalPrice = Number(item.price) || 0;
           const discountedPrice = item.discountedPrice !== '' && item.discountedPrice != null ? Number(item.discountedPrice) : null;

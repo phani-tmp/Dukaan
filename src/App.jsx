@@ -242,7 +242,7 @@ function App() {
     }
     
     setShowCheckoutModal(false);
-    handleCheckout(userAddresses, setCurrentView);
+    handleCheckout(userAddresses, setCurrentView, language);
   };
 
   const loading = authLoading || dataLoading;

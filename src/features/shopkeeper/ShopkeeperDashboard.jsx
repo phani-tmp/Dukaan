@@ -365,12 +365,17 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
           </div>
 
           <div class="items-list">
-            ${order.items.map(item => `
-              <div class="item-row">
-                <span class="item-name">${item.nameEn || item.name}</span>
-                <span class="item-price">₹${((item.price || 0) * item.quantity).toFixed(2)}</span>
-              </div>
-            `).join('')}
+            ${order.items.map(item => {
+              const itemName = order.customerLanguage === 'te' 
+                ? (item.nameTe || item.nameEn || item.name) 
+                : (item.nameEn || item.name);
+              return `
+                <div class="item-row">
+                  <span class="item-name">${itemName}</span>
+                  <span class="item-price">₹${((item.price || 0) * item.quantity).toFixed(2)}</span>
+                </div>
+              `;
+            }).join('')}
           </div>
 
           <div class="divider"></div>

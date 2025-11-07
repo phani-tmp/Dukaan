@@ -33,7 +33,9 @@ const CartView = ({
 
       <div className="cart-items" style={{ paddingBottom: '140px' }}>
         {items.map(item => {
-          const itemName = language === 'te' ? (item.nameTe || item.nameEn || item.name) : (item.nameEn || item.name);
+          const itemName = language === 'te' 
+            ? (item.nameTe || item.nameEn || item.name || 'ఉత్పత్తి') 
+            : (item.nameEn || item.nameTe || item.name || 'Product');
           return (
           <div key={item.id} className="cart-item">
             <img src={item.imageUrl || 'https://via.placeholder.com/80'} alt={itemName} className="cart-item-image" />
