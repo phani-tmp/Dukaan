@@ -1,0 +1,44 @@
+VoiceSearch.jsx:48 [VoiceSearch] Search error: TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+    at getTeluguName (productSynonyms.js:198:34)
+    at productSynonyms.js:191:17
+    at Array.map (<anonymous>)
+    at buildProductContext (productSynonyms.js:184:19)
+    at handleVoiceSearch (VoiceSearch.jsx:27:30)
+    at stopRecording (VoiceSearch.jsx:92:13)
+    at async toggleRecording (VoiceSearch.jsx:108:7)
+
+HomeView.jsx:141 [HomeView] Rendering with: 
+{productsCount: 5, categoriesCount: 8, voiceSearchResults: 0}
+HomeView.jsx:141 [HomeView] Rendering with: 
+{productsCount: 5, categoriesCount: 8, voiceSearchResults: 0}
+audioRecorder.js:94 [AudioRecorder] Web recording started with mimeType: audio/webm;codecs=opus
+audioRecorder.js:151 [AudioRecorder] Web recording stopped, blob size: 68747 type: audio/webm;codecs=opus
+VoiceSearch.jsx:87 [VoiceSearch] Audio recorded, sending to Gemini...
+gemini.js:325 [Gemini] Starting audio transcription...
+gemini.js:348 [Gemini] Transcription result: Brinjal.
+VoiceSearch.jsx:90 [VoiceSearch] Transcribed: Brinjal.
+VoiceSearch.jsx:48 [VoiceSearch] Search error: TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+    at getTeluguName (productSynonyms.js:198:34)
+    at productSynonyms.js:191:17
+    at Array.map (<anonymous>)
+    at buildProductContext (productSynonyms.js:184:19)
+    at handleVoiceSearch (VoiceSearch.jsx:27:30)
+    at stopRecording (VoiceSearch.jsx:92:13)
+    at async toggleRecording (VoiceSearch.jsx:108:7)
+HomeView.jsx:141 [HomeView] Rendering with: 
+{productsCount: 5, categoriesCount: 8, voiceSearchResults: 0}
+HomeView.jsx:141 [HomeView] Rendering with: 
+{productsCount: 5, categoriesCount: 8, voiceSearchResults: 0}
+HomeView.jsx:141 [HomeView] Rendering with: 
+{productsCount: 5, categoriesCount: 8, voiceSearchResults: 0}
+HomeView.jsx:141 [HomeView] Rendering with: 
+{productsCount: 5, categoriesCount: 8, voiceSearchResults: 0}
+HomeView.jsx:177 Uncaught TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+    at HomeView.jsx:177:14
+    at Array.filter (<anonymous>)
+    at HomeView.jsx:176:21
+    at HomeView (HomeView.jsx:173:30)
+App.jsx:352 An error occurred in the <HomeView> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.

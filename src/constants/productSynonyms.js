@@ -181,20 +181,24 @@ export const productSynonyms = {
 };
 
 export function buildProductContext(products) {
-  return products.map(product => ({
-    id: product.id,
-    name: product.name,
-    category: product.category,
-    subcategory: product.subcategory,
-    price: product.discountedPrice || product.price,
-    unit: product.unit || 'piece',
-    teluguName: getTeluguName(product.name),
-    hindiName: getHindiName(product.name),
-    aliases: getAliases(product.name)
-  }));
+  return products.map(product => {
+    const productName = product.nameEn || product.name || '';
+    return {
+      id: product.id,
+      name: productName,
+      category: product.category,
+      subcategory: product.subcategory,
+      price: product.discountedPrice || product.price,
+      unit: product.unit || 'piece',
+      teluguName: product.nameTe || getTeluguName(productName),
+      hindiName: getHindiName(productName),
+      aliases: getAliases(productName)
+    };
+  });
 }
 
 function getTeluguName(productName) {
+  if (!productName) return '';
   const normalized = productName.toLowerCase().trim();
   
   for (const category in productSynonyms) {
@@ -210,6 +214,7 @@ function getTeluguName(productName) {
 }
 
 function getHindiName(productName) {
+  if (!productName) return '';
   const normalized = productName.toLowerCase().trim();
   
   for (const category in productSynonyms) {
@@ -225,6 +230,7 @@ function getHindiName(productName) {
 }
 
 function getAliases(productName) {
+  if (!productName) return [];
   const normalized = productName.toLowerCase().trim();
   
   for (const category in productSynonyms) {

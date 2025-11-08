@@ -173,11 +173,14 @@ const HomeView = ({
   const basicSearchResults = useMemo(() => {
     if (!searchTerm) return [];
     const term = searchTerm.toLowerCase();
-    return products.filter(p => 
-      p.name.toLowerCase().includes(term) ||
-      (p.nameTe && p.nameTe.includes(searchTerm)) ||
-      (p.category && p.category.toLowerCase().includes(term))
-    );
+    return products.filter(p => {
+      const productName = p.nameEn || p.name || '';
+      return (
+        productName.toLowerCase().includes(term) ||
+        (p.nameTe && p.nameTe.toLowerCase().includes(term)) ||
+        (p.category && p.category.toLowerCase().includes(term))
+      );
+    });
   }, [products, searchTerm]);
 
   const searchResults = useMemo(() => {
