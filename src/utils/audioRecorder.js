@@ -1,12 +1,31 @@
+import { Capacitor } from '@capacitor/core';
+
+// Dynamically import Capacitor plugin only when needed
+let VoiceRecorder = null;
+const loadVoiceRecorder = async () => {
+  if (!VoiceRecorder && Capacitor.isNativePlatform()) {
+    const module = await import('capacitor-voice-recorder');
+    VoiceRecorder = module.VoiceRecorder;
+  }
+  return VoiceRecorder;
+};
+
 export class AudioRecorder {
   constructor() {
     this.mediaRecorder = null;
     this.audioChunks = [];
     this.stream = null;
     this.actualMimeType = null;
+    this.isNative = Capacitor.isNativePlatform();
+    this.nativeRecording = null;
   }
 
   static isSupported() {
+    // On native platforms, always return true if plugin is available
+    if (Capacitor.isNativePlatform()) {
+      return true;
+    }
+    // On web, check for MediaRecorder support
     return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
   }
 
@@ -16,6 +35,29 @@ export class AudioRecorder {
         throw new Error('FEATURE_NOT_SUPPORTED');
       }
 
+      // Use native Capacitor plugin on iOS/Android
+      if (this.isNative) {
+        const recorder = await loadVoiceRecorder();
+        if (!recorder) {
+          throw new Error('Voice recorder plugin not available');
+        }
+
+        // Check and request permission
+        const hasPermission = await recorder.hasAudioRecordingPermission();
+        if (!hasPermission.value) {
+          const requestResult = await recorder.requestAudioRecordingPermission();
+          if (!requestResult.value) {
+            throw { name: 'NotAllowedError', message: 'Microphone permission denied' };
+          }
+        }
+
+        // Start recording with native plugin
+        await recorder.startRecording();
+        console.log('[AudioRecorder] Native recording started');
+        return true;
+      }
+
+      // Fallback to web MediaRecorder API
       this.stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           channelCount: 1,
@@ -49,7 +91,7 @@ export class AudioRecorder {
       };
 
       this.mediaRecorder.start(100);
-      console.log('[AudioRecorder] Recording started with mimeType:', this.actualMimeType);
+      console.log('[AudioRecorder] Web recording started with mimeType:', this.actualMimeType);
       return true;
     } catch (error) {
       console.error('[AudioRecorder] Error starting recording:', error);
@@ -58,6 +100,39 @@ export class AudioRecorder {
   }
 
   async stopRecording() {
+    // Use native Capacitor plugin on iOS/Android
+    if (this.isNative) {
+      const recorder = await loadVoiceRecorder();
+      if (!recorder) {
+        throw new Error('Voice recorder plugin not available');
+      }
+
+      const result = await recorder.stopRecording();
+      
+      if (!result.value || !result.value.recordDataBase64) {
+        throw new Error('No recording data received');
+      }
+
+      console.log('[AudioRecorder] Native recording stopped, duration:', result.value.msDuration, 'ms');
+      
+      // Convert base64 to Blob for consistency with web API
+      const base64Data = result.value.recordDataBase64;
+      const mimeType = result.value.mimeType || 'audio/aac';
+      
+      // Decode base64 to binary
+      const binaryString = atob(base64Data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      const audioBlob = new Blob([bytes], { type: mimeType });
+      this.actualMimeType = mimeType;
+      
+      return audioBlob;
+    }
+
+    // Fallback to web MediaRecorder API
     return new Promise((resolve, reject) => {
       if (!this.mediaRecorder || this.mediaRecorder.state === 'inactive') {
         reject(new Error('No active recording'));
@@ -73,7 +148,7 @@ export class AudioRecorder {
             this.stream = null;
           }
 
-          console.log('[AudioRecorder] Recording stopped, blob size:', audioBlob.size, 'type:', this.actualMimeType);
+          console.log('[AudioRecorder] Web recording stopped, blob size:', audioBlob.size, 'type:', this.actualMimeType);
           resolve(audioBlob);
         } catch (error) {
           reject(error);
@@ -84,7 +159,21 @@ export class AudioRecorder {
     });
   }
 
-  cancel() {
+  async cancel() {
+    if (this.isNative) {
+      const recorder = await loadVoiceRecorder();
+      if (recorder) {
+        // Native plugin doesn't have explicit cancel, just stop
+        try {
+          await recorder.stopRecording();
+        } catch (error) {
+          console.log('[AudioRecorder] Cancel error (may already be stopped):', error);
+        }
+      }
+      return;
+    }
+
+    // Web API cancel
     if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
       this.mediaRecorder.stop();
     }
