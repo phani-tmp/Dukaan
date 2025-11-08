@@ -1,7 +1,7 @@
 export const firebaseConfig = {
     // ACTUAL API KEY
-    // apiKey: "AIzaSyAWRYzgUdSBHcBLKJoVFs0M-r2bI7AYD1s",
-    apiKey: "AIzaSyCBTRIjrSVMOBs9kmF8JeHOm6LeXqBYkmM",
+    apiKey: "AIzaSyAWRYzgUdSBHcBLKJoVFs0M-r2bI7AYD1s",
+    // apiKey: "AIzaSyCBTRIjrSVMOBs9kmF8JeHOm6LeXqBYkmM",
     // ACTUAL AUTH DOMAIN 
     authDomain: "dukaan-476221.firebaseapp.com",
     // ACTUAL PROJECT ID
