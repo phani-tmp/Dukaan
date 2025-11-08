@@ -21,6 +21,8 @@ The application features a modern, mobile-first design with a professional, emoj
 - **State Management**: React's Context API (AuthContext, DataContext, CartContext, AddressContext).
 - **Code Structure**: Feature-oriented component-based architecture.
 - **Geolocation**: Browser geolocation API with OpenStreetMap Nominatim for reverse geocoding.
+- **Mobile Optimizations**: Fixed viewport handling to prevent blank screen on keyboard appearance (Nov 2025). Enhanced mobile input experience with iOS zoom prevention and Android keyboard layout stability.
+- **Native Audio Recording**: Integrated Capacitor Voice Recorder plugin (`capacitor-voice-recorder`) for reliable microphone access on Android/iOS with automatic fallback to web MediaRecorder API for browsers (Nov 2025).
 
 ### Feature Specifications
 - **Authentication & Role-Based Access Control**: Village-friendly OTP-first login with intelligent user detection, profile setup flexibility (skip option), and distinct roles (customer, shopkeeper, rider) with strict isolation.
@@ -32,7 +34,7 @@ The application features a modern, mobile-first design with a professional, emoj
 - **Shopkeeper Order Display**: Collapsible product list with bilingual names (English and Telugu) for efficient order preparation. Space-saving dropdown shows item count when collapsed, full product details when expanded.
 - **Product Management**: CRUD for products, categories, subcategories (shopkeeper dashboard), including "out of stock" and "popular" toggles, and dual image input. Flexible item ordering via sortable fields.
 - **Comprehensive Rider Management System**: Separate rider authentication and dashboard, secure access to assigned orders, Google Maps integration for navigation, one-tap status updates, and automatic rider assignment.
-- **AI-Powered Shopping with Gemini**: Voice search (MediaRecorder API + Gemini 2.0 Flash audio transcription) and debounced semantic text search supporting multilingual input (Telugu, English, Hindi) and contextual understanding. Includes shopkeeper voice-to-text input for forms.
+- **AI-Powered Shopping with Gemini**: Voice search (Capacitor Voice Recorder plugin on mobile, MediaRecorder API on web + Gemini 2.0 Flash audio transcription) and debounced semantic text search supporting multilingual input (Telugu, English, Hindi) and contextual understanding. Includes shopkeeper voice-to-text input for forms.
 - **User Profile**: Order history, user statistics.
 - **Real-time Notifications**: Toast notifications for order status.
 - **Customizable Branding**: Logo upload for display across all interfaces.
@@ -46,6 +48,7 @@ The application features a modern, mobile-first design with a professional, emoj
 ## External Dependencies
 - **Firebase**: Firestore (database), Authentication (phone and anonymous sign-in).
 - **Google Gemini AI**: Used for voice-powered shopping (audio transcription), semantic search, and language translation (`@google/genai` package).
-- **Browser MediaRecorder API**: Audio recording for voice input.
+- **Capacitor Voice Recorder**: Native audio recording for voice input on Android/iOS (`capacitor-voice-recorder` package).
+- **Browser MediaRecorder API**: Audio recording fallback for web browsers.
 - **lucide-react**: For vector icons.
 - **OpenStreetMap Nominatim**: For reverse geocoding addresses.
