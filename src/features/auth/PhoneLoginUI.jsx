@@ -104,8 +104,6 @@ const PhoneLoginUI = ({
               <Phone className="w-5 h-5" />
               Continue
             </button>
-            
-            <div id="recaptcha-container"></div>
           </div>
         )}
 
@@ -295,6 +293,9 @@ const PhoneLoginUI = ({
             </button>
           </div>
         )}
+        
+        {/* Keep reCAPTCHA container in DOM to prevent Firebase errors */}
+        <div id="recaptcha-container" style={{ position: 'absolute', visibility: 'hidden' }}></div>
       </div>
     </div>
   );
