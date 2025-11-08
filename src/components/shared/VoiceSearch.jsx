@@ -54,7 +54,11 @@ export default function VoiceSearch({
 
   const startRecording = async () => {
     try {
-      await recorder.startRecording();
+      // Pass auto-stop callback to recorder
+      await recorder.startRecording(() => {
+        console.log('[VoiceSearch] Auto-stopping after silence detected');
+        stopRecording();
+      });
       setIsListening(true);
       onVoiceStart?.();
     } catch (error) {
@@ -120,8 +124,8 @@ export default function VoiceSearch({
       disabled={isProcessing}
       aria-label={language === 'te' ? 'వాయిస్ సెర్చ్' : 'Voice Search'}
       title={isListening 
-        ? (language === 'te' ? 'ఆపండి' : 'Tap to stop') 
-        : (language === 'te' ? 'వెతకండి' : 'Tap and speak')}
+        ? (language === 'te' ? 'మాట్లాడటం పూర్తయింది? ఆగిపోతుంది...' : 'Speaking... Will auto-stop after 2s silence') 
+        : (language === 'te' ? 'మైక్‌ని నొక్కి మాట్లాడండి' : 'Tap mic and speak')}
     >
       {isListening ? <MicOff size={20} /> : <Mic size={20} />}
     </button>

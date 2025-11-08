@@ -37,7 +37,11 @@ const BilingualVoiceInput = ({ onTranscript, className = '' }) => {
 
   const startRecording = async () => {
     try {
-      await recorder.startRecording();
+      // Pass auto-stop callback to recorder
+      await recorder.startRecording(() => {
+        console.log('[BilingualVoiceInput] Auto-stopping after silence');
+        stopRecording();
+      });
       setIsListening(true);
     } catch (error) {
       console.error('[BilingualVoiceInput] Recording error:', error);
@@ -84,7 +88,7 @@ const BilingualVoiceInput = ({ onTranscript, className = '' }) => {
       onClick={toggleRecording}
       className={`voice-input-btn ${isListening ? 'listening' : ''} ${className}`}
       title={isListening 
-        ? 'Tap to stop recording' 
+        ? 'Speaking... Auto-stops after 2s silence' 
         : 'Tap and speak (auto-translates to both languages)'}
     >
       {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}

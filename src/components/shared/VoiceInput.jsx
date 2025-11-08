@@ -14,7 +14,11 @@ export default function VoiceInput({ onTranscript, language = 'en', className = 
 
   const startRecording = async () => {
     try {
-      await recorder.startRecording();
+      // Pass auto-stop callback to recorder
+      await recorder.startRecording(() => {
+        console.log('[VoiceInput] Auto-stopping after silence');
+        stopRecording();
+      });
       setIsListening(true);
     } catch (error) {
       console.error('[VoiceInput] Recording error:', error);
@@ -70,8 +74,8 @@ export default function VoiceInput({ onTranscript, language = 'en', className = 
       className={`voice-input-btn ${isListening ? 'listening' : ''} ${className}`}
       aria-label={language === 'te' ? 'వాయిస్ ఇన్‌పుట్' : 'Voice Input'}
       title={isListening 
-        ? (language === 'te' ? 'ఆపండి' : 'Tap to stop') 
-        : (language === 'te' ? 'మాట్లాడండి' : 'Tap and speak')}
+        ? (language === 'te' ? 'మాట్లాడుతున్నారు... 2 సెకన్ల నిశ్శబ్దం తర్వాత ఆగుతుంది' : 'Speaking... Auto-stops after 2s silence') 
+        : (language === 'te' ? 'మైక్‌ని నొక్కి మాట్లాడండి' : 'Tap mic and speak')}
     >
       {isListening ? <MicOff size={18} /> : <Mic size={18} />}
     </button>

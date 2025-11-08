@@ -18,6 +18,10 @@ export class AudioRecorder {
     this.actualMimeType = null;
     this.isNative = Capacitor.isNativePlatform();
     this.nativeRecording = null;
+    this.audioContext = null;
+    this.analyser = null;
+    this.silenceTimer = null;
+    this.onAutoStop = null;
   }
 
   static isSupported() {
@@ -29,11 +33,13 @@ export class AudioRecorder {
     return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
   }
 
-  async startRecording() {
+  async startRecording(autoStopCallback = null) {
     try {
       if (!AudioRecorder.isSupported()) {
         throw new Error('FEATURE_NOT_SUPPORTED');
       }
+
+      this.onAutoStop = autoStopCallback;
 
       // Use native Capacitor plugin on iOS/Android
       if (this.isNative) {
@@ -91,6 +97,12 @@ export class AudioRecorder {
       };
 
       this.mediaRecorder.start(100);
+      
+      // Start silence detection for web
+      if (autoStopCallback) {
+        this.startSilenceDetection();
+      }
+      
       console.log('[AudioRecorder] Web recording started with mimeType:', this.actualMimeType);
       return true;
     } catch (error) {
@@ -99,7 +111,75 @@ export class AudioRecorder {
     }
   }
 
+  startSilenceDetection() {
+    try {
+      // Create audio context for analyzing audio levels
+      this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const source = this.audioContext.createMediaStreamSource(this.stream);
+      this.analyser = this.audioContext.createAnalyser();
+      this.analyser.fftSize = 2048;
+      this.analyser.smoothingTimeConstant = 0.8;
+      source.connect(this.analyser);
+
+      const bufferLength = this.analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      let silenceStart = Date.now();
+      const SILENCE_THRESHOLD = 15; // Audio level threshold
+      const SILENCE_DURATION = 2000; // 2 seconds of silence
+      const MIN_RECORDING_TIME = 500; // Minimum 0.5 seconds before auto-stop
+      const recordingStartTime = Date.now();
+
+      const checkAudioLevel = () => {
+        if (!this.analyser || !this.mediaRecorder || this.mediaRecorder.state !== 'recording') {
+          return;
+        }
+
+        this.analyser.getByteFrequencyData(dataArray);
+        
+        // Calculate average volume
+        const average = dataArray.reduce((sum, value) => sum + value, 0) / bufferLength;
+
+        if (average < SILENCE_THRESHOLD) {
+          // Silence detected
+          const silenceDuration = Date.now() - silenceStart;
+          const recordingDuration = Date.now() - recordingStartTime;
+          
+          if (silenceDuration > SILENCE_DURATION && recordingDuration > MIN_RECORDING_TIME) {
+            console.log('[AudioRecorder] Silence detected, auto-stopping...');
+            if (this.onAutoStop) {
+              this.onAutoStop();
+            }
+            return;
+          }
+        } else {
+          // Sound detected, reset silence timer
+          silenceStart = Date.now();
+        }
+
+        // Continue monitoring
+        requestAnimationFrame(checkAudioLevel);
+      };
+
+      checkAudioLevel();
+      console.log('[AudioRecorder] Silence detection started');
+    } catch (error) {
+      console.error('[AudioRecorder] Error starting silence detection:', error);
+    }
+  }
+
   async stopRecording() {
+    // Clean up audio context and silence detection
+    if (this.audioContext) {
+      try {
+        await this.audioContext.close();
+      } catch (error) {
+        console.log('[AudioRecorder] Error closing audio context:', error);
+      }
+      this.audioContext = null;
+      this.analyser = null;
+    }
+
     // Use native Capacitor plugin on iOS/Android
     if (this.isNative) {
       const recorder = await loadVoiceRecorder();
@@ -160,6 +240,17 @@ export class AudioRecorder {
   }
 
   async cancel() {
+    // Clean up audio context and silence detection
+    if (this.audioContext) {
+      try {
+        await this.audioContext.close();
+      } catch (error) {
+        console.log('[AudioRecorder] Error closing audio context:', error);
+      }
+      this.audioContext = null;
+      this.analyser = null;
+    }
+
     if (this.isNative) {
       const recorder = await loadVoiceRecorder();
       if (recorder) {
