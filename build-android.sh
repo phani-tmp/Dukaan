@@ -1,0 +1,2 @@
+#!/bin/bash
+VITE_GEMINI_API_KEY="AIzaSyAVBBw2bRGN8JUjZZyfjYIScdpwv6pGx9c" npm run build && npx cap sync android
