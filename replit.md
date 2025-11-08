@@ -3,6 +3,10 @@
 ## Overview
 Dukaan is a quick commerce application, inspired by Zepto, designed for direct-to-consumer shopping across groceries, medicines, and electronics. Built with React, Vite, and Firebase, it offers a scalable, production-ready solution with a professional and intuitive user experience. Key features include robust authentication with OTP-first login, a three-level category hierarchy, comprehensive order management with flexible workflows (pickup/delivery), bilingual support (English/Telugu), AI-powered voice and text shopping via Google Gemini, and customizable branding. The project aims to provide a seamless shopping experience and efficient management tools for shopkeepers and riders.
 
+## 📚 Documentation Files
+- **`PROJECT_STRUCTURE.md`** - Complete explanation of project architecture, folder structure, and how all pieces fit together
+- **`LOCAL_DEVELOPMENT.md`** - Step-by-step guide for local development outside Replit, including Android Studio setup
+
 ## User Preferences
 I prefer the agent to be meticulous and thorough, avoiding the introduction of new bugs or regressions. When making changes, prioritize robust, production-quality code. For any significant architectural decisions or feature implementations, please ask for confirmation before proceeding. Ensure that the design philosophy adheres to a professional, emoji-free aesthetic with real product imagery. I value clear and concise explanations for complex technical concepts. Do not make changes to the `App.jsx` file without explicit instruction.
 
