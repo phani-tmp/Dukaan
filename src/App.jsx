@@ -126,12 +126,12 @@ function App() {
           try {
             const { latitude, longitude } = position.coords;
             const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
+              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
             );
             const data = await response.json();
             
-            const city = data.address.city || data.address.town || data.address.village || 'Unknown';
-            const state = data.address.state || '';
+            const city = data.city || data.locality || data.principalSubdivision || 'Unknown';
+            const state = data.principalSubdivisionCode || '';
             setLocation(`${city}${state ? ', ' + state : ''}`);
           } catch (error) {
             console.error('Error getting location name:', error);
