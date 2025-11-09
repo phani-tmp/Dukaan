@@ -224,34 +224,25 @@ export const AuthProvider = ({ children }) => {
       const phoneLookupRef = doc(db, 'artifacts', appId, 'public', 'data', 'users_by_phone', phoneNumber);
       const phoneLookup = await getDoc(phoneLookupRef);
       
-      let firebaseUid;
-      let result;
-      
       if (phoneLookup.exists()) {
-        // Existing user - reuse their UID to preserve profile data
-        firebaseUid = phoneLookup.data().uid;
-        console.log('[Auth] Existing user found, UID:', firebaseUid);
+        // EXISTING USER - Skip Firebase sign-in and redirect to password login
+        const firebaseUid = phoneLookup.data().uid;
+        console.log('[Auth] Existing user verified, UID:', firebaseUid);
+        console.log('[Auth] Redirecting to password login (OTP verified successfully)');
         
-        // Sign in anonymously (temporary until custom tokens work)
-        result = await signInAnonymously(auth);
-        
-        // IMPORTANT: We're creating a NEW anonymous UID, but we'll map it to the existing user
-        // This is a temporary workaround - in production, use Firebase custom tokens
-        const tempUid = result.user.uid;
-        
-        // Sign out the temp account
-        await auth.signOut();
-        
-        // TODO: When custom tokens are ready, sign in with the custom token instead
-        // For now, we'll just verify the user exists and let password login handle the rest
-        console.log('[Auth] User verified. Please use password login for existing users.');
-        alert('User exists. Please use password login.');
+        alert('Phone verified! Please enter your password to continue.');
         setAuthStep('password');
+        setOtp('');
         return;
-      } else {
-        // New user - create Firebase account
-        result = await signInAnonymously(auth);
-        firebaseUid = result.user.uid;
+      }
+      
+      // NEW USER - Create Firebase account
+      console.log('[Auth] New user detected - creating account');
+      
+      try {
+        // Try to sign in anonymously
+        const result = await signInAnonymously(auth);
+        const firebaseUid = result.user.uid;
         console.log('[Auth] New user created with UID:', firebaseUid);
         
         // Create user profile
@@ -267,21 +258,31 @@ export const AuthProvider = ({ children }) => {
         await setDoc(phoneLookupRef, {
           uid: firebaseUid
         });
-      }
-      
-      // Check if this is a new user or existing user
-      if (isNewUser) {
-        // New user - show registration form
-        console.log('[Auth] New user - showing registration/profile setup');
+        
+        // Show registration form
+        console.log('[Auth] New user - showing registration form');
         setShowProfileSetup(true);
         setAuthStep('register');
-      } else {
-        // Existing user - login complete
-        console.log('[Auth] Existing user - login complete');
-        setShowProfileSetup(false);
-        setAuthStep('phone');
+        setOtp('');
+      } catch (firebaseError) {
+        console.error('[Auth] Firebase sign-in error:', firebaseError);
+        
+        // Check if anonymous auth is disabled
+        if (firebaseError.code === 'auth/admin-restricted-operation') {
+          alert('⚠️ Firebase Setup Required:\n\n' +
+                'Anonymous authentication is disabled in your Firebase Console.\n\n' +
+                'To enable new user registration:\n' +
+                '1. Go to Firebase Console → Authentication\n' +
+                '2. Click "Sign-in method" tab\n' +
+                '3. Enable "Anonymous" provider\n\n' +
+                'For now, only existing users with passwords can log in.');
+          setAuthStep('phone');
+          setOtp('');
+          return;
+        }
+        
+        throw firebaseError;
       }
-      setOtp('');
     } catch (error) {
       console.error('[Auth] OTP verification error:', error);
       alert(`Invalid OTP: ${error.message}. Please try again.`);
