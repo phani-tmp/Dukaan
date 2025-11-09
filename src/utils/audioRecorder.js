@@ -46,6 +46,17 @@ export class AudioRecorder {
         // Start recording with native plugin
         await VoiceRecorder.startRecording();
         console.log('[AudioRecorder] Native recording started');
+        
+        // Auto-stop after 10 seconds for native recording (no silence detection available)
+        if (autoStopCallback) {
+          this.silenceTimer = setTimeout(() => {
+            console.log('[AudioRecorder] Auto-stopping native recording after 10s');
+            if (this.onAutoStop) {
+              this.onAutoStop();
+            }
+          }, 10000);
+        }
+        
         return true;
       }
 
@@ -168,6 +179,12 @@ export class AudioRecorder {
 
     // Use native Capacitor plugin on iOS/Android
     if (this.isNative) {
+      // Clear auto-stop timer
+      if (this.silenceTimer) {
+        clearTimeout(this.silenceTimer);
+        this.silenceTimer = null;
+      }
+      
       const result = await VoiceRecorder.stopRecording();
       
       if (!result.value || !result.value.recordDataBase64) {
