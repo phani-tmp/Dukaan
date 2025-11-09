@@ -1,0 +1,19 @@
+2025-11-08 19:55:08.103  9281-9281  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:7ed61804: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+2025-11-08 19:55:08.105  9281-9281  InsetsController        com.dukaan.quickcommerce             D  hide(ime(), fromIme=false)
+2025-11-08 19:55:08.106  9281-9281  WindowOnBackDispatcher  com.dukaan.quickcommerce             W  sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@6dccc2f
+2025-11-08 19:55:08.108  9281-9281  InsetsController        com.dukaan.quickcommerce             D  Setting requestedVisibleTypes to -9 (was -1)
+2025-11-08 19:55:08.117  9281-9281  Capacitor/Plugin        com.dukaan.quickcommerce             V  To native (Capacitor plugin): callbackId: 63661217, pluginId: VoiceRecorder, methodName: hasAudioRecordingPermission
+2025-11-08 19:55:08.118  9281-9281  Capacitor               com.dukaan.quickcommerce             V  callback: 63661217, pluginId: VoiceRecorder, methodName: hasAudioRecordingPermission, methodData: {}
+2025-11-08 19:55:08.173  9281-9281  Capacitor/Plugin        com.dukaan.quickcommerce             V  To native (Capacitor plugin): callbackId: 63661218, pluginId: VoiceRecorder, methodName: startRecording
+2025-11-08 19:55:08.175  9281-9281  Capacitor               com.dukaan.quickcommerce             V  callback: 63661218, pluginId: VoiceRecorder, methodName: startRecording, methodData: {}
+2025-11-08 19:55:08.324  9281-9281  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-DC4RjeCb.js - Line 3865 - Msg: [AudioRecorder] Native recording started
+2025-11-08 19:55:08.367  9281-9281  ImeTracker              com.dukaan.quickcommerce             I  system_server:98d4224c: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+2025-11-08 19:55:08.572  9281-9281  ImeTracker              com.dukaan.quickcommerce             I  system_server:10b014bf: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+2025-11-08 19:55:14.914  9281-9281  Capacitor/Plugin        com.dukaan.quickcommerce             V  To native (Capacitor plugin): callbackId: 63661219, pluginId: VoiceRecorder, methodName: stopRecording
+2025-11-08 19:55:14.914  9281-9281  Capacitor               com.dukaan.quickcommerce             V  callback: 63661219, pluginId: VoiceRecorder, methodName: stopRecording, methodData: {}
+2025-11-08 19:55:15.021  9281-9281  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-DC4RjeCb.js - Line 3865 - Msg: [AudioRecorder] Native recording stopped, duration: 6525 ms
+2025-11-08 19:55:15.027  9281-9281  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-DC4RjeCb.js - Line 4064 - Msg: [VoiceSearch] Audio recorded, sending to Gemini...
+2025-11-08 19:55:15.027  9281-9281  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-DC4RjeCb.js - Line 4064 - Msg: [Gemini] Starting audio transcription...
+2025-11-08 19:55:15.925  9281-9281  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-DC4RjeCb.js - Line 4064 - Msg: [Gemini] Transcription result: Hello.
+2025-11-08 19:55:15.926  9281-9281  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-DC4RjeCb.js - Line 4064 - Msg: [VoiceSearch] Transcribed: Hello.
+2025-11-08 19:55:16.946  9281-9281  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-DC4RjeCb.js - Line 4064 - Msg: [HomeView] Rendering with: [object Object]
