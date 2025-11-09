@@ -675,6 +675,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 80px);
+  padding-bottom: 100px; /* Space for bottom navigation */
 }
 
 .cart-items {
@@ -785,6 +786,7 @@ body {
 /* --- ORDERS VIEW --- */
 .orders-view {
   padding: 16px;
+  padding-bottom: 100px; /* Space for bottom navigation */
 }
 
 .orders-list {
@@ -1540,6 +1542,7 @@ body {
 
 .order-history-view {
   padding: 16px;
+  padding-bottom: 100px; /* Space for bottom navigation */
   min-height: calc(100vh - 120px);
 }
 
@@ -2290,11 +2293,11 @@ body {
 
 /* --- CATEGORY PRODUCTS VIEW --- */
 .category-products-view {
-  padding-bottom: 20px;
+  padding-bottom: 100px; /* Space for bottom navigation */
 }
 
 .home-view {
-  padding-bottom: 20px;
+  padding-bottom: 100px; /* Space for bottom navigation */
 }
 
 /* --- UTILITIES --- */
@@ -2321,6 +2324,7 @@ body {
 .subcategories-view,
 .subcategory-products-view {
   padding: 16px;
+  padding-bottom: 100px; /* Space for bottom navigation */
 }
 
 .subcategory-grid {
