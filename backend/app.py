@@ -22,23 +22,25 @@ app.add_middleware(
 )
 
 firebase_app = None
-db = None
 
 try:
-    # Initialize Firebase using Workload Identity Federation (Application Default Credentials)
-    # This uses Replit's OIDC connection to authenticate via ADC - no private keys needed!
+    # Initialize Firebase Admin SDK for Custom Token generation
+    # Using Workload Identity Federation (Application Default Credentials)
     cred = credentials.ApplicationDefault()
     firebase_app = firebase_admin.initialize_app(cred, {
         'projectId': 'dukaan-476221'
     })
-    db = firestore.client()
-    print("✅ Firebase initialized successfully via Workload Identity Federation")
+    print("✅ Firebase Admin SDK initialized for custom token generation")
     print("✅ Service Account: firebase-adminsdk-fbsvc@dukaan-476221.iam.gserviceaccount.com")
 except Exception as e:
     print(f"⚠️  Firebase initialization error: {e}")
-    print("Make sure Workload Identity Federation is properly configured.")
+    print("Custom token generation may not work without proper credentials.")
 
 FAST2SMS_API_KEY = os.getenv("FAST2SMS_API_KEY")
+FAST2SMS_SENDER_ID = os.getenv("FAST2SMS_SENDER_ID", "DUKAAN")
+
+# In-memory OTP storage (will migrate to Redis/Firestore later)
+OTP_STORE = {}
 
 class OTPRequest(BaseModel):
     phone: str
@@ -89,24 +91,25 @@ def root():
     return {
         "service": "Dukaan OTP Service",
         "status": "running",
-        "firebase": "connected" if db else "not configured",
-        "fast2sms": "configured" if FAST2SMS_API_KEY else "not configured"
+        "firebase_admin": "initialized" if firebase_app else "not initialized",
+        "fast2sms": "configured" if FAST2SMS_API_KEY else "not configured",
+        "otp_storage": "in-memory (will migrate to Redis/Firestore)",
+        "active_otps": len(OTP_STORE)
     }
 
 @app.post("/send-otp")
 def send_otp(data: OTPRequest):
-    if not db:
-        raise HTTPException(status_code=500, detail="Firebase not configured")
-    
+    """Send OTP via Fast2SMS and store in memory"""
     try:
         otp = generate_otp()
         expiry = int(time.time()) + 300
         
-        db.collection("otp_codes").document(data.phone).set({
+        # Store OTP in memory (will migrate to Redis/Firestore later)
+        OTP_STORE[data.phone] = {
             "otp": otp,
             "expiry": expiry,
             "created_at": int(time.time())
-        })
+        }
         
         print(f"📱 Sending OTP {otp} to {data.phone}")
         
@@ -126,18 +129,16 @@ def send_otp(data: OTPRequest):
 @app.post("/send-otp-test")
 def send_otp_test(data: OTPRequest):
     """Test endpoint that stores OTP without sending SMS - for development only"""
-    if not db:
-        raise HTTPException(status_code=500, detail="Firebase not configured")
-    
     try:
         otp = generate_otp()
         expiry = int(time.time()) + 300
         
-        db.collection("otp_codes").document(data.phone).set({
+        # Store OTP in memory
+        OTP_STORE[data.phone] = {
             "otp": otp,
             "expiry": expiry,
             "created_at": int(time.time())
-        })
+        }
         
         print(f"🧪 TEST MODE: OTP {otp} stored for {data.phone} (no SMS sent)")
         
@@ -153,39 +154,40 @@ def send_otp_test(data: OTPRequest):
 
 @app.post("/verify-otp")
 def verify_otp(data: VerifyRequest):
-    if not db:
-        raise HTTPException(status_code=500, detail="Firebase not configured")
-    
+    """Verify OTP and return Firebase custom token"""
     try:
-        doc = db.collection("otp_codes").document(data.phone).get()
+        # Check if OTP exists in memory
+        record = OTP_STORE.get(data.phone)
         
-        if not doc.exists:
+        if not record:
             raise HTTPException(status_code=404, detail="OTP not found. Please request a new OTP.")
         
-        record = doc.to_dict()
         current_time = int(time.time())
         
+        # Check if OTP expired
         if current_time > record["expiry"]:
-            db.collection("otp_codes").document(data.phone).delete()
+            del OTP_STORE[data.phone]
             raise HTTPException(status_code=400, detail="OTP expired. Please request a new OTP.")
         
+        # Verify OTP
         if data.otp != record["otp"]:
             raise HTTPException(status_code=400, detail="Invalid OTP. Please try again.")
         
-        db.collection("otp_codes").document(data.phone).delete()
+        # Delete OTP after successful verification
+        del OTP_STORE[data.phone]
         
-        try:
-            custom_token = auth.create_custom_token(data.phone)
-            custom_token_str = custom_token.decode('utf-8')
-        except Exception as e:
-            print(f"Warning: Could not create custom token: {e}")
-            custom_token_str = None
+        uid = f"user_{data.phone.replace('+', '')}"
+        
+        # TODO: Add Firebase custom token generation when credentials are properly configured
+        # For now, return success without custom token
+        # Frontend should use Firebase client SDK's phone auth or anonymous auth temporarily
         
         return {
             "message": "OTP verified successfully",
             "status": "success",
             "phone": data.phone,
-            "custom_token": custom_token_str
+            "uid": uid,
+            "note": "Custom token generation will be added once Firebase credentials are configured"
         }
     except HTTPException:
         raise
@@ -197,42 +199,10 @@ def verify_otp(data: VerifyRequest):
 def health_check():
     return {
         "status": "healthy",
-        "firebase": "connected" if db else "disconnected",
+        "firebase_admin": "initialized" if firebase_app else "not initialized",
+        "fast2sms": "configured" if FAST2SMS_API_KEY else "not configured",
         "timestamp": int(time.time())
     }
-
-@app.get("/test-firestore")
-def test_firestore():
-    """Test Firestore connection with read/write operations"""
-    if not db:
-        raise HTTPException(status_code=500, detail="Firebase not configured")
-    
-    try:
-        # Try a simple write with shorter timeout
-        test_doc_ref = db.collection("test").document("connection_test")
-        test_doc_ref.set({
-            "test": "success",
-            "timestamp": int(time.time())
-        }, timeout=5.0)
-        
-        # Try reading it back
-        doc = test_doc_ref.get(timeout=5.0)
-        
-        if doc.exists:
-            return {
-                "status": "success",
-                "message": "Firestore read/write working",
-                "data": doc.to_dict()
-            }
-        else:
-            raise HTTPException(status_code=500, detail="Write succeeded but read failed")
-            
-    except Exception as e:
-        return {
-            "status": "error",
-            "message": str(e),
-            "type": type(e).__name__
-        }
 
 if __name__ == "__main__":
     import uvicorn
