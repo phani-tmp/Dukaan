@@ -1,14 +1,5 @@
 import { Capacitor } from '@capacitor/core';
-
-// Dynamically import Capacitor plugin only when needed
-let VoiceRecorder = null;
-const loadVoiceRecorder = async () => {
-  if (!VoiceRecorder && Capacitor.isNativePlatform()) {
-    const module = await import('capacitor-voice-recorder');
-    VoiceRecorder = module.VoiceRecorder;
-  }
-  return VoiceRecorder;
-};
+import { VoiceRecorder } from 'capacitor-voice-recorder';
 
 export class AudioRecorder {
   constructor() {
@@ -43,22 +34,17 @@ export class AudioRecorder {
 
       // Use native Capacitor plugin on iOS/Android
       if (this.isNative) {
-        const recorder = await loadVoiceRecorder();
-        if (!recorder) {
-          throw new Error('Voice recorder plugin not available');
-        }
-
         // Check and request permission
-        const hasPermission = await recorder.hasAudioRecordingPermission();
+        const hasPermission = await VoiceRecorder.hasAudioRecordingPermission();
         if (!hasPermission.value) {
-          const requestResult = await recorder.requestAudioRecordingPermission();
+          const requestResult = await VoiceRecorder.requestAudioRecordingPermission();
           if (!requestResult.value) {
             throw { name: 'NotAllowedError', message: 'Microphone permission denied' };
           }
         }
 
         // Start recording with native plugin
-        await recorder.startRecording();
+        await VoiceRecorder.startRecording();
         console.log('[AudioRecorder] Native recording started');
         return true;
       }
@@ -182,12 +168,7 @@ export class AudioRecorder {
 
     // Use native Capacitor plugin on iOS/Android
     if (this.isNative) {
-      const recorder = await loadVoiceRecorder();
-      if (!recorder) {
-        throw new Error('Voice recorder plugin not available');
-      }
-
-      const result = await recorder.stopRecording();
+      const result = await VoiceRecorder.stopRecording();
       
       if (!result.value || !result.value.recordDataBase64) {
         throw new Error('No recording data received');
@@ -252,14 +233,11 @@ export class AudioRecorder {
     }
 
     if (this.isNative) {
-      const recorder = await loadVoiceRecorder();
-      if (recorder) {
-        // Native plugin doesn't have explicit cancel, just stop
-        try {
-          await recorder.stopRecording();
-        } catch (error) {
-          console.log('[AudioRecorder] Cancel error (may already be stopped):', error);
-        }
+      // Native plugin doesn't have explicit cancel, just stop
+      try {
+        await VoiceRecorder.stopRecording();
+      } catch (error) {
+        console.log('[AudioRecorder] Cancel error (may already be stopped):', error);
       }
       return;
     }
