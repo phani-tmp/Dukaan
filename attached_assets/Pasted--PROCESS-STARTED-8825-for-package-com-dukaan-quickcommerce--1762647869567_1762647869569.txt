@@ -1,0 +1,111 @@
+---------------------------- PROCESS STARTED (8825) for package com.dukaan.quickcommerce ----------------------------
+2025-11-08 19:23:17.678  8825-8825  nativeloader            com.dukaan.quickcommerce             D  Configuring clns-9 for other apk /data/app/~~mj_b13NgHTTtdMOZRUbkyQ==/com.dukaan.quickcommerce-FlZKuZ17o5zYtrPzyoYCWQ==/base.apk. target_sdk_version=35, uses_libraries=, library_path=/data/app/~~mj_b13NgHTTtdMOZRUbkyQ==/com.dukaan.quickcommerce-FlZKuZ17o5zYtrPzyoYCWQ==/lib/arm64, permitted_path=/data:/mnt/expand:/data/user/0/com.dukaan.quickcommerce
+2025-11-08 19:23:17.688  8825-8825  CompatChangeReporter    com.dukaan.quickcommerce             D  Compat change id reported: 202956589; UID 10214; state: ENABLED
+2025-11-08 19:23:17.694  8825-8825  n.quickcommerce         com.dukaan.quickcommerce             I  AssetManager2(0xb400006f33aa47b8) locale list changing from [] to [en-US]
+2025-11-08 19:23:17.709  8825-8825  GraphicsEnvironment     com.dukaan.quickcommerce             V  Currently set values for:
+2025-11-08 19:23:17.709  8825-8825  GraphicsEnvironment     com.dukaan.quickcommerce             V    angle_gl_driver_selection_pkgs=[]
+2025-11-08 19:23:17.709  8825-8825  GraphicsEnvironment     com.dukaan.quickcommerce             V    angle_gl_driver_selection_values=[]
+2025-11-08 19:23:17.709  8825-8825  GraphicsEnvironment     com.dukaan.quickcommerce             V  com.dukaan.quickcommerce is not listed in per-application setting
+2025-11-08 19:23:17.710  8825-8825  GraphicsEnvironment     com.dukaan.quickcommerce             V  ANGLE allowlist from config: com.dreamgames.royalmatch com.dts.freefiremax com.dxx.firenow com.gramgames.mergedragons com.ludo.king com.mojang.minecraftpe com.my.defense com.nintendo.zaka com.os.airforce com.playrix.fishdomdd.gplay io.teslatech.callbreak jp.konami.prospia net.peakgames.toonblast
+2025-11-08 19:23:17.710  8825-8825  GraphicsEnvironment     com.dukaan.quickcommerce             V  com.dukaan.quickcommerce is not listed in ANGLE allowlist or settings, returning default
+2025-11-08 19:23:17.710  8825-8825  GraphicsEnvironment     com.dukaan.quickcommerce             V  Neither updatable production driver nor prerelease driver is supported.
+2025-11-08 19:23:17.740  8825-8825  FirebaseApp             com.dukaan.quickcommerce             I  Device unlocked: initializing all Firebase APIs for app [DEFAULT]
+2025-11-08 19:23:17.744  8825-8825  FirebaseInitProvider    com.dukaan.quickcommerce             I  FirebaseApp initialization successful
+2025-11-08 19:23:17.749  8825-8825  CompatChangeReporter    com.dukaan.quickcommerce             D  Compat change id reported: 279646685; UID 10214; state: ENABLED
+2025-11-08 19:23:17.761  8825-8825  n.quickcommerce         com.dukaan.quickcommerce             I  AssetManager2(0xb400006f33aada98) locale list changing from [] to [en-US]
+2025-11-08 19:23:17.763  8825-8874  DisplayManager          com.dukaan.quickcommerce             I  Choreographer implicitly registered for the refresh rate.
+2025-11-08 19:23:17.812  8825-8825  AppCompatDelegate       com.dukaan.quickcommerce             D  Checking for metadata for AppLocalesMetadataHolderService : Service not found
+2025-11-08 19:23:17.812  8825-8825  n.quickcommerce         com.dukaan.quickcommerce             I  AssetManager2(0xb400006f33aaabb8) locale list changing from [] to [en-US]
+2025-11-08 19:23:17.821  8825-8825  ashmem                  com.dukaan.quickcommerce             E  Pinning is deprecated since Android Q. Please use trim or other methods.
+2025-11-08 19:23:17.825  8825-8874  EGL_emulation           com.dukaan.quickcommerce             I  Opening libGLESv1_CM_emulation.so
+2025-11-08 19:23:17.825  8825-8874  EGL_emulation           com.dukaan.quickcommerce             I  Opening libGLESv2_emulation.so
+2025-11-08 19:23:17.832  8825-8874  HWUI                    com.dukaan.quickcommerce             W  Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+2025-11-08 19:23:17.833  8825-8874  HWUI                    com.dukaan.quickcommerce             W  Failed to initialize 101010-2 format, error = EGL_SUCCESS
+2025-11-08 19:23:17.879  8825-8825  CompatChangeReporter    com.dukaan.quickcommerce             D  Compat change id reported: 309578419; UID 10214; state: ENABLED
+2025-11-08 19:23:17.880  8825-8825  DesktopModeFlags        com.dukaan.quickcommerce             D  Toggle override initialized to: OVERRIDE_UNSET
+2025-11-08 19:23:17.889  8825-8825  n.quickcommerce         com.dukaan.quickcommerce             I  hiddenapi: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (runtime_flags=0, domain=platform, api=unsupported) from Landroidx/appcompat/widget/ViewUtils; (domain=app) using reflection: allowed
+2025-11-08 19:23:17.908  8825-8825  n.quickcommerce         com.dukaan.quickcommerce             I  AssetManager2(0xb400006f33aabe78) locale list changing from [] to [en-US]
+2025-11-08 19:23:17.909  8825-8825  WebViewFactory          com.dukaan.quickcommerce             I  Loading com.google.android.webview version 133.0.6943.137 (code 694313732)
+2025-11-08 19:23:17.909  8825-8825  n.quickcommerce         com.dukaan.quickcommerce             I  AssetManager2(0xb400006f33aad138) locale list changing from [] to [en-US]
+2025-11-08 19:23:17.911  8825-8825  n.quickcommerce         com.dukaan.quickcommerce             I  AssetManager2(0xb400006f33aab518) locale list changing from [] to [en-US]
+2025-11-08 19:23:17.911  8825-8825  n.quickcommerce         com.dukaan.quickcommerce             I  AssetManager2(0xb400006f33aad778) locale list changing from [] to [en-US]
+2025-11-08 19:23:17.915  8825-8825  n.quickcommerce         com.dukaan.quickcommerce             I  AssetManager2(0xb400006f33aa8638) locale list changing from [] to [en-US]
+2025-11-08 19:23:17.915  8825-8825  ResourcesManager        com.dukaan.quickcommerce             V  The following library key has been added: ResourcesKey{ mHash=7ec58ac8 mResDir=null mSplitDirs=[] mOverlayDirs=[] mLibDirs=[/data/app/~~jg7fYpGs7eP2heGfVo_MvA==/com.google.android.webview-GxxIcVTnZgzc4G6C6a1Udw==/WebViewGoogle.apk,/data/app/~~jkbZ735jDvOhNw2uXHkD5w==/com.google.android.trichromelibrary_694313732-yk8kGOAvHM9T_nbrFiuPuw==/TrichromeLibrary.apk,/system_ext/framework/androidx.window.extensions.jar] mDisplayId=0 mOverrideConfig=v36 mCompatInfo={420dpi always-compat} mLoaders=[]}
+2025-11-08 19:23:17.920  8825-8825  n.quickcommerce         com.dukaan.quickcommerce             W  Failed to find entry 'classes.dex': Entry not found
+2025-11-08 19:23:17.921  8825-8825  nativeloader            com.dukaan.quickcommerce             D  Configuring clns-10 for other apk /data/app/~~jkbZ735jDvOhNw2uXHkD5w==/com.google.android.trichromelibrary_694313732-yk8kGOAvHM9T_nbrFiuPuw==/TrichromeLibrary.apk. target_sdk_version=34, uses_libraries=ALL, library_path=/data/app/~~jg7fYpGs7eP2heGfVo_MvA==/com.google.android.webview-GxxIcVTnZgzc4G6C6a1Udw==/lib/arm64:/data/app/~~jg7fYpGs7eP2heGfVo_MvA==/com.google.android.webview-GxxIcVTnZgzc4G6C6a1Udw==/WebViewGoogle.apk!/lib/arm64-v8a:/data/app/~~jkbZ735jDvOhNw2uXHkD5w==/com.google.android.trichromelibrary_694313732-yk8kGOAvHM9T_nbrFiuPuw==/TrichromeLibrary.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand
+2025-11-08 19:23:17.922  8825-8825  ApplicationLoaders      com.dukaan.quickcommerce             D  Returning zygote-cached class loader: /system_ext/framework/androidx.window.extensions.jar
+2025-11-08 19:23:17.931  8825-8825  nativeloader            com.dukaan.quickcommerce             D  Configuring clns-11 for other apk /data/app/~~jg7fYpGs7eP2heGfVo_MvA==/com.google.android.webview-GxxIcVTnZgzc4G6C6a1Udw==/WebViewGoogle.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~jg7fYpGs7eP2heGfVo_MvA==/com.google.android.webview-GxxIcVTnZgzc4G6C6a1Udw==/lib/arm64:/data/app/~~jg7fYpGs7eP2heGfVo_MvA==/com.google.android.webview-GxxIcVTnZgzc4G6C6a1Udw==/WebViewGoogle.apk!/lib/arm64-v8a:/data/app/~~jkbZ735jDvOhNw2uXHkD5w==/com.google.android.trichromelibrary_694313732-yk8kGOAvHM9T_nbrFiuPuw==/TrichromeLibrary.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand
+2025-11-08 19:23:17.969  8825-8825  cr_WVCFactoryProvider   com.dukaan.quickcommerce             I  version=133.0.6943.137 (694313732) minSdkVersion=29 isBundle=false multiprocess=true packageId=2
+2025-11-08 19:23:17.980  8825-8825  n.quickcommerce         com.dukaan.quickcommerce             I  AssetManager2(0xb400006f33aaa578) locale list changing from [] to [en-US]
+2025-11-08 19:23:18.010  8825-8825  nativeloader            com.dukaan.quickcommerce             D  Load /data/app/~~jkbZ735jDvOhNw2uXHkD5w==/com.google.android.trichromelibrary_694313732-yk8kGOAvHM9T_nbrFiuPuw==/TrichromeLibrary.apk!/lib/arm64-v8a/libmonochrome_64.so using class loader ns clns-11 (caller=/data/app/~~jg7fYpGs7eP2heGfVo_MvA==/com.google.android.webview-GxxIcVTnZgzc4G6C6a1Udw==/WebViewGoogle.apk): ok
+2025-11-08 19:23:18.024  8825-8825  nativeloader            com.dukaan.quickcommerce             D  Load /system/lib64/libwebviewchromium_plat_support.so using class loader ns clns-11 (caller=/data/app/~~jg7fYpGs7eP2heGfVo_MvA==/com.google.android.webview-GxxIcVTnZgzc4G6C6a1Udw==/WebViewGoogle.apk): ok
+2025-11-08 19:23:18.037  8825-8879  chromium                com.dukaan.quickcommerce             E  [1108/192318.034992:ERROR:variations_seed_loader.cc(39)] Seed missing signature.
+2025-11-08 19:23:18.040  8825-8879  chromium                com.dukaan.quickcommerce             I  [INFO:variations_seed_loader.cc(67)] Failed to open file for reading.: No such file or directory (2)
+2025-11-08 19:23:18.048  8825-8825  cr_LibraryLoader        com.dukaan.quickcommerce             I  Successfully loaded native library
+2025-11-08 19:23:18.053  8825-8825  cr_CachingUmaRecorder   com.dukaan.quickcommerce             I  Flushed 6 samples from 6 histograms, 0 samples were dropped.
+2025-11-08 19:23:18.057  8825-8825  cr_CombinedPProvider    com.dukaan.quickcommerce             I  #registerProvider() provider:WV.C8@a9bd5af isPolicyCacheEnabled:false policyProvidersSize:0
+2025-11-08 19:23:18.058  8825-8825  cr_PolicyProvider       com.dukaan.quickcommerce             I  #setManagerAndSource() 0
+2025-11-08 19:23:18.123  8825-8825  cr_CombinedPProvider    com.dukaan.quickcommerce             I  #linkNativeInternal() 1
+2025-11-08 19:23:18.125  8825-8825  cr_AppResProvider       com.dukaan.quickcommerce             I  #getApplicationRestrictionsFromUserManager() Bundle[EMPTY_PARCEL]
+2025-11-08 19:23:18.125  8825-8825  cr_PolicyProvider       com.dukaan.quickcommerce             I  #notifySettingsAvailable() 0
+2025-11-08 19:23:18.125  8825-8825  cr_CombinedPProvider    com.dukaan.quickcommerce             I  #onSettingsAvailable() 0
+2025-11-08 19:23:18.125  8825-8825  cr_CombinedPProvider    com.dukaan.quickcommerce             I  #flushPolicies()
+2025-11-08 19:23:18.180  8825-8825  n.quickcommerce         com.dukaan.quickcommerce             I  AssetManager2(0xb400006f33aa5d98) locale list changing from [] to [en-US]
+2025-11-08 19:23:18.182  8825-8825  n.quickcommerce         com.dukaan.quickcommerce             I  AssetManager2(0xb400006f33aae3f8) locale list changing from [] to [en-US]
+2025-11-08 19:23:18.308  8825-8825  CompatChangeReporter    com.dukaan.quickcommerce             D  Compat change id reported: 352594277; UID 10214; state: ENABLED
+2025-11-08 19:23:18.376  8825-8825  Capacitor               com.dukaan.quickcommerce             D  Starting BridgeActivity
+2025-11-08 19:23:18.392  8825-8825  Capacitor               com.dukaan.quickcommerce             D  Registering plugin instance: CapacitorCookies
+2025-11-08 19:23:18.396  8825-8825  Capacitor               com.dukaan.quickcommerce             D  Registering plugin instance: WebView
+2025-11-08 19:23:18.406  8825-8825  Capacitor               com.dukaan.quickcommerce             D  Registering plugin instance: CapacitorHttp
+2025-11-08 19:23:18.407  8825-8825  Capacitor               com.dukaan.quickcommerce             D  Registering plugin instance: VoiceRecorder
+2025-11-08 19:23:18.438  8825-8825  Capacitor               com.dukaan.quickcommerce             W  Unable to read file at path public/plugins
+2025-11-08 19:23:18.444  8825-8825  Capacitor               com.dukaan.quickcommerce             D  Loading app at https://localhost
+2025-11-08 19:23:18.491  8825-8903  cr_media                com.dukaan.quickcommerce             W  BLUETOOTH_CONNECT permission is missing.
+2025-11-08 19:23:18.495  8825-8903  cr_media                com.dukaan.quickcommerce             W  getBluetoothAdapter() requires BLUETOOTH permission
+2025-11-08 19:23:18.495  8825-8903  cr_media                com.dukaan.quickcommerce             W  registerBluetoothIntentsIfNeeded: Requires BLUETOOTH permission
+2025-11-08 19:23:18.498  8825-8919  libc                    com.dukaan.quickcommerce             W  Access denied finding property "vendor.mesa.log"
+2025-11-08 19:23:18.498  8825-8919  libc                    com.dukaan.quickcommerce             W  Access denied finding property "vendor.mesa.log.file"
+2025-11-08 19:23:18.498  8825-8919  MESA                    com.dukaan.quickcommerce             E  Failed to open rendernode: No such file or directory
+2025-11-08 19:23:18.520  8825-8825  Capacitor               com.dukaan.quickcommerce             D  App started
+2025-11-08 19:23:18.523  8825-8825  Capacitor               com.dukaan.quickcommerce             D  App resumed
+2025-11-08 19:23:18.548  8825-8825  CompatChangeReporter    com.dukaan.quickcommerce             D  Compat change id reported: 349153669; UID 10214; state: ENABLED
+2025-11-08 19:23:18.552  8825-8825  HWUI                    com.dukaan.quickcommerce             W  Unknown dataspace 0
+2025-11-08 19:23:18.554  8825-8919  libc                    com.dukaan.quickcommerce             W  Access denied finding property "vendor.mesa.vk.trace.per.submit"
+2025-11-08 19:23:18.558  8825-8919  libc                    com.dukaan.quickcommerce             W  Access denied finding property "vendor.mesa.gallium.print.optio"
+2025-11-08 19:23:18.558  8825-8919  libc                    com.dukaan.quickcommerce             W  Access denied finding property "vendor.mesa.vk.trace.frame"
+2025-11-08 19:23:18.560  8825-8919  libc                    com.dukaan.quickcommerce             W  Access denied finding property "vendor.mesa.vk.wsi.headless.swa"
+2025-11-08 19:23:18.584  8825-8897  Capacitor               com.dukaan.quickcommerce             D  Handling local request: https://localhost/
+2025-11-08 19:23:18.614  8825-8825  Choreographer           com.dukaan.quickcommerce             I  Skipped 51 frames!  The application may be doing too much work on its main thread.
+2025-11-08 19:23:18.626  8825-8933  CameraManagerGlobal     com.dukaan.quickcommerce             I  Connecting to camera service
+2025-11-08 19:23:18.711  8825-8919  chromium                com.dukaan.quickcommerce             W  [WARNING:viz_main_impl.cc(85)] VizNullHypothesis is disabled (not a warning)
+2025-11-08 19:23:18.778  8825-8901  HWUI                    com.dukaan.quickcommerce             I  Davey! duration=991ms; Flags=1, FrameTimelineVsyncId=44423, IntendedVsync=2505928709588, Vsync=2506778709554, InputEventId=0, HandleInputStart=2506784156986, AnimationStart=2506784158902, PerformTraversalsStart=2506785582402, DrawStart=2506841037194, FrameDeadline=2505945376254, FrameStartTime=2506783974194, FrameInterval=16666666, WorkloadTarget=16666666, SyncQueued=2506872753486, SyncStart=2506872844361, IssueDrawCommandsStart=2506872979652, SwapBuffers=2506900818402, FrameCompleted=2506920759361, DequeueBufferDuration=2875, QueueBufferDuration=17047583, GpuCompleted=2506912108111, SwapBuffersCompleted=2506920759361, DisplayPresentTime=0, CommandSubmissionCompleted=2506900818402, 
+2025-11-08 19:23:18.799  8825-8825  Capacitor               com.dukaan.quickcommerce             D  App paused
+2025-11-08 19:23:18.991  8825-8897  Capacitor               com.dukaan.quickcommerce             D  Handling local request: https://localhost/assets/index-1ppv2cvc.js
+2025-11-08 19:23:18.997  8825-8895  Capacitor               com.dukaan.quickcommerce             D  Handling local request: https://localhost/assets/index-C5XWjvs2.css
+2025-11-08 19:23:19.029  8825-8825  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/ - Line 1 - Msg: Uncaught TypeError: Cannot read properties of undefined (reading 'triggerEvent')
+2025-11-08 19:23:19.495  8825-8825  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-1ppv2cvc.js - Line 4362 - Msg: [Mode] Shopkeeper mode: false Rider mode: false URL: 
+2025-11-08 19:23:19.499  8825-8825  Capacitor               com.dukaan.quickcommerce             D  onGeolocationPermissionsShowPrompt: DOING IT HERE FOR ORIGIN: https://localhost/
+2025-11-08 19:23:19.499  8825-8825  Activity                com.dukaan.quickcommerce             W  Can request only one set of permissions at a time
+2025-11-08 19:23:19.506  8825-8825  Capacitor               com.dukaan.quickcommerce             D  Unable to find a Capacitor plugin to handle permission requestCode, trying Cordova plugins 1528957837
+2025-11-08 19:23:19.509  8825-8894  Capacitor               com.dukaan.quickcommerce             D  Handling local request: https://localhost/favicon.svg
+2025-11-08 19:23:19.564  8825-8825  cr_LocationProvider     com.dukaan.quickcommerce             E  Caught security exception while registering for location updates from the system. The application does not have sufficient geolocation permissions.
+2025-11-08 19:23:19.564  8825-8825  cr_LocationProvider     com.dukaan.quickcommerce             E  newErrorAvailable application does not have sufficient geolocation permissions.
+2025-11-08 19:23:19.619  8825-8825  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-1ppv2cvc.js - Line 4362 - Msg: Geolocation error: [object GeolocationPositionError]
+2025-11-08 19:23:19.971  8825-8825  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-1ppv2cvc.js - Line 3624 - Msg: [Auth] User authenticated: 90m8scDZanhfAUlDEJZTlIEiy6o2
+2025-11-08 19:23:19.971  8825-8825  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-1ppv2cvc.js - Line 3624 - Msg: [Auth] Loading profile for UID: 90m8scDZanhfAUlDEJZTlIEiy6o2
+2025-11-08 19:23:19.991  8825-8825  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-1ppv2cvc.js - Line 4064 - Msg: [HomeView] Rendering with: [object Object]
+2025-11-08 19:23:19.999  8825-8894  Capacitor               com.dukaan.quickcommerce             D  Handling local request: https://localhost/dukaan-logo.png
+2025-11-08 19:23:20.371  8825-8825  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-1ppv2cvc.js - Line 3624 - Msg: [Auth] Profile loaded: Phan Role: customer
+2025-11-08 19:23:20.633  8825-8825  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-1ppv2cvc.js - Line 4064 - Msg: [HomeView] Rendering with: [object Object]
+2025-11-08 19:23:20.646  8825-8825  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-1ppv2cvc.js - Line 4064 - Msg: [HomeView] Rendering with: [object Object]
+2025-11-08 19:23:20.978  8825-8847  n.quickcommerce         com.dukaan.quickcommerce             I  Compiler allocated 5111KB to compile void android.view.ViewRootImpl.performTraversals()
+2025-11-08 19:23:23.387   632-959   ClipboardService        system_server                        E  Denying clipboard access to com.dukaan.quickcommerce, application is not in focus nor is it a system service for user 0
+2025-11-08 19:23:23.396   632-959   ClipboardService        system_server                        E  Denying clipboard access to com.dukaan.quickcommerce, application is not in focus nor is it a system service for user 0
+2025-11-08 19:23:23.441   632-960   ClipboardService        system_server                        E  Denying clipboard access to com.dukaan.quickcommerce, application is not in focus nor is it a system service for user 0
+2025-11-08 19:23:23.528  8825-8825  Capacitor               com.dukaan.quickcommerce             D  Unable to find a Capacitor plugin to handle permission requestCode, trying Cordova plugins 1
+2025-11-08 19:23:23.529  8825-8825  Capacitor               com.dukaan.quickcommerce             D  App resumed
+2025-11-08 19:23:23.568  8825-8825  InsetsController        com.dukaan.quickcommerce             D  hide(ime(), fromIme=false)
+2025-11-08 19:23:23.568  8825-8825  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:ed963c6a: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+2025-11-08 19:23:23.720  8825-8965  ProfileInstaller        com.dukaan.quickcommerce             D  Installing profile for com.dukaan.quickcommerce
+2025-11-08 19:23:28.070  8825-8894  Capacitor               com.dukaan.quickcommerce             D  Handling local request: https://localhost/assets/index-CsaBVI6t.js
+2025-11-08 19:23:28.072  8825-8825  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-1ppv2cvc.js - Line 3865 - Msg: Uncaught (in promise) Error: "VoiceRecorder.then()" is not implemented on android
