@@ -5,7 +5,8 @@ import {
   signOut, 
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword,
+  signInAnonymously
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, collection, addDoc, getDocs } from 'firebase/firestore';
 import { getFirebaseInstances, appId } from '../services/firebase';

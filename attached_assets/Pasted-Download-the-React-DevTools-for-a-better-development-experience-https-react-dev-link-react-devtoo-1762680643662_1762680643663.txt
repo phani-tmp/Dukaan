@@ -1,0 +1,50 @@
+Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
+2App.jsx:161 [Mode] Shopkeeper mode: false Rider mode: false URL: 
+AuthContext.jsx:46 [Auth] No user authenticated
+AuthContext.jsx:121 [Auth] OTP-only user detected - sending OTP
+AuthContext.jsx:141 [Auth] Sending OTP to: +917993558836
+AuthContext.jsx:165 [Auth] OTP sent successfully: Object
+AuthContext.jsx:169 [Auth] TEST OTP: 635334
+AuthContext.jsx:194 [Auth] Verifying OTP for: +917993558836
+:8000/verify-otp:1  Failed to load resource: the server responded with a status of 400 (Bad Request)Understand this error
+AuthContext.jsx:285 [Auth] OTP verification error: Error: Invalid OTP. Please try again.
+    at handleVerifyOTP (AuthContext.jsx:217:15)
+handleVerifyOTP @ AuthContext.jsx:285Understand this error
+AuthContext.jsx:194 [Auth] Verifying OTP for: +917993558836
+AuthContext.jsx:220 [Auth] OTP verified successfully: {message: 'OTP verified successfully', status: 'success', phone: '+917993558836', uid: 'user_917993558836', note: 'Custom token generation will be added once Firebase credentials are configured'}
+AuthContext.jsx:232 [Auth] Existing user found, UID: Mak85KSkO8fyiR0i94lPp0svwEH3
+AuthContext.jsx:285 [Auth] OTP verification error: ReferenceError: signInAnonymously is not defined
+    at handleVerifyOTP (AuthContext.jsx:235:9)
+handleVerifyOTP @ AuthContext.jsx:285
+await in handleVerifyOTP
+executeDispatch @ react-dom_client.js?v=695e33fb:11736
+runWithFiberInDEV @ react-dom_client.js?v=695e33fb:1485
+processDispatchQueue @ react-dom_client.js?v=695e33fb:11772
+(anonymous) @ react-dom_client.js?v=695e33fb:12182
+batchedUpdates$1 @ react-dom_client.js?v=695e33fb:2628
+dispatchEventForPluginEventSystem @ react-dom_client.js?v=695e33fb:11877
+dispatchEvent @ react-dom_client.js?v=695e33fb:14792
+dispatchDiscreteEvent @ react-dom_client.js?v=695e33fb:14773Understand this error
+AuthContext.jsx:194 [Auth] Verifying OTP for: +917993558836
+AuthContext.jsx:203  POST https://554d64f2-8fb7-47e9-8f40-3960b62a30a8-00-l8y60wt4t9mh.kirk.replit.dev:8000/verify-otp 404 (Not Found)
+handleVerifyOTP @ AuthContext.jsx:203
+executeDispatch @ react-dom_client.js?v=695e33fb:11736
+runWithFiberInDEV @ react-dom_client.js?v=695e33fb:1485
+processDispatchQueue @ react-dom_client.js?v=695e33fb:11772
+(anonymous) @ react-dom_client.js?v=695e33fb:12182
+batchedUpdates$1 @ react-dom_client.js?v=695e33fb:2628
+dispatchEventForPluginEventSystem @ react-dom_client.js?v=695e33fb:11877
+dispatchEvent @ react-dom_client.js?v=695e33fb:14792
+dispatchDiscreteEvent @ react-dom_client.js?v=695e33fb:14773Understand this error
+AuthContext.jsx:285 [Auth] OTP verification error: Error: OTP not found. Please request a new OTP.
+    at handleVerifyOTP (AuthContext.jsx:217:15)
+handleVerifyOTP @ AuthContext.jsx:285
+await in handleVerifyOTP
+executeDispatch @ react-dom_client.js?v=695e33fb:11736
+runWithFiberInDEV @ react-dom_client.js?v=695e33fb:1485
+processDispatchQueue @ react-dom_client.js?v=695e33fb:11772
+(anonymous) @ react-dom_client.js?v=695e33fb:12182
+batchedUpdates$1 @ react-dom_client.js?v=695e33fb:2628
+dispatchEventForPluginEventSystem @ react-dom_client.js?v=695e33fb:11877
+dispatchEvent @ react-dom_client.js?v=695e33fb:14792
+dispatchDiscreteEvent @ react-dom_client.js?v=695e33fb:14773Understand this error
