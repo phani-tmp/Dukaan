@@ -46,6 +46,18 @@ export class AudioRecorder {
         // Start recording with native plugin
         await VoiceRecorder.startRecording();
         console.log('[AudioRecorder] Native recording started');
+        
+        // Native doesn't have real-time audio analysis, so use smart timeout
+        // Auto-stop after 5 seconds (enough time to say product names)
+        if (autoStopCallback) {
+          this.silenceTimer = setTimeout(() => {
+            console.log('[AudioRecorder] Auto-stopping native recording after 5s');
+            if (this.onAutoStop) {
+              this.onAutoStop();
+            }
+          }, 5000); // 5 seconds - production-grade timeout
+        }
+        
         return true;
       }
 
@@ -111,9 +123,9 @@ export class AudioRecorder {
       const dataArray = new Uint8Array(bufferLength);
 
       let silenceStart = Date.now();
-      const SILENCE_THRESHOLD = 15; // Audio level threshold
-      const SILENCE_DURATION = 2000; // 2 seconds of silence
-      const MIN_RECORDING_TIME = 500; // Minimum 0.5 seconds before auto-stop
+      const SILENCE_THRESHOLD = 20; // Increased from 15 for better detection
+      const SILENCE_DURATION = 1500; // Reduced to 1.5s for faster auto-stop
+      const MIN_RECORDING_TIME = 800; // Minimum 0.8 seconds before auto-stop
       const recordingStartTime = Date.now();
 
       const checkAudioLevel = () => {
@@ -168,6 +180,12 @@ export class AudioRecorder {
 
     // Use native Capacitor plugin on iOS/Android
     if (this.isNative) {
+      // Clear auto-stop timer if exists
+      if (this.silenceTimer) {
+        clearTimeout(this.silenceTimer);
+        this.silenceTimer = null;
+      }
+      
       const result = await VoiceRecorder.stopRecording();
       
       if (!result.value || !result.value.recordDataBase64) {
