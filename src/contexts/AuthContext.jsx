@@ -133,84 +133,157 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // For NEW users - send OTP
+  // For NEW users - send OTP via Fast2SMS backend
   const handleSendOTP = async () => {
-    if (!auth) {
-      alert('Authentication not initialized. Please refresh the page.');
-      return;
-    }
-
     try {
       const fullPhoneNumber = `${countryCode}${phoneNumber}`;
       
-      if (window.recaptchaVerifier) {
-        try {
-          window.recaptchaVerifier.clear();
-        } catch (e) {
-          console.log('[Auth] Error clearing old verifier:', e);
-        }
-        window.recaptchaVerifier = null;
+      console.log('[Auth] Sending OTP to:', fullPhoneNumber);
+      
+      // Call Fast2SMS backend (use test endpoint for development)
+      // Auto-detect backend URL based on environment
+      const backendUrl = window.location.hostname.includes('replit.dev') 
+        ? `https://${window.location.hostname}:8000`
+        : (window.location.hostname === 'localhost' 
+            ? 'http://localhost:8000'
+            : import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000');
+      
+      const response = await fetch(`${backendUrl}/send-otp-test`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phone: fullPhoneNumber })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.detail || 'Failed to send OTP');
+      }
+
+      console.log('[Auth] OTP sent successfully:', data);
+      
+      // Store OTP temporarily for development (will be removed in production)
+      if (data.otp) {
+        console.log('[Auth] TEST OTP:', data.otp);
       }
       
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-        callback: () => {
-          console.log('[Auth] reCAPTCHA verified');
-        }
-      });
-      
-      const appVerifier = window.recaptchaVerifier;
-      const confirmation = await signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier);
-      setConfirmationResult(confirmation);
+      setConfirmationResult({ phone: fullPhoneNumber }); // Store phone for verification
       setAuthStep('otp');
       alert('OTP sent to your phone!');
     } catch (error) {
       console.error('[Auth] OTP send error:', error);
-      if (window.recaptchaVerifier) {
-        try {
-          window.recaptchaVerifier.clear();
-        } catch (e) {
-          console.log('[Auth] Error clearing verifier:', e);
-        }
-        window.recaptchaVerifier = null;
-      }
       alert(`Failed to send OTP: ${error.message}. Please try again.`);
     }
   };
 
-  // Verify OTP for both new and existing users
+  // Verify OTP for both new and existing users via Fast2SMS backend
   const handleVerifyOTP = async () => {
     if (!otp || otp.length !== 6) {
       alert('Please enter a valid 6-digit OTP');
       return;
     }
 
-    if (!confirmationResult) {
+    if (!confirmationResult || !confirmationResult.phone) {
       alert('Please request OTP first');
       return;
     }
 
     try {
-      const result = await confirmationResult.confirm(otp);
-      console.log('[Auth] OTP verified for user:', result.user.uid);
+      console.log('[Auth] Verifying OTP for:', confirmationResult.phone);
       
-      // Check if this is a new user or existing OTP-only user
+      // Call Fast2SMS backend to verify OTP
+      const backendUrl = window.location.hostname.includes('replit.dev') 
+        ? `https://${window.location.hostname}:8000`
+        : (window.location.hostname === 'localhost' 
+            ? 'http://localhost:8000'
+            : import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000');
+      
+      const response = await fetch(`${backendUrl}/verify-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          phone: confirmationResult.phone,
+          otp: otp 
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.detail || 'Failed to verify OTP');
+      }
+
+      console.log('[Auth] OTP verified successfully:', data);
+      
+      // Check if user already exists in Firestore (to preserve their data)
+      const phoneLookupRef = doc(db, 'artifacts', appId, 'public', 'data', 'users_by_phone', phoneNumber);
+      const phoneLookup = await getDoc(phoneLookupRef);
+      
+      let firebaseUid;
+      let result;
+      
+      if (phoneLookup.exists()) {
+        // Existing user - reuse their UID to preserve profile data
+        firebaseUid = phoneLookup.data().uid;
+        console.log('[Auth] Existing user found, UID:', firebaseUid);
+        
+        // Sign in anonymously (temporary until custom tokens work)
+        result = await signInAnonymously(auth);
+        
+        // IMPORTANT: We're creating a NEW anonymous UID, but we'll map it to the existing user
+        // This is a temporary workaround - in production, use Firebase custom tokens
+        const tempUid = result.user.uid;
+        
+        // Sign out the temp account
+        await auth.signOut();
+        
+        // TODO: When custom tokens are ready, sign in with the custom token instead
+        // For now, we'll just verify the user exists and let password login handle the rest
+        console.log('[Auth] User verified. Please use password login for existing users.');
+        alert('User exists. Please use password login.');
+        setAuthStep('password');
+        return;
+      } else {
+        // New user - create Firebase account
+        result = await signInAnonymously(auth);
+        firebaseUid = result.user.uid;
+        console.log('[Auth] New user created with UID:', firebaseUid);
+        
+        // Create user profile
+        const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', firebaseUid);
+        await setDoc(userRef, {
+          uid: firebaseUid,
+          phone: confirmationResult.phone,
+          createdAt: new Date().toISOString(),
+          authMethod: 'fast2sms-otp'
+        }, { merge: true });
+        
+        // Create phone lookup
+        await setDoc(phoneLookupRef, {
+          uid: firebaseUid
+        });
+      }
+      
+      // Check if this is a new user or existing user
       if (isNewUser) {
         // New user - show registration form
         console.log('[Auth] New user - showing registration/profile setup');
         setShowProfileSetup(true);
         setAuthStep('register');
       } else {
-        // Existing OTP-only user - they're now authenticated
-        // onAuthStateChanged will load their profile automatically
-        console.log('[Auth] Existing OTP-only user - login complete');
-        setShowProfileSetup(false); // Explicitly hide profile setup for existing users
+        // Existing user - login complete
+        console.log('[Auth] Existing user - login complete');
+        setShowProfileSetup(false);
         setAuthStep('phone');
       }
       setOtp('');
     } catch (error) {
       console.error('[Auth] OTP verification error:', error);
-      alert('Invalid OTP. Please try again.');
+      alert(`Invalid OTP: ${error.message}. Please try again.`);
     }
   };
 
