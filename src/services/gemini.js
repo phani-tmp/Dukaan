@@ -331,18 +331,7 @@ export async function transcribeAudio(audioBase64, mimeType = 'audio/webm') {
           role: 'user',
           parts: [
             {
-              text: `Listen to this audio and transcribe exactly what was said. The audio may be in Telugu, English, Hindi, or a mix.
-
-IMPORTANT CONTEXT: This is a voice search for a grocery/quick commerce app. Common words include:
-- Vegetables: tomato, onion, brinjal (eggplant), potato, cabbage, carrot, beans, etc.
-- Fruits: apple, banana, mango, orange, grapes, etc.
-- Groceries: rice, dal, oil, atta (flour), sugar, salt, etc.
-- Dairy: milk, curd, paneer, butter, ghee, etc.
-- Telugu vegetables: vankaya (brinjal), ulli (onion), bangaladumpa (potato), tamata (tomato)
-
-When you hear unclear audio, prefer matching it to common grocery product names rather than generic words.
-
-Return ONLY the transcribed text, no explanations or additional commentary.`
+              text: 'Listen to this audio and transcribe exactly what was said. The audio may be in Telugu, English, Hindi, or a mix. Return ONLY the transcribed text, no explanations or additional commentary.'
             },
             {
               inlineData: {

@@ -124,7 +124,7 @@ export default function VoiceSearch({
       disabled={isProcessing}
       aria-label={language === 'te' ? 'వాయిస్ సెర్చ్' : 'Voice Search'}
       title={isListening 
-        ? (language === 'te' ? 'మాట్లాడండి... పూర్తయితే మళ్లీ నొక్కండి (10సె ఆటో-స్టాప్)' : 'Speak... Tap again when done (auto-stops in 10s)') 
+        ? (language === 'te' ? 'మాట్లాడండి... పూర్తయితే మళ్లీ నొక్కండి' : 'Speaking... Tap again when done') 
         : (language === 'te' ? 'మైక్‌ని నొక్కి మాట్లాడండి' : 'Tap mic and speak')}
     >
       {isListening ? <MicOff size={20} /> : <Mic size={20} />}
