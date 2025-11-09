@@ -149,7 +149,7 @@ export const AuthProvider = ({ children }) => {
             ? 'http://localhost:8000'
             : import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000');
       
-      const response = await fetch(`${backendUrl}/send-otp-test`, {
+      const response = await fetch(`${backendUrl}/send-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -163,13 +163,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.detail || 'Failed to send OTP');
       }
 
-      console.log('[Auth] OTP sent successfully:', data);
-      
-      // In test mode, log the OTP to console
-      if (data.otp) {
-        console.log('🔐 TEST OTP:', data.otp);
-        alert(`TEST MODE: Your OTP is ${data.otp}\n\n(Check console for OTP in test mode)`);
-      }
+      console.log('[Auth] OTP sent successfully to', fullPhoneNumber);
       
       setConfirmationResult({ phone: fullPhoneNumber }); // Store phone for verification
       setAuthStep('otp');
