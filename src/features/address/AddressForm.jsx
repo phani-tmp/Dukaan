@@ -19,42 +19,25 @@ const AddressForm = ({ onSave, onClose, editingAddress }) => {
           const { latitude, longitude } = position.coords;
           
           try {
-            // Use backend geocoding endpoint to avoid CORS issues
-            const backendUrl = window.location.hostname.includes('replit.dev') 
-              ? `https://${window.location.hostname}:8000`
-              : (window.location.hostname === 'localhost' 
-                  ? 'http://localhost:8000'
-                  : import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000');
-            
             const response = await fetch(
-              `${backendUrl}/geocode?lat=${latitude}&lon=${longitude}`
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
             );
-            
             const data = await response.json();
             
-            if (data.status === 'success' && data.address) {
-              setFormData({
-                ...formData,
-                fullAddress: data.address,
-                latitude,
-                longitude
-              });
-            } else {
-              // Fallback: just use coordinates
-              setFormData({
-                ...formData,
-                fullAddress: `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-                latitude,
-                longitude
-              });
-            }
+            const address = data.display_name || `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            
+            setFormData({
+              ...formData,
+              fullAddress: address,
+              latitude,
+              longitude
+            });
             setLoadingLocation(false);
           } catch (error) {
             console.error('Error getting address:', error);
-            // Fallback: just coordinates, user can edit
             setFormData({
               ...formData,
-              fullAddress: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+              fullAddress: `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
               latitude,
               longitude
             });

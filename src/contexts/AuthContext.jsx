@@ -5,8 +5,7 @@ import {
   signOut, 
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signInAnonymously
+  createUserWithEmailAndPassword
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, collection, addDoc, getDocs } from 'firebase/firestore';
 import { getFirebaseInstances, appId } from '../services/firebase';
@@ -83,10 +82,10 @@ export const AuthProvider = ({ children }) => {
         }
       } else {
         // User is authenticated but has no profile
+        // Only show profile setup if they're in the registration step
         console.log('[Auth] User authenticated but no profile found for UID:', uid);
-        console.log('[Auth] Auto-showing profile setup for user without profile');
         setUserProfile(null);
-        setShowProfileSetup(true); // Auto-show profile setup if user has no profile
+        // Don't automatically show profile setup here - let the auth flow control it
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
@@ -134,231 +133,84 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // For NEW users - send OTP via Fast2SMS backend
+  // For NEW users - send OTP
   const handleSendOTP = async () => {
+    if (!auth) {
+      alert('Authentication not initialized. Please refresh the page.');
+      return;
+    }
+
     try {
       const fullPhoneNumber = `${countryCode}${phoneNumber}`;
       
-      console.log('[Auth] Sending OTP to:', fullPhoneNumber);
-      
-      // Call Fast2SMS backend (use test endpoint for development)
-      // Auto-detect backend URL based on environment
-      const backendUrl = window.location.hostname.includes('replit.dev') 
-        ? `https://${window.location.hostname}:8000`
-        : (window.location.hostname === 'localhost' 
-            ? 'http://localhost:8000'
-            : import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000');
-      
-      const response = await fetch(`${backendUrl}/send-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phone: fullPhoneNumber })
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.detail || 'Failed to send OTP');
+      if (window.recaptchaVerifier) {
+        try {
+          window.recaptchaVerifier.clear();
+        } catch (e) {
+          console.log('[Auth] Error clearing old verifier:', e);
+        }
+        window.recaptchaVerifier = null;
       }
-
-      console.log('[Auth] OTP sent successfully to', fullPhoneNumber);
       
-      setConfirmationResult({ phone: fullPhoneNumber }); // Store phone for verification
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'invisible',
+        callback: () => {
+          console.log('[Auth] reCAPTCHA verified');
+        }
+      });
+      
+      const appVerifier = window.recaptchaVerifier;
+      const confirmation = await signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier);
+      setConfirmationResult(confirmation);
       setAuthStep('otp');
       alert('OTP sent to your phone!');
     } catch (error) {
       console.error('[Auth] OTP send error:', error);
+      if (window.recaptchaVerifier) {
+        try {
+          window.recaptchaVerifier.clear();
+        } catch (e) {
+          console.log('[Auth] Error clearing verifier:', e);
+        }
+        window.recaptchaVerifier = null;
+      }
       alert(`Failed to send OTP: ${error.message}. Please try again.`);
     }
   };
 
-  // Verify OTP for both new and existing users via Fast2SMS backend
+  // Verify OTP for both new and existing users
   const handleVerifyOTP = async () => {
     if (!otp || otp.length !== 6) {
       alert('Please enter a valid 6-digit OTP');
       return;
     }
 
-    if (!confirmationResult || !confirmationResult.phone) {
+    if (!confirmationResult) {
       alert('Please request OTP first');
       return;
     }
 
     try {
-      console.log('[Auth] Verifying OTP for:', confirmationResult.phone);
+      const result = await confirmationResult.confirm(otp);
+      console.log('[Auth] OTP verified for user:', result.user.uid);
       
-      // Call Fast2SMS backend to verify OTP
-      const backendUrl = window.location.hostname.includes('replit.dev') 
-        ? `https://${window.location.hostname}:8000`
-        : (window.location.hostname === 'localhost' 
-            ? 'http://localhost:8000'
-            : import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000');
-      
-      const response = await fetch(`${backendUrl}/verify-otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          phone: confirmationResult.phone,
-          otp: otp 
-        })
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.detail || 'Failed to verify OTP');
-      }
-
-      console.log('[Auth] OTP verified successfully:', data);
-      
-      // Check if user already exists in Firestore (to preserve their data)
-      const phoneLookupRef = doc(db, 'artifacts', appId, 'public', 'data', 'users_by_phone', phoneNumber);
-      const phoneLookup = await getDoc(phoneLookupRef);
-      
-      if (phoneLookup.exists()) {
-        // EXISTING USER - Check if they have a password
-        const firebaseUid = phoneLookup.data().uid;
-        console.log('[Auth] Existing user verified, UID:', firebaseUid);
-        
-        // Get user profile to check if they have a password
-        const userProfileRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', firebaseUid);
-        const userProfile = await getDoc(userProfileRef);
-        
-        if (userProfile.exists() && userProfile.data().password) {
-          // User has password - ask for it
-          console.log('[Auth] User has password - redirecting to password login');
-          alert('Phone verified! Please enter your password to continue.');
-          setAuthStep('password');
-          setOtp('');
-          return;
-        }
-        
-        // User exists but NO password - OTP-only user
-        console.log('[Auth] Existing OTP-only user - allowing seamless login');
-        
-        // For existing users without password, create a ONE-TIME login session
-        // They can set a password later if they want
-        const phoneEmail = `${countryCode}${phoneNumber}@dukaan.app`;
-        
-        // Try to sign in with the existing email (they might have set a password before)
-        try {
-          // Generate a temporary password based on their phone number (consistent)
-          const tempPassword = `DUKAAN_${phoneNumber}_TEMP`;
-          
-          console.log('[Auth] Attempting sign-in for existing user');
-          const result = await signInWithEmailAndPassword(auth, phoneEmail, tempPassword);
-          console.log('[Auth] Existing user signed in successfully');
-          
-          // Login successful - they're in!
-          setShowProfileSetup(false);
-          setAuthStep('phone');
-          setOtp('');
-          alert('Welcome back! Login successful.');
-          return;
-        } catch (signInError) {
-          // Sign-in failed - need to create account first
-          console.log('[Auth] Creating new email/password account for existing user');
-          
-          try {
-            // Create the email/password account with temp password
-            const tempPassword = `DUKAAN_${phoneNumber}_TEMP`;
-            const phoneEmail = `${countryCode}${phoneNumber}@dukaan.app`;
-            
-            const createResult = await createUserWithEmailAndPassword(auth, phoneEmail, tempPassword);
-            console.log('[Auth] Account created, user logged in:', createResult.user.uid);
-            
-            // Update their Firestore profile to link accounts
-            const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', createResult.user.uid);
-            await setDoc(userRef, {
-              uid: createResult.user.uid,
-              phoneNumber: `${countryCode}${phoneNumber}`,
-              phone: `${countryCode}${phoneNumber}`,
-              tempPassword: tempPassword,
-              authMethod: 'fast2sms-otp',
-              updatedAt: new Date().toISOString()
-            }, { merge: true });
-            
-            // Login successful!
-            console.log('[Auth] User logged in successfully');
-            setShowProfileSetup(false);
-            setAuthStep('phone');
-            setOtp('');
-            alert('✅ Welcome! You are now logged in.');
-            return;
-          } catch (createError) {
-            console.error('[Auth] Failed to create account:', createError);
-            
-            if (createError.code === 'auth/operation-not-allowed') {
-              alert('⚠️ Setup Required:\n\nPlease enable Email/Password authentication in Firebase Console:\n\n1. Go to Firebase Console → Authentication\n2. Click "Sign-in method"\n3. Enable "Email/Password"\n\nThen try again.');
-            } else if (createError.code === 'auth/email-already-in-use') {
-              alert('Account exists. Please contact support.');
-            } else {
-              alert(`Login failed: ${createError.message}`);
-            }
-            
-            setAuthStep('phone');
-            setOtp('');
-            return;
-          }
-        }
-      }
-      
-      // NEW USER - Create Firebase email/password account immediately
-      console.log('[Auth] New user detected - creating email/password account');
-      
-      try {
-        const phoneEmail = `${countryCode}${phoneNumber}@dukaan.app`;
-        const tempPassword = `OTP${Date.now()}${Math.random().toString(36)}`.slice(0, 20); // Temporary auto-generated password
-        
-        console.log('[Auth] Creating Firebase account with email:', phoneEmail);
-        const result = await createUserWithEmailAndPassword(auth, phoneEmail, tempPassword);
-        const firebaseUid = result.user.uid;
-        console.log('[Auth] New user created with UID:', firebaseUid);
-        
-        // Create basic user profile
-        const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', firebaseUid);
-        await setDoc(userRef, {
-          uid: firebaseUid,
-          phone: confirmationResult.phone,
-          phoneNumber: confirmationResult.phone,
-          name: `User-${phoneNumber}`, // Temporary name - will be updated in profile setup
-          role: 'customer',
-          createdAt: new Date().toISOString(),
-          authMethod: 'fast2sms-otp',
-          tempPassword: tempPassword // Store temp password so we can update it later
-        }, { merge: true });
-        
-        // Create phone lookup
-        await setDoc(phoneLookupRef, {
-          uid: firebaseUid
-        });
-        
-        // Show registration form to set real name/password
-        console.log('[Auth] New user - showing profile setup');
+      // Check if this is a new user or existing OTP-only user
+      if (isNewUser) {
+        // New user - show registration form
+        console.log('[Auth] New user - showing registration/profile setup');
         setShowProfileSetup(true);
         setAuthStep('register');
-        setOtp('');
-      } catch (firebaseError) {
-        console.error('[Auth] Firebase account creation error:', firebaseError);
-        
-        if (firebaseError.code === 'auth/email-already-in-use') {
-          alert('Account already exists. Please use password login.');
-          setAuthStep('password');
-          setOtp('');
-          return;
-        }
-        
-        alert(`Failed to create account: ${firebaseError.message}`);
+      } else {
+        // Existing OTP-only user - they're now authenticated
+        // onAuthStateChanged will load their profile automatically
+        console.log('[Auth] Existing OTP-only user - login complete');
+        setShowProfileSetup(false); // Explicitly hide profile setup for existing users
         setAuthStep('phone');
-        setOtp('');
       }
+      setOtp('');
     } catch (error) {
       console.error('[Auth] OTP verification error:', error);
-      alert(`Invalid OTP: ${error.message}. Please try again.`);
+      alert('Invalid OTP. Please try again.');
     }
   };
 
@@ -389,62 +241,42 @@ export const AuthProvider = ({ children }) => {
 
   // For NEW users - complete registration
   const handleCompleteRegistration = async (profileData) => {
-    console.log('[Auth] Starting registration with data:', { 
-      hasUser: !!user, 
-      uid: user?.uid,
-      phone: `${countryCode}${phoneNumber}`,
-      hasPassword: !!profileData.password
-    });
-
     if (!user) {
-      alert('Authentication session expired. Please verify OTP again.');
-      setAuthStep('phone');
+      alert('Please verify OTP first');
       return;
     }
 
-    // Password is now optional - allow OTP-only users
-    const hasPassword = profileData.password && profileData.password.length >= 6;
+    if (!profileData.password || profileData.password.length < 6) {
+      alert('Password must be at least 6 characters');
+      return;
+    }
 
     try {
       const phoneEmail = `${countryCode}${phoneNumber}@dukaan.app`;
       
-      console.log('[Auth] Saving user profile to Firestore...');
+      // Create password-based auth account
+      // Note: User is already authenticated via phone, we need to link email/password
+      // For simplicity, we'll store the profile and rely on phone auth
       
-      // Save user profile to Firestore with merge to preserve existing data
+      // Save user profile to Firestore
       const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid);
-      const profileToSave = {
+      await setDoc(userDocRef, {
         name: profileData.name,
         phoneNumber: `${countryCode}${phoneNumber}`,
+        password: profileData.password, // In production, this should be hashed!
         email: profileData.email || '',
-        role: 'customer', // Default role
-        updatedAt: new Date().toISOString()
-      };
-
-      // Only save password if provided
-      if (hasPassword) {
-        profileToSave.password = profileData.password; // In production, this should be hashed!
-      }
-
-      // Check if this is the first time saving (add createdAt)
-      const existingDoc = await getDoc(userDocRef);
-      if (!existingDoc.exists()) {
-        profileToSave.createdAt = new Date().toISOString();
-      }
-
-      await setDoc(userDocRef, profileToSave, { merge: true });
-      console.log('[Auth] User profile saved successfully');
+        createdAt: new Date().toISOString()
+      });
 
       // Save phone number mapping
       const phoneDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users_by_phone', phoneNumber);
       await setDoc(phoneDocRef, {
         uid: user.uid,
         phoneNumber: `${countryCode}${phoneNumber}`
-      }, { merge: true });
-      console.log('[Auth] Phone mapping saved successfully');
+      });
 
       // Save initial address if provided
       if (profileData.address && profileData.address.street) {
-        console.log('[Auth] Saving address...');
         const addressRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'addresses'));
         await setDoc(addressRef, {
           userId: user.uid,
@@ -456,21 +288,15 @@ export const AuthProvider = ({ children }) => {
           isDefault: true,
           createdAt: new Date().toISOString()
         });
-        console.log('[Auth] Address saved successfully');
       }
       
-      console.log('[Auth] Registration complete!');
       setShowProfileSetup(false);
       setAuthStep('phone');
-      
-      // Reload user profile
-      await loadUserProfile(user.uid);
-      
-      alert('Welcome to DUKAAN! Your profile has been created successfully.');
+      setUserProfile({ id: user.uid, ...profileData, phoneNumber: `${countryCode}${phoneNumber}` });
+      alert('Registration successful! You can now login with your phone number and password.');
     } catch (error) {
-      console.error('[Auth] Error completing registration:', error);
-      console.error('[Auth] Error details:', error.code, error.message);
-      alert(`Failed to save profile: ${error.message}\n\nPlease try again or contact support.`);
+      console.error('Error completing registration:', error);
+      alert('Failed to complete registration. Please try again.');
     }
   };
 
@@ -490,27 +316,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   const handleSaveProfile = async (profileData) => {
-    if (!user) {
-      console.error('[Auth] No user session - cannot save profile');
-      alert('Session expired. Please login again.');
-      setAuthStep('phone');
-      return;
-    }
+    if (!user) return;
     
     try {
-      // Get phone number from multiple sources (Firebase auth, context state, or profile data)
-      const phoneNum = user.phoneNumber || 
-                       profileData.phoneNumber || 
-                       `${countryCode}${phoneNumber}` || // From OTP verification context
-                       confirmationResult?.phone; // From OTP confirmation
-      
-      if (!phoneNum) {
-        console.error('[Auth] No phone number available');
-        alert('Phone number missing. Please login again.');
-        setAuthStep('phone');
-        return;
-      }
-      
+      // Get phone number from Firebase auth
+      const phoneNum = user.phoneNumber || profileData.phoneNumber;
       const cleanPhone = phoneNum.replace(/[^\d]/g, '').slice(-10); // Get last 10 digits
       
       // PREVENT DUPLICATE PHONE NUMBERS: Check if this phone is already registered to a different user
@@ -539,16 +349,10 @@ export const AuthProvider = ({ children }) => {
         console.log('[Auth] Auto-generated username:', userName);
       }
       
-      // Ensure we have the full phone number with country code
-      const fullPhoneNumber = phoneNum.startsWith('+') ? phoneNum : `+${phoneNum}`;
-      
-      console.log('[Auth] Saving profile with phone:', fullPhoneNumber);
-      
       // Create user document preserving existing role
       const userDoc = {
         name: userName,
-        phoneNumber: fullPhoneNumber, // Always save with country code
-        phone: fullPhoneNumber, // Duplicate field for compatibility
+        phoneNumber: user.phoneNumber || phoneNum,
         email: profileData.email || null,
         role: existingRole || 'customer', // Preserve existing role or default to customer
         profileCompleted: profileData.profileCompleted || false, // Track if user completed setup or skipped
@@ -571,15 +375,14 @@ export const AuthProvider = ({ children }) => {
       // Save phone number mapping (now safe - we checked for duplicates above)
       await setDoc(phoneDocRef, {
         uid: user.uid,
-        phoneNumber: fullPhoneNumber
+        phoneNumber: user.phoneNumber || phoneNum
       });
       
       setShowProfileSetup(false);
       const updatedProfile = { 
         id: user.uid, 
         name: userName,
-        phoneNumber: fullPhoneNumber, // Use full phone with country code
-        phone: fullPhoneNumber,
+        phoneNumber: user.phoneNumber || phoneNum,
         email: profileData.email || null,
         role: existingRole || 'customer',
         profileCompleted: profileData.profileCompleted || false
