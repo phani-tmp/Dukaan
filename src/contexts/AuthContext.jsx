@@ -149,7 +149,7 @@ export const AuthProvider = ({ children }) => {
             ? 'http://localhost:8000'
             : import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000');
       
-      const response = await fetch(`${backendUrl}/send-otp-test`, {
+      const response = await fetch(`${backendUrl}/send-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -163,12 +163,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.detail || 'Failed to send OTP');
       }
 
-      console.log('[Auth] OTP sent successfully:', data);
-      
-      // Store OTP temporarily for development (will be removed in production)
-      if (data.otp) {
-        console.log('[Auth] TEST OTP:', data.otp);
-      }
+      console.log('[Auth] OTP sent successfully to', fullPhoneNumber);
       
       setConfirmationResult({ phone: fullPhoneNumber }); // Store phone for verification
       setAuthStep('otp');
@@ -225,15 +220,45 @@ export const AuthProvider = ({ children }) => {
       const phoneLookup = await getDoc(phoneLookupRef);
       
       if (phoneLookup.exists()) {
-        // EXISTING USER - Skip Firebase sign-in and redirect to password login
+        // EXISTING USER - Check if they have a password
         const firebaseUid = phoneLookup.data().uid;
         console.log('[Auth] Existing user verified, UID:', firebaseUid);
-        console.log('[Auth] Redirecting to password login (OTP verified successfully)');
         
-        alert('Phone verified! Please enter your password to continue.');
-        setAuthStep('password');
-        setOtp('');
-        return;
+        // Get user profile to check if they have a password
+        const userProfileRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', firebaseUid);
+        const userProfile = await getDoc(userProfileRef);
+        
+        if (userProfile.exists() && userProfile.data().password) {
+          // User has password - ask for it
+          console.log('[Auth] User has password - redirecting to password login');
+          alert('Phone verified! Please enter your password to continue.');
+          setAuthStep('password');
+          setOtp('');
+          return;
+        }
+        
+        // User exists but NO password - sign them in directly with email/password they set during registration
+        // OR use the backend's custom token if available
+        console.log('[Auth] OTP-only user - attempting seamless sign-in');
+        
+        // For now, ask them to set up a password (temporary until custom tokens work)
+        alert('Please complete your profile setup with a password for secure access.');
+        
+        // Create temporary Firebase session to complete profile
+        try {
+          const tempResult = await signInAnonymously(auth);
+          console.log('[Auth] Temporary session created for existing user profile completion');
+          setShowProfileSetup(true);
+          setAuthStep('register');
+          setOtp('');
+          return;
+        } catch (authError) {
+          console.error('[Auth] Could not create temp session:', authError);
+          alert('Authentication error. Please enable Anonymous sign-in in Firebase Console.');
+          setAuthStep('phone');
+          setOtp('');
+          return;
+        }
       }
       
       // NEW USER - Create Firebase account
