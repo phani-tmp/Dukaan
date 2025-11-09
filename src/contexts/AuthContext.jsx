@@ -260,17 +260,50 @@ export const AuthProvider = ({ children }) => {
           alert('Welcome back! Login successful.');
           return;
         } catch (signInError) {
-          // They don't have an email/password account yet - that's OK!
-          // Just tell them they're verified and can use the app
-          console.log('[Auth] User verified via OTP (no email/password account needed)');
-          alert(`✅ Phone verified!\n\nYou can now use the app with OTP-only login.\n\nTo enable password login, please go to Profile and set a password.`);
+          // Sign-in failed - need to create account first
+          console.log('[Auth] Creating new email/password account for existing user');
           
-          // Set them as authenticated in the app state (even without Firebase auth)
-          // Their profile already exists in Firestore, so just load it
-          await loadUserProfile(firebaseUid);
-          setAuthStep('phone');
-          setOtp('');
-          return;
+          try {
+            // Create the email/password account with temp password
+            const tempPassword = `DUKAAN_${phoneNumber}_TEMP`;
+            const phoneEmail = `${countryCode}${phoneNumber}@dukaan.app`;
+            
+            const createResult = await createUserWithEmailAndPassword(auth, phoneEmail, tempPassword);
+            console.log('[Auth] Account created, user logged in:', createResult.user.uid);
+            
+            // Update their Firestore profile to link accounts
+            const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', createResult.user.uid);
+            await setDoc(userRef, {
+              uid: createResult.user.uid,
+              phoneNumber: `${countryCode}${phoneNumber}`,
+              phone: `${countryCode}${phoneNumber}`,
+              tempPassword: tempPassword,
+              authMethod: 'fast2sms-otp',
+              updatedAt: new Date().toISOString()
+            }, { merge: true });
+            
+            // Login successful!
+            console.log('[Auth] User logged in successfully');
+            setShowProfileSetup(false);
+            setAuthStep('phone');
+            setOtp('');
+            alert('✅ Welcome! You are now logged in.');
+            return;
+          } catch (createError) {
+            console.error('[Auth] Failed to create account:', createError);
+            
+            if (createError.code === 'auth/operation-not-allowed') {
+              alert('⚠️ Setup Required:\n\nPlease enable Email/Password authentication in Firebase Console:\n\n1. Go to Firebase Console → Authentication\n2. Click "Sign-in method"\n3. Enable "Email/Password"\n\nThen try again.');
+            } else if (createError.code === 'auth/email-already-in-use') {
+              alert('Account exists. Please contact support.');
+            } else {
+              alert(`Login failed: ${createError.message}`);
+            }
+            
+            setAuthStep('phone');
+            setOtp('');
+            return;
+          }
         }
       }
       
