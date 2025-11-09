@@ -18,6 +18,10 @@ author = "agent"
 task = "workflow.run"
 args = "Server"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Backend"
+
 [[workflows.workflow]]
 name = "Server"
 author = "agent"
@@ -30,6 +34,18 @@ waitForPort = 5000
 [workflows.workflow.metadata]
 outputType = "webview"
 
+[[workflows.workflow]]
+name = "Backend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd backend && uvicorn app:app --host 0.0.0.0 --port 8000 --reload"
+waitForPort = 8000
+
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[ports]]
 localPort = 5000
 externalPort = 80
@@ -39,12 +55,20 @@ localPort = 5001
 externalPort = 3000
 
 [[ports]]
+localPort = 8000
+externalPort = 8000
+
+[[ports]]
 localPort = 37295
 externalPort = 3003
 
 [[ports]]
 localPort = 39213
 externalPort = 3001
+
+[[ports]]
+localPort = 39785
+externalPort = 5173
 
 [[ports]]
 localPort = 41437

@@ -25,30 +25,18 @@ firebase_app = None
 db = None
 
 try:
-    # Initialize Firebase using environment variables (no JSON file needed)
-    firebase_project_id = os.getenv("FIREBASE_PROJECT_ID")
-    firebase_private_key = os.getenv("FIREBASE_PRIVATE_KEY")
-    firebase_client_email = os.getenv("FIREBASE_CLIENT_EMAIL")
-    
-    if firebase_project_id and firebase_private_key and firebase_client_email:
-        # Fix newlines in private key (critical for proper parsing)
-        private_key_fixed = firebase_private_key.replace("\\n", "\n")
-        
-        cred = credentials.Certificate({
-            "type": "service_account",
-            "project_id": firebase_project_id,
-            "private_key": private_key_fixed,
-            "client_email": firebase_client_email,
-            "token_uri": "https://oauth2.googleapis.com/token",
-        })
-        
-        firebase_app = firebase_admin.initialize_app(cred)
-        db = firestore.client()
-        print(f"✅ Firebase initialized successfully for project: {firebase_project_id}")
-    else:
-        print("⚠️  Firebase credentials not found. Please add FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, and FIREBASE_CLIENT_EMAIL to Secrets")
+    # Initialize Firebase using Workload Identity Federation (Application Default Credentials)
+    # This uses Replit's OIDC connection to authenticate via ADC - no private keys needed!
+    cred = credentials.ApplicationDefault()
+    firebase_app = firebase_admin.initialize_app(cred, {
+        'projectId': 'dukaan-476221'
+    })
+    db = firestore.client()
+    print("✅ Firebase initialized successfully via Workload Identity Federation")
+    print("✅ Service Account: firebase-adminsdk-fbsvc@dukaan-476221.iam.gserviceaccount.com")
 except Exception as e:
     print(f"⚠️  Firebase initialization error: {e}")
+    print("Make sure Workload Identity Federation is properly configured.")
 
 FAST2SMS_API_KEY = os.getenv("FAST2SMS_API_KEY")
 
@@ -133,6 +121,34 @@ def send_otp(data: OTPRequest):
         raise
     except Exception as e:
         print(f"Error sending OTP: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/send-otp-test")
+def send_otp_test(data: OTPRequest):
+    """Test endpoint that stores OTP without sending SMS - for development only"""
+    if not db:
+        raise HTTPException(status_code=500, detail="Firebase not configured")
+    
+    try:
+        otp = generate_otp()
+        expiry = int(time.time()) + 300
+        
+        db.collection("otp_codes").document(data.phone).set({
+            "otp": otp,
+            "expiry": expiry,
+            "created_at": int(time.time())
+        })
+        
+        print(f"🧪 TEST MODE: OTP {otp} stored for {data.phone} (no SMS sent)")
+        
+        return {
+            "message": "OTP stored successfully (TEST MODE - no SMS sent)",
+            "phone": data.phone,
+            "otp": otp,
+            "expires_in": 300
+        }
+    except Exception as e:
+        print(f"Error storing OTP: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/verify-otp")
