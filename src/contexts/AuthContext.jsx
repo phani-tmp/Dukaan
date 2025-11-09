@@ -83,10 +83,10 @@ export const AuthProvider = ({ children }) => {
         }
       } else {
         // User is authenticated but has no profile
-        // Only show profile setup if they're in the registration step
         console.log('[Auth] User authenticated but no profile found for UID:', uid);
+        console.log('[Auth] Auto-showing profile setup for user without profile');
         setUserProfile(null);
-        // Don't automatically show profile setup here - let the auth flow control it
+        setShowProfileSetup(true); // Auto-show profile setup if user has no profile
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
