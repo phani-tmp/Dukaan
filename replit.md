@@ -17,7 +17,7 @@ The application features a modern, mobile-first design with a professional, emoj
 
 ### Technical Implementations
 - **Frontend**: React with Vite.
-- **Backend/Database**: Firebase (Firestore, Authentication).
+- **Backend/Database**: Firebase (Firestore, Authentication). FastAPI backend (`/backend`) for OTP services via Fast2SMS.
 - **Styling**: Custom CSS with `lucide-react` for icons.
 - **Comprehensive Bilingual Support**: Translation dictionary for all UI text, bilingual product/category/subcategory names (`nameEn`, `nameTe`), and language toggle. All hardcoded English text replaced with translation keys for complete Telugu support.
 - **Image Handling**: Supports direct image upload (Base64) and URL-based images.
@@ -29,7 +29,7 @@ The application features a modern, mobile-first design with a professional, emoj
 - **Native Audio Recording**: Integrated Capacitor Voice Recorder plugin (`capacitor-voice-recorder`) for reliable microphone access on Android/iOS with automatic fallback to web MediaRecorder API for browsers (Nov 2025).
 
 ### Feature Specifications
-- **Authentication & Role-Based Access Control**: Village-friendly OTP-first login with intelligent user detection, profile setup flexibility (skip option), and distinct roles (customer, shopkeeper, rider) with strict isolation.
+- **Authentication & Role-Based Access Control**: Village-friendly OTP-first login with intelligent user detection, profile setup flexibility (skip option), and distinct roles (customer, shopkeeper, rider) with strict isolation. Fast2SMS backend for reliable OTP delivery in Indian villages (Nov 2025).
 - **Address Management**: CRUD operations, labels, default selection, delivery instructions, and storage of geographical coordinates.
 - **Three-Level Category Hierarchy**: Home → Subcategories → Products. All levels support bilingual names (English and Telugu).
 - **Bilingual Product Names**: Products, categories, and subcategories all have `nameEn` and `nameTe` fields. UI automatically displays the appropriate language based on user selection, with backward compatibility for legacy products with single `name` field.
@@ -50,9 +50,46 @@ The application features a modern, mobile-first design with a professional, emoj
 - **Idempotent Seed Data**: Prevents duplicate data entry.
 
 ## External Dependencies
-- **Firebase**: Firestore (database), Authentication (phone and anonymous sign-in).
+- **Firebase**: Firestore (database), Authentication (phone and anonymous sign-in), Admin SDK for custom token generation.
+- **Fast2SMS**: SMS gateway for OTP delivery (reliable for Indian phone numbers).
 - **Google Gemini AI**: Used for voice-powered shopping (audio transcription), semantic search, and language translation (`@google/genai` package).
 - **Capacitor Voice Recorder**: Native audio recording for voice input on Android/iOS (`capacitor-voice-recorder` package).
 - **Browser MediaRecorder API**: Audio recording fallback for web browsers.
 - **lucide-react**: For vector icons.
 - **OpenStreetMap Nominatim**: For reverse geocoding addresses.
+
+## Backend Architecture (FastAPI OTP Service)
+
+### Overview
+The `/backend` directory contains a FastAPI service that handles OTP generation, delivery via Fast2SMS, and verification. This replaces Firebase's built-in phone authentication for better reliability in Indian villages.
+
+### Current Implementation (Nov 2025)
+- **OTP Storage**: In-memory dictionary (`OTP_STORE`) - will migrate to Redis/Firestore for production scalability
+- **OTP Delivery**: Fast2SMS SMS gateway with customizable sender ID
+- **Expiry**: 5-minute OTP validity (300 seconds)
+- **Firebase Integration**: Uses Workload Identity Federation via Application Default Credentials (ADC)
+- **Custom Tokens**: Temporarily disabled due to credential configuration - will be enabled once Firebase Admin SDK credentials are properly set up
+
+### Endpoints
+- `POST /send-otp` - Sends OTP via Fast2SMS SMS
+- `POST /send-otp-test` - Test mode: stores OTP without sending SMS (returns OTP in response)
+- `POST /verify-otp` - Verifies OTP and returns user UID (custom token generation pending)
+- `GET /health` - Health check endpoint
+- `GET /` - Service status and configuration
+
+### Environment Variables
+- `FAST2SMS_API_KEY` - Fast2SMS API key (stored in Replit Secrets)
+- `FAST2SMS_SENDER_ID` - SMS sender ID (default: "DUKAAN")
+
+### Security Features
+- OTP automatically deleted after successful verification
+- OTP expiry validation (5 minutes)
+- Phone number sanitization
+- CORS enabled for frontend integration
+
+### Future Enhancements
+1. Migrate from in-memory to Redis/Firestore for persistent OTP storage
+2. Add rate limiting (max 3 OTPs per 5 minutes per phone number)
+3. Enable Firebase custom token generation once credentials are configured
+4. Add IP/device throttling
+5. Implement SMS delivery confirmation webhooks
