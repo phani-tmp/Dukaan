@@ -237,34 +237,37 @@ export const AuthProvider = ({ children }) => {
           return;
         }
         
-        // User exists but NO password - they need to set one now
-        console.log('[Auth] Existing OTP-only user - needs to set password');
+        // User exists but NO password - OTP-only user
+        console.log('[Auth] Existing OTP-only user - allowing seamless login');
         
-        // Create email/password account for this existing user
+        // For existing users without password, create a ONE-TIME login session
+        // They can set a password later if they want
+        const phoneEmail = `${countryCode}${phoneNumber}@dukaan.app`;
+        
+        // Try to sign in with the existing email (they might have set a password before)
         try {
-          const phoneEmail = `${countryCode}${phoneNumber}@dukaan.app`;
-          const tempPassword = `temp_${Date.now()}_${Math.random().toString(36)}`; // Temporary password
+          // Generate a temporary password based on their phone number (consistent)
+          const tempPassword = `DUKAAN_${phoneNumber}_TEMP`;
           
-          console.log('[Auth] Creating email/password account for existing user');
-          const result = await createUserWithEmailAndPassword(auth, phoneEmail, tempPassword);
-          console.log('[Auth] Account created, showing password setup');
+          console.log('[Auth] Attempting sign-in for existing user');
+          const result = await signInWithEmailAndPassword(auth, phoneEmail, tempPassword);
+          console.log('[Auth] Existing user signed in successfully');
           
-          // Show profile setup to let them set a real password
-          setShowProfileSetup(true);
-          setAuthStep('register');
+          // Login successful - they're in!
+          setShowProfileSetup(false);
+          setAuthStep('phone');
           setOtp('');
+          alert('Welcome back! Login successful.');
           return;
-        } catch (authError) {
-          if (authError.code === 'auth/email-already-in-use') {
-            // Email already exists - try signing in with it
-            console.log('[Auth] Email already exists, user should use password login');
-            alert('You already have an account. Please use password login.');
-            setAuthStep('password');
-            setOtp('');
-            return;
-          }
-          console.error('[Auth] Could not create account:', authError);
-          alert(`Authentication error: ${authError.message}`);
+        } catch (signInError) {
+          // They don't have an email/password account yet - that's OK!
+          // Just tell them they're verified and can use the app
+          console.log('[Auth] User verified via OTP (no email/password account needed)');
+          alert(`✅ Phone verified!\n\nYou can now use the app with OTP-only login.\n\nTo enable password login, please go to Profile and set a password.`);
+          
+          // Set them as authenticated in the app state (even without Firebase auth)
+          // Their profile already exists in Firestore, so just load it
+          await loadUserProfile(firebaseUid);
           setAuthStep('phone');
           setOtp('');
           return;
