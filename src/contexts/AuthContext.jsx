@@ -341,42 +341,62 @@ export const AuthProvider = ({ children }) => {
 
   // For NEW users - complete registration
   const handleCompleteRegistration = async (profileData) => {
+    console.log('[Auth] Starting registration with data:', { 
+      hasUser: !!user, 
+      uid: user?.uid,
+      phone: `${countryCode}${phoneNumber}`,
+      hasPassword: !!profileData.password
+    });
+
     if (!user) {
-      alert('Please verify OTP first');
+      alert('Authentication session expired. Please verify OTP again.');
+      setAuthStep('phone');
       return;
     }
 
-    if (!profileData.password || profileData.password.length < 6) {
-      alert('Password must be at least 6 characters');
-      return;
-    }
+    // Password is now optional - allow OTP-only users
+    const hasPassword = profileData.password && profileData.password.length >= 6;
 
     try {
       const phoneEmail = `${countryCode}${phoneNumber}@dukaan.app`;
       
-      // Create password-based auth account
-      // Note: User is already authenticated via phone, we need to link email/password
-      // For simplicity, we'll store the profile and rely on phone auth
+      console.log('[Auth] Saving user profile to Firestore...');
       
-      // Save user profile to Firestore
+      // Save user profile to Firestore with merge to preserve existing data
       const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid);
-      await setDoc(userDocRef, {
+      const profileToSave = {
         name: profileData.name,
         phoneNumber: `${countryCode}${phoneNumber}`,
-        password: profileData.password, // In production, this should be hashed!
         email: profileData.email || '',
-        createdAt: new Date().toISOString()
-      });
+        role: 'customer', // Default role
+        updatedAt: new Date().toISOString()
+      };
+
+      // Only save password if provided
+      if (hasPassword) {
+        profileToSave.password = profileData.password; // In production, this should be hashed!
+      }
+
+      // Check if this is the first time saving (add createdAt)
+      const existingDoc = await getDoc(userDocRef);
+      if (!existingDoc.exists()) {
+        profileToSave.createdAt = new Date().toISOString();
+      }
+
+      await setDoc(userDocRef, profileToSave, { merge: true });
+      console.log('[Auth] User profile saved successfully');
 
       // Save phone number mapping
       const phoneDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users_by_phone', phoneNumber);
       await setDoc(phoneDocRef, {
         uid: user.uid,
         phoneNumber: `${countryCode}${phoneNumber}`
-      });
+      }, { merge: true });
+      console.log('[Auth] Phone mapping saved successfully');
 
       // Save initial address if provided
       if (profileData.address && profileData.address.street) {
+        console.log('[Auth] Saving address...');
         const addressRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'addresses'));
         await setDoc(addressRef, {
           userId: user.uid,
@@ -388,15 +408,21 @@ export const AuthProvider = ({ children }) => {
           isDefault: true,
           createdAt: new Date().toISOString()
         });
+        console.log('[Auth] Address saved successfully');
       }
       
+      console.log('[Auth] Registration complete!');
       setShowProfileSetup(false);
       setAuthStep('phone');
-      setUserProfile({ id: user.uid, ...profileData, phoneNumber: `${countryCode}${phoneNumber}` });
-      alert('Registration successful! You can now login with your phone number and password.');
+      
+      // Reload user profile
+      await loadUserProfile(user.uid);
+      
+      alert('Welcome to DUKAAN! Your profile has been created successfully.');
     } catch (error) {
-      console.error('Error completing registration:', error);
-      alert('Failed to complete registration. Please try again.');
+      console.error('[Auth] Error completing registration:', error);
+      console.error('[Auth] Error details:', error.code, error.message);
+      alert(`Failed to save profile: ${error.message}\n\nPlease try again or contact support.`);
     }
   };
 
