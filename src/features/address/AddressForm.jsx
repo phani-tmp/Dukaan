@@ -18,16 +18,49 @@ const AddressForm = ({ onSave, onClose, editingAddress }) => {
         async (position) => {
           const { latitude, longitude } = position.coords;
           
-          // Just use coordinates - OpenStreetMap blocks CORS requests from Replit
-          // Users can manually type their address
-          setFormData({
-            ...formData,
-            fullAddress: `Lat: ${latitude.toFixed(6)}, Lon: ${longitude.toFixed(6)}`,
-            latitude,
-            longitude
-          });
-          setLoadingLocation(false);
-          alert('Location captured! Please enter your full address manually.');
+          try {
+            // Use Google Maps Geocoding API as fallback (works better with CORS)
+            // Or use a simpler approach: just capture coordinates and let user type address
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
+              {
+                headers: {
+                  'User-Agent': 'DUKAAN-App/1.0'
+                }
+              }
+            );
+            
+            if (response.ok) {
+              const data = await response.json();
+              const address = data.display_name || `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+              
+              setFormData({
+                ...formData,
+                fullAddress: address,
+                latitude,
+                longitude
+              });
+            } else {
+              // Fallback: just use coordinates
+              setFormData({
+                ...formData,
+                fullAddress: `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+                latitude,
+                longitude
+              });
+            }
+            setLoadingLocation(false);
+          } catch (error) {
+            console.error('Error getting address:', error);
+            // Fallback: just coordinates, user can edit
+            setFormData({
+              ...formData,
+              fullAddress: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+              latitude,
+              longitude
+            });
+            setLoadingLocation(false);
+          }
         },
         (error) => {
           console.error('Geolocation error:', error);
