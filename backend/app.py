@@ -25,13 +25,28 @@ firebase_app = None
 db = None
 
 try:
-    if os.path.exists("serviceAccountKey.json"):
-        cred = credentials.Certificate("serviceAccountKey.json")
+    # Initialize Firebase using environment variables (no JSON file needed)
+    firebase_project_id = os.getenv("FIREBASE_PROJECT_ID")
+    firebase_private_key = os.getenv("FIREBASE_PRIVATE_KEY")
+    firebase_client_email = os.getenv("FIREBASE_CLIENT_EMAIL")
+    
+    if firebase_project_id and firebase_private_key and firebase_client_email:
+        # Fix newlines in private key (critical for proper parsing)
+        private_key_fixed = firebase_private_key.replace("\\n", "\n")
+        
+        cred = credentials.Certificate({
+            "type": "service_account",
+            "project_id": firebase_project_id,
+            "private_key": private_key_fixed,
+            "client_email": firebase_client_email,
+            "token_uri": "https://oauth2.googleapis.com/token",
+        })
+        
         firebase_app = firebase_admin.initialize_app(cred)
         db = firestore.client()
-        print("✅ Firebase initialized successfully")
+        print(f"✅ Firebase initialized successfully for project: {firebase_project_id}")
     else:
-        print("⚠️  Firebase service account key not found. Please add serviceAccountKey.json")
+        print("⚠️  Firebase credentials not found. Please add FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, and FIREBASE_CLIENT_EMAIL to Secrets")
 except Exception as e:
     print(f"⚠️  Firebase initialization error: {e}")
 
