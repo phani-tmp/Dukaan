@@ -201,6 +201,39 @@ def health_check():
         "timestamp": int(time.time())
     }
 
+@app.get("/test-firestore")
+def test_firestore():
+    """Test Firestore connection with read/write operations"""
+    if not db:
+        raise HTTPException(status_code=500, detail="Firebase not configured")
+    
+    try:
+        # Try a simple write with shorter timeout
+        test_doc_ref = db.collection("test").document("connection_test")
+        test_doc_ref.set({
+            "test": "success",
+            "timestamp": int(time.time())
+        }, timeout=5.0)
+        
+        # Try reading it back
+        doc = test_doc_ref.get(timeout=5.0)
+        
+        if doc.exists:
+            return {
+                "status": "success",
+                "message": "Firestore read/write working",
+                "data": doc.to_dict()
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Write succeeded but read failed")
+            
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e),
+            "type": type(e).__name__
+        }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8080)
