@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import random
@@ -207,3 +207,38 @@ def health_check():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8080)
+
+@app.get("/geocode")
+async def geocode_location(lat: float = Query(...), lon: float = Query(...)):
+    """
+    Reverse geocode coordinates to get address
+    Proxies request to OpenStreetMap to avoid CORS issues
+    """
+    try:
+        url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&addressdetails=1"
+        headers = {
+            "User-Agent": "DUKAAN-App/1.0 (https://dukaan.replit.app)"
+        }
+        
+        response = requests.get(url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return {
+                "status": "success",
+                "address": data.get("display_name", f"{lat}, {lon}"),
+                "details": data
+            }
+        else:
+            return {
+                "status": "error",
+                "address": f"{lat}, {lon}",
+                "message": f"Geocoding service returned {response.status_code}"
+            }
+    except Exception as e:
+        print(f"Geocoding error: {e}")
+        return {
+            "status": "error",
+            "address": f"{lat}, {lon}",
+            "message": str(e)
+        }
