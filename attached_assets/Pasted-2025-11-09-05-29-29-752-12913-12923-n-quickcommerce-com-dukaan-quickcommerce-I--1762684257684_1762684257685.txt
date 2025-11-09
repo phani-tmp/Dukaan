@@ -1,0 +1,33 @@
+2025-11-09 05:29:29.752 12913-12923 n.quickcommerce         com.dukaan.quickcommerce             I  Compiler allocated 5111KB to compile void android.view.ViewRootImpl.performTraversals()
+2025-11-09 05:29:29.839 12913-12913 Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-BlLOvCfD.js - Line 3474 - Msg: [Auth] User authenticated: 90m8scDZanhfAUlDEJZTlIEiy6o2
+2025-11-09 05:29:29.840 12913-12913 Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-BlLOvCfD.js - Line 3474 - Msg: [Auth] Loading profile for UID: 90m8scDZanhfAUlDEJZTlIEiy6o2
+2025-11-09 05:29:29.848 12913-12913 Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-BlLOvCfD.js - Line 3924 - Msg: [HomeView] Rendering with: [object Object]
+2025-11-09 05:29:29.850 12913-12989 Capacitor               com.dukaan.quickcommerce             D  Handling local request: https://localhost/dukaan-logo.png
+2025-11-09 05:29:30.258 12913-12913 Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-BlLOvCfD.js - Line 3474 - Msg: [Auth] Profile loaded: Phan Role: customer
+2025-11-09 05:29:30.462 12913-12913 Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-BlLOvCfD.js - Line 3924 - Msg: [HomeView] Rendering with: [object Object]
+2025-11-09 05:29:30.491 12913-12913 Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-BlLOvCfD.js - Line 3924 - Msg: [HomeView] Rendering with: [object Object]
+2025-11-09 05:29:32.007 12913-13060 ProfileInstaller        com.dukaan.quickcommerce             D  Installing profile for com.dukaan.quickcommerce
+2025-11-09 05:29:36.141 12913-12913 Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-BlLOvCfD.js - Line 3474 - Msg: [Auth] No user authenticated
+2025-11-09 05:29:36.170 12913-12913 CompatChangeReporter    com.dukaan.quickcommerce             D  Compat change id reported: 63938206; UID 10214; state: ENABLED
+2025-11-09 05:29:36.395 12913-12924 n.quickcommerce         com.dukaan.quickcommerce             I  Background concurrent mark compact GC freed 5935KB AllocSpace bytes, 32(1196KB) LOS objects, 49% free, 4247KB/8494KB, paused 828us,1.357ms total 228.850ms
+2025-11-09 05:29:37.643 12913-12913 WindowOnBackDispatcher  com.dukaan.quickcommerce             W  sendCancelIfRunning: isInProgress=false callback=android.view.ViewRootImpl$$ExternalSyntheticLambda13@138c65b
+2025-11-09 05:29:37.645 12913-12966 HWUI                    com.dukaan.quickcommerce             D  endAllActiveAnimators on 0xb400007073ad8870 (RippleDrawable) with handle 0xb4000070a3b14a60
+2025-11-09 05:29:37.698 12913-12913 InsetsController        com.dukaan.quickcommerce             D  hide(ime(), fromIme=false)
+2025-11-09 05:29:37.698 12913-12913 ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:f0ef6772: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+2025-11-09 05:29:37.757 12913-12913 AssistStructure         com.dukaan.quickcommerce             I  Flattened final assist data: 2668 bytes, containing 1 windows, 6 views
+2025-11-09 05:29:39.160 12913-12913 Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-BlLOvCfD.js - Line 4222 - Msg: Geolocation error: [object GeolocationPositionError]
+2025-11-09 05:29:39.618 12913-12913 AssistStructure         com.dukaan.quickcommerce             I  Flattened final assist data: 2916 bytes, containing 1 windows, 6 views
+2025-11-09 05:29:39.629 12913-12913 ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:3fa30a0b: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+2025-11-09 05:29:39.631 12913-12913 InsetsController        com.dukaan.quickcommerce             D  show(ime(), fromIme=false)
+2025-11-09 05:29:39.632 12913-12913 InsetsController        com.dukaan.quickcommerce             D  Setting requestedVisibleTypes to -1 (was -9)
+2025-11-09 05:29:40.052 12913-13072 InteractionJankMonitor  com.dukaan.quickcommerce             W  Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=com.dukaan.quickcommerce
+2025-11-09 05:29:40.257 12913-12913 ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:3fa30a0b: onShown
+2025-11-09 05:29:46.774 12913-12913 ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:bd6cdd43: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+2025-11-09 05:29:46.775 12913-12913 InsetsController        com.dukaan.quickcommerce             D  hide(ime(), fromIme=false)
+2025-11-09 05:29:46.775 12913-12913 WindowOnBackDispatcher  com.dukaan.quickcommerce             W  sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@8437628
+2025-11-09 05:29:46.778 12913-12913 InsetsController        com.dukaan.quickcommerce             D  Setting requestedVisibleTypes to -9 (was -1)
+2025-11-09 05:29:47.022 12913-12913 Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-BlLOvCfD.js - Line 3474 - Msg: [Auth] OTP-only user detected - sending OTP
+2025-11-09 05:29:47.025 12913-12913 ImeTracker              com.dukaan.quickcommerce             I  system_server:5d956b3f: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+2025-11-09 05:29:47.026 12913-12913 Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-BlLOvCfD.js - Line 3474 - Msg: [Auth] Sending OTP to: +917993558836
+2025-11-09 05:29:47.033 12913-12913 Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-BlLOvCfD.js - Line 3474 - Msg: [Auth] OTP send error: TypeError: Failed to fetch
+2025-11-09 05:29:47.077 12913-12913 ImeTracker              com.dukaan.quickcommerce             I  system_server:ed0d4a: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
