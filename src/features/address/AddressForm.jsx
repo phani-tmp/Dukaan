@@ -18,31 +18,16 @@ const AddressForm = ({ onSave, onClose, editingAddress }) => {
         async (position) => {
           const { latitude, longitude } = position.coords;
           
-          try {
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
-            );
-            const data = await response.json();
-            
-            const address = data.display_name || `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-            
-            setFormData({
-              ...formData,
-              fullAddress: address,
-              latitude,
-              longitude
-            });
-            setLoadingLocation(false);
-          } catch (error) {
-            console.error('Error getting address:', error);
-            setFormData({
-              ...formData,
-              fullAddress: `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-              latitude,
-              longitude
-            });
-            setLoadingLocation(false);
-          }
+          // Just use coordinates - OpenStreetMap blocks CORS requests from Replit
+          // Users can manually type their address
+          setFormData({
+            ...formData,
+            fullAddress: `Lat: ${latitude.toFixed(6)}, Lon: ${longitude.toFixed(6)}`,
+            latitude,
+            longitude
+          });
+          setLoadingLocation(false);
+          alert('Location captured! Please enter your full address manually.');
         },
         (error) => {
           console.error('Geolocation error:', error);

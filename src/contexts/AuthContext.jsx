@@ -503,10 +503,16 @@ export const AuthProvider = ({ children }) => {
         console.log('[Auth] Auto-generated username:', userName);
       }
       
+      // Ensure we have the full phone number with country code
+      const fullPhoneNumber = phoneNum.startsWith('+') ? phoneNum : `+${phoneNum}`;
+      
+      console.log('[Auth] Saving profile with phone:', fullPhoneNumber);
+      
       // Create user document preserving existing role
       const userDoc = {
         name: userName,
-        phoneNumber: user.phoneNumber || phoneNum,
+        phoneNumber: fullPhoneNumber, // Always save with country code
+        phone: fullPhoneNumber, // Duplicate field for compatibility
         email: profileData.email || null,
         role: existingRole || 'customer', // Preserve existing role or default to customer
         profileCompleted: profileData.profileCompleted || false, // Track if user completed setup or skipped
@@ -529,14 +535,15 @@ export const AuthProvider = ({ children }) => {
       // Save phone number mapping (now safe - we checked for duplicates above)
       await setDoc(phoneDocRef, {
         uid: user.uid,
-        phoneNumber: user.phoneNumber || phoneNum
+        phoneNumber: fullPhoneNumber
       });
       
       setShowProfileSetup(false);
       const updatedProfile = { 
         id: user.uid, 
         name: userName,
-        phoneNumber: user.phoneNumber || phoneNum,
+        phoneNumber: fullPhoneNumber, // Use full phone with country code
+        phone: fullPhoneNumber,
         email: profileData.email || null,
         role: existingRole || 'customer',
         profileCompleted: profileData.profileCompleted || false
