@@ -44,18 +44,15 @@ The frontend currently auto-detects the backend URL:
 
 #### Option A: Use Replit Deployment (Recommended)
 
-1. Make the backend publicly accessible:
-   ```bash
-   # The backend is already running on port 8000
-   # Replit exposes it at: https://YOUR-REPL-NAME.replit.app:8000
-   ```
+✅ **Already configured!** Your backend URL is:
+```
+https://554d64f2-8fb7-47e9-8f40-3960b62a30a8-00-l8y60wt4t9mh.kirk.replit.dev:8000
+```
 
-2. **Update `AuthContext.jsx` line 147-149** to use production backend URL:
-   ```javascript
-   const backendUrl = window.location.hostname.includes('replit.dev') 
-     ? `https://${window.location.hostname.replace(':5000', ':8000')}`
-     : 'https://YOUR-REPL-NAME.replit.app:8000'; // Add your actual Replit backend URL
-   ```
+The frontend auto-detects this on web, but for Android builds you need to set:
+```bash
+export VITE_BACKEND_URL=https://554d64f2-8fb7-47e9-8f40-3960b62a30a8-00-l8y60wt4t9mh.kirk.replit.dev:8000
+```
 
 #### Option B: Deploy Backend Separately (Advanced)
 
@@ -74,7 +71,12 @@ The frontend currently auto-detects the backend URL:
 
 1. **Sync Capacitor with latest web code:**
    ```bash
-   VITE_GEMINI_API_KEY="$GEMINI_API_KEY" npm run build
+   # Set environment variables for Android build
+   export VITE_GEMINI_API_KEY="your_gemini_api_key_here"
+   export VITE_BACKEND_URL=https://554d64f2-8fb7-47e9-8f40-3960b62a30a8-00-l8y60wt4t9mh.kirk.replit.dev:8000
+   
+   # Build and sync
+   npm run build
    npx cap sync android
    ```
 
