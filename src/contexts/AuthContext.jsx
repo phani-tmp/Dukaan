@@ -237,46 +237,63 @@ export const AuthProvider = ({ children }) => {
           return;
         }
         
-        // User exists but NO password - sign them in directly with email/password they set during registration
-        // OR use the backend's custom token if available
-        console.log('[Auth] OTP-only user - attempting seamless sign-in');
+        // User exists but NO password - they need to set one now
+        console.log('[Auth] Existing OTP-only user - needs to set password');
         
-        // For now, ask them to set up a password (temporary until custom tokens work)
-        alert('Please complete your profile setup with a password for secure access.');
-        
-        // Create temporary Firebase session to complete profile
+        // Create email/password account for this existing user
         try {
-          const tempResult = await signInAnonymously(auth);
-          console.log('[Auth] Temporary session created for existing user profile completion');
+          const phoneEmail = `${countryCode}${phoneNumber}@dukaan.app`;
+          const tempPassword = `temp_${Date.now()}_${Math.random().toString(36)}`; // Temporary password
+          
+          console.log('[Auth] Creating email/password account for existing user');
+          const result = await createUserWithEmailAndPassword(auth, phoneEmail, tempPassword);
+          console.log('[Auth] Account created, showing password setup');
+          
+          // Show profile setup to let them set a real password
           setShowProfileSetup(true);
           setAuthStep('register');
           setOtp('');
           return;
         } catch (authError) {
-          console.error('[Auth] Could not create temp session:', authError);
-          alert('Authentication error. Please enable Anonymous sign-in in Firebase Console.');
+          if (authError.code === 'auth/email-already-in-use') {
+            // Email already exists - try signing in with it
+            console.log('[Auth] Email already exists, user should use password login');
+            alert('You already have an account. Please use password login.');
+            setAuthStep('password');
+            setOtp('');
+            return;
+          }
+          console.error('[Auth] Could not create account:', authError);
+          alert(`Authentication error: ${authError.message}`);
           setAuthStep('phone');
           setOtp('');
           return;
         }
       }
       
-      // NEW USER - Create Firebase account
-      console.log('[Auth] New user detected - creating account');
+      // NEW USER - Create Firebase email/password account immediately
+      console.log('[Auth] New user detected - creating email/password account');
       
       try {
-        // Try to sign in anonymously
-        const result = await signInAnonymously(auth);
+        const phoneEmail = `${countryCode}${phoneNumber}@dukaan.app`;
+        const tempPassword = `OTP${Date.now()}${Math.random().toString(36)}`.slice(0, 20); // Temporary auto-generated password
+        
+        console.log('[Auth] Creating Firebase account with email:', phoneEmail);
+        const result = await createUserWithEmailAndPassword(auth, phoneEmail, tempPassword);
         const firebaseUid = result.user.uid;
         console.log('[Auth] New user created with UID:', firebaseUid);
         
-        // Create user profile
+        // Create basic user profile
         const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', firebaseUid);
         await setDoc(userRef, {
           uid: firebaseUid,
           phone: confirmationResult.phone,
+          phoneNumber: confirmationResult.phone,
+          name: `User-${phoneNumber}`, // Temporary name - will be updated in profile setup
+          role: 'customer',
           createdAt: new Date().toISOString(),
-          authMethod: 'fast2sms-otp'
+          authMethod: 'fast2sms-otp',
+          tempPassword: tempPassword // Store temp password so we can update it later
         }, { merge: true });
         
         // Create phone lookup
@@ -284,29 +301,24 @@ export const AuthProvider = ({ children }) => {
           uid: firebaseUid
         });
         
-        // Show registration form
-        console.log('[Auth] New user - showing registration form');
+        // Show registration form to set real name/password
+        console.log('[Auth] New user - showing profile setup');
         setShowProfileSetup(true);
         setAuthStep('register');
         setOtp('');
       } catch (firebaseError) {
-        console.error('[Auth] Firebase sign-in error:', firebaseError);
+        console.error('[Auth] Firebase account creation error:', firebaseError);
         
-        // Check if anonymous auth is disabled
-        if (firebaseError.code === 'auth/admin-restricted-operation') {
-          alert('⚠️ Firebase Setup Required:\n\n' +
-                'Anonymous authentication is disabled in your Firebase Console.\n\n' +
-                'To enable new user registration:\n' +
-                '1. Go to Firebase Console → Authentication\n' +
-                '2. Click "Sign-in method" tab\n' +
-                '3. Enable "Anonymous" provider\n\n' +
-                'For now, only existing users with passwords can log in.');
-          setAuthStep('phone');
+        if (firebaseError.code === 'auth/email-already-in-use') {
+          alert('Account already exists. Please use password login.');
+          setAuthStep('password');
           setOtp('');
           return;
         }
         
-        throw firebaseError;
+        alert(`Failed to create account: ${firebaseError.message}`);
+        setAuthStep('phone');
+        setOtp('');
       }
     } catch (error) {
       console.error('[Auth] OTP verification error:', error);
@@ -442,11 +454,27 @@ export const AuthProvider = ({ children }) => {
   };
 
   const handleSaveProfile = async (profileData) => {
-    if (!user) return;
+    if (!user) {
+      console.error('[Auth] No user session - cannot save profile');
+      alert('Session expired. Please login again.');
+      setAuthStep('phone');
+      return;
+    }
     
     try {
-      // Get phone number from Firebase auth
-      const phoneNum = user.phoneNumber || profileData.phoneNumber;
+      // Get phone number from multiple sources (Firebase auth, context state, or profile data)
+      const phoneNum = user.phoneNumber || 
+                       profileData.phoneNumber || 
+                       `${countryCode}${phoneNumber}` || // From OTP verification context
+                       confirmationResult?.phone; // From OTP confirmation
+      
+      if (!phoneNum) {
+        console.error('[Auth] No phone number available');
+        alert('Phone number missing. Please login again.');
+        setAuthStep('phone');
+        return;
+      }
+      
       const cleanPhone = phoneNum.replace(/[^\d]/g, '').slice(-10); // Get last 10 digits
       
       // PREVENT DUPLICATE PHONE NUMBERS: Check if this phone is already registered to a different user
