@@ -7,15 +7,24 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:344365593313:android:d88144fd18f79052bcbda0",
+        "mobilesdk_app_id": "1:344365593313:android:3ba65eca4d18185fbcbda0",
         "android_client_info": {
           "package_name": "com.dukaan.quickcommerce"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "344365593313-s796dc1sc3e9mtepu9anfgtqtai3rvsp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dukaan.quickcommerce",
+            "certificate_hash": "6f42609e4390b335763a1548acf1033a21ea00d6"
+          }
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyCBTRIjrSVMOBs9kmF8JeHOm6LeXqBYkmM"
+          "current_key": ""
         }
       ],
       "services": {
