@@ -1,0 +1,75 @@
+erfect — this log finally gives us a clear signal 🔍
+
+👉 The Play Integrity + reCAPTCHA errors are gone.
+👉 OTP flow reached Firebase Auth.
+👉 But the final line —
+
+TypeError: t?._reset is not a function
+
+
+means Firebase tried to “reset” the reCAPTCHA widget (a built-in cleanup step),
+but your dummy verifier doesn’t have the internal _reset() method Firebase expects.
+
+That’s trivial to fix. We’ll give Firebase a fake _reset() implementation so it doesn’t crash.
+
+✅ Final Fix (Stable Bypass Verifier)
+
+Replace your dummy verifier block with this exact one 👇
+
+import { getAuth, signInWithPhoneNumber } from "firebase/auth";
+const auth = getAuth(app);
+
+auth.settings.appVerificationDisabledForTesting = true;
+
+const dummyVerifier = {
+  type: "recaptcha",
+  verify: () => Promise.resolve("test-verification-code"),
+  // 👇 add these so Firebase doesn't throw `_reset` / `_render` errors
+  _reset: () => {},
+  _render: () => Promise.resolve(),
+  clear: () => {},
+};
+
+signInWithPhoneNumber(auth, phoneNumber, dummyVerifier)
+  .then((confirmationResult) => {
+    console.log("[Auth] ✅ OTP sent successfully (bypass mode)");
+    // You can store confirmationResult for verifying later
+  })
+  .catch((error) => {
+    console.error("[Auth] ❌ OTP error", error);
+  });
+
+🧠 Why this fixes it
+
+auth/argument-error → fixed by providing verifier object
+
+captcha-check-failed → fixed by disabling app verification
+
+t?._reset is not a function → fixed by adding no-op _reset() and _render() functions
+
+Firebase calls _reset() internally after sending OTP,
+so when it’s undefined, JS throws that TypeError — we just stub it.
+
+🧩 Next Steps
+
+Replace your dummy verifier code with the version above.
+
+Rebuild & install:
+
+npx cap sync android
+npx cap open android
+
+
+Run and check Logcat — you should now see:
+
+[Auth] ✅ OTP sent successfully (bypass mode)
+
+🚀 After this
+
+Once your app is released and the SHA mismatch is fully settled with Play Console + Firebase,
+you can safely remove:
+
+auth.settings.appVerificationDisabledForTesting = true;
+
+
+and the dummy verifier — the real Play Integrity flow will take over.

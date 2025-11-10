@@ -1,0 +1,46 @@
+25-11-10 03:41:34.589  7908-7908  InsetsController        com.dukaan.quickcommerce             D  hide(ime(), fromIme=false)
+2025-11-10 03:41:34.589  7908-7908  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:2a0397b1: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+2025-11-10 03:41:34.856  7908-7973  Capacitor               com.dukaan.quickcommerce             D  Handling local request: https://localhost/assets/index-CBFNq_oK.js
+2025-11-10 03:41:34.856  7908-7970  Capacitor               com.dukaan.quickcommerce             D  Handling local request: https://localhost/assets/index-CYr6BRCo.css
+2025-11-10 03:41:35.399  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-CBFNq_oK.js - Line 3624 - Msg: [Firebase] ⚠️ App verification disabled for testing
+2025-11-10 03:41:35.420  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-CBFNq_oK.js - Line 4362 - Msg: [Mode] Shopkeeper mode: false Rider mode: false URL: 
+2025-11-10 03:41:35.421  7908-7908  Capacitor               com.dukaan.quickcommerce             D  onGeolocationPermissionsShowPrompt: DOING IT HERE FOR ORIGIN: https://localhost/
+2025-11-10 03:41:35.421  7908-7908  Capacitor               com.dukaan.quickcommerce             D  onGeolocationPermissionsShowPrompt: has required permission
+2025-11-10 03:41:35.425  7908-7968  Capacitor               com.dukaan.quickcommerce             D  Handling local request: https://localhost/favicon.svg
+2025-11-10 03:41:35.934  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-CBFNq_oK.js - Line 3624 - Msg: [Auth] No user authenticated
+2025-11-10 03:41:36.042  7908-7925  n.quickcommerce         com.dukaan.quickcommerce             I  Compiler allocated 5111KB to compile void android.view.ViewRootImpl.performTraversals()
+2025-11-10 03:41:37.459  7908-7908  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:320383cc: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+2025-11-10 03:41:37.462  7908-7908  InsetsController        com.dukaan.quickcommerce             D  show(ime(), fromIme=false)
+2025-11-10 03:41:37.464  7908-7908  InsetsController        com.dukaan.quickcommerce             D  Setting requestedVisibleTypes to -1 (was -9)
+2025-11-10 03:41:37.476  7908-7908  AssistStructure         com.dukaan.quickcommerce             I  Flattened final assist data: 2916 bytes, containing 1 windows, 6 views
+2025-11-10 03:41:37.781  7908-8033  InteractionJankMonitor  com.dukaan.quickcommerce             W  Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=com.dukaan.quickcommerce
+2025-11-10 03:41:37.987  7908-7908  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:320383cc: onShown
+2025-11-10 03:41:38.944  7908-8035  ProfileInstaller        com.dukaan.quickcommerce             D  Installing profile for com.dukaan.quickcommerce
+2025-11-10 03:41:44.483  7908-7908  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:d3daa2c6: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+2025-11-10 03:41:44.483  7908-7908  InsetsController        com.dukaan.quickcommerce             D  hide(ime(), fromIme=false)
+2025-11-10 03:41:44.483  7908-7908  WindowOnBackDispatcher  com.dukaan.quickcommerce             W  sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@579c20d
+2025-11-10 03:41:44.484  7908-7908  InsetsController        com.dukaan.quickcommerce             D  Setting requestedVisibleTypes to -9 (was -1)
+2025-11-10 03:41:44.750  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-CBFNq_oK.js - Line 3624 - Msg: [Auth] OTP-only user detected - sending OTP
+2025-11-10 03:41:44.750  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-CBFNq_oK.js - Line 3624 - Msg: [Auth] 🔵 Attempting OTP send for: +917993558836
+2025-11-10 03:41:44.750  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-CBFNq_oK.js - Line 3624 - Msg: [Auth] 🔵 Bypass mode: ENABLED
+2025-11-10 03:41:44.750  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-CBFNq_oK.js - Line 3624 - Msg: [Auth] ⚠️ Creating dummy verifier (bypass enabled)
+2025-11-10 03:41:44.750  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-CBFNq_oK.js - Line 3624 - Msg: [Auth] 🔵 Calling signInWithPhoneNumber...
+2025-11-10 03:41:44.786  7908-7908  ImeTracker              com.dukaan.quickcommerce             I  system_server:c209a980: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+2025-11-10 03:41:44.790  7908-7926  n.quickcommerce         com.dukaan.quickcommerce             I  Background concurrent mark compact GC freed 5437KB AllocSpace bytes, 30(1092KB) LOS objects, 49% free, 4224KB/8448KB, paused 85us,1.014ms total 220.319ms
+2025-11-10 03:41:45.068  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-CBFNq_oK.js - Line 1473 - Msg: Failed to initialize reCAPTCHA Enterprise config. Triggering the reCAPTCHA v2 verification.
+2025-11-10 03:41:45.194  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CBFNq_oK.js - Line 3624 - Msg: [Auth] ❌ ============ FIREBASE OTP ERROR ============
+2025-11-10 03:41:45.194  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CBFNq_oK.js - Line 3624 - Msg: [Auth] ❌ Error Code: undefined
+2025-11-10 03:41:45.194  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CBFNq_oK.js - Line 3624 - Msg: [Auth] ❌ Error Message: t?._reset is not a function
+2025-11-10 03:41:45.194  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CBFNq_oK.js - Line 3624 - Msg: [Auth] ❌ Full Error Object: {
+                                                                                                      "stack": "TypeError: t?._reset is not a function\n    at P1 (https://localhost/assets/index-CBFNq_oK.js:1473:1820)\n    at async b1 (https://localhost/assets/index-CBFNq_oK.js:1473:251)\n    at async k (https://localhost/assets/index-CBFNq_oK.js:3624:4152)\n    at async M (https://localhost/assets/index-CBFNq_oK.js:3624:3006)",
+                                                                                                      "message": "t?._reset is not a function"
+                                                                                                    }
+2025-11-10 03:41:45.195  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CBFNq_oK.js - Line 3624 - Msg: [Auth] ❌ Stack Trace: TypeError: t?._reset is not a function (Ask Gemini)
+                                                                                                        at P1 (https://localhost/assets/index-CBFNq_oK.js:1473:1820)
+                                                                                                        at async b1 (https://localhost/assets/index-CBFNq_oK.js:1473:251)
+                                                                                                        at async k (https://localhost/assets/index-CBFNq_oK.js:3624:4152)
+                                                                                                        at async M (https://localhost/assets/index-CBFNq_oK.js:3624:3006)
+2025-11-10 03:41:45.195  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CBFNq_oK.js - Line 3624 - Msg: [Auth] ❌ Detailed Message: t?._reset is not a function
+2025-11-10 03:41:45.195  7908-7908  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CBFNq_oK.js - Line 3624 - Msg: [Auth] ❌ ============================================
+2025-11-10 03:41:45.211  7908-7908  CompatChangeReporter    com.dukaan.quickcommerce             D  Compat change id reported: 63938206; UID 10214; state: ENABLED
+2025-11-10 03:41:45.267  7908-7908  ImeTracker              com.dukaan.quickcommerce             I  system_server:fdbd1f21: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED

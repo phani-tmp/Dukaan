@@ -176,10 +176,13 @@ export const AuthProvider = ({ children }) => {
         appVerifier = window.recaptchaVerifier;
       } else {
         console.log('[Auth] ⚠️ Creating dummy verifier (bypass enabled)');
-        // Create dummy verifier to satisfy Firebase argument requirements
+        // Create complete dummy verifier with all methods Firebase expects
         appVerifier = {
           type: 'recaptcha',
-          verify: () => Promise.resolve('bypass-verification-token')
+          verify: () => Promise.resolve('bypass-verification-token'),
+          _reset: () => {},
+          _render: () => Promise.resolve(),
+          clear: () => {}
         };
       }
       
