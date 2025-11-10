@@ -142,6 +142,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+      console.log('[Auth] 🔵 Attempting OTP send for:', fullPhoneNumber);
       
       if (window.recaptchaVerifier) {
         try {
@@ -152,20 +153,51 @@ export const AuthProvider = ({ children }) => {
         window.recaptchaVerifier = null;
       }
       
+      console.log('[Auth] 🔵 Creating RecaptchaVerifier...');
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         size: 'invisible',
         callback: () => {
-          console.log('[Auth] reCAPTCHA verified');
+          console.log('[Auth] ✅ reCAPTCHA verified successfully');
+        },
+        'error-callback': (error) => {
+          console.error('[Auth] ❌ reCAPTCHA error:', error);
         }
       });
       
       const appVerifier = window.recaptchaVerifier;
+      console.log('[Auth] 🔵 Calling signInWithPhoneNumber...');
       const confirmation = await signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier);
+      console.log('[Auth] ✅ OTP sent successfully! Confirmation:', confirmation);
       setConfirmationResult(confirmation);
       setAuthStep('otp');
       alert('OTP sent to your phone!');
     } catch (error) {
-      console.error('[Auth] OTP send error:', error);
+      // PRODUCTION-GRADE ERROR LOGGING
+      console.error('[Auth] ❌ ============ FIREBASE OTP ERROR ============');
+      console.error('[Auth] ❌ Error Code:', error.code);
+      console.error('[Auth] ❌ Error Message:', error.message);
+      console.error('[Auth] ❌ Full Error Object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+      
+      // Log all error properties
+      if (error.code) console.error('[Auth] ❌ Firebase Error Code:', error.code);
+      if (error.customData) console.error('[Auth] ❌ Custom Data:', error.customData);
+      if (error.stack) console.error('[Auth] ❌ Stack Trace:', error.stack);
+      
+      // Specific error code handling
+      const errorMessages = {
+        'auth/invalid-app-credential': '🔴 INVALID_APP_CREDENTIAL: SHA-1 fingerprint mismatch or API key issue. Check Firebase Console.',
+        'auth/missing-app-credential': '🔴 MISSING_APP_CREDENTIAL: App not properly configured in Firebase.',
+        'auth/invalid-phone-number': '🔴 Invalid phone number format.',
+        'auth/too-many-requests': '🔴 Too many OTP requests. Please wait and try again.',
+        'auth/quota-exceeded': '🔴 Daily OTP quota exceeded.',
+        'auth/operation-not-allowed': '🔴 Phone authentication not enabled in Firebase Console.',
+        'auth/captcha-check-failed': '🔴 reCAPTCHA verification failed.'
+      };
+      
+      const detailedMessage = errorMessages[error.code] || error.message;
+      console.error('[Auth] ❌ Detailed Message:', detailedMessage);
+      console.error('[Auth] ❌ ============================================');
+      
       if (window.recaptchaVerifier) {
         try {
           window.recaptchaVerifier.clear();
@@ -174,7 +206,7 @@ export const AuthProvider = ({ children }) => {
         }
         window.recaptchaVerifier = null;
       }
-      alert(`Failed to send OTP: ${error.message}. Please try again.`);
+      alert(`Failed to send OTP: ${detailedMessage}`);
     }
   };
 
@@ -184,6 +216,8 @@ export const AuthProvider = ({ children }) => {
       alert('Please enter a valid 6-digit OTP');
       return;
     }
+    
+    console.log('[Auth] 🔵 Verifying OTP...');
 
     if (!confirmationResult) {
       alert('Please request OTP first');
@@ -192,7 +226,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const result = await confirmationResult.confirm(otp);
-      console.log('[Auth] OTP verified for user:', result.user.uid);
+      console.log('[Auth] ✅ OTP verified successfully for user:', result.user.uid);
       
       // Check if this is a new user or existing OTP-only user
       if (isNewUser) {
@@ -209,8 +243,20 @@ export const AuthProvider = ({ children }) => {
       }
       setOtp('');
     } catch (error) {
-      console.error('[Auth] OTP verification error:', error);
-      alert('Invalid OTP. Please try again.');
+      // PRODUCTION-GRADE OTP VERIFICATION ERROR LOGGING
+      console.error('[Auth] ❌ ============ OTP VERIFICATION ERROR ============');
+      console.error('[Auth] ❌ Error Code:', error.code);
+      console.error('[Auth] ❌ Error Message:', error.message);
+      console.error('[Auth] ❌ Full Error:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+      console.error('[Auth] ❌ ================================================');
+      
+      const errorMessages = {
+        'auth/invalid-verification-code': 'The OTP code is invalid. Please check and try again.',
+        'auth/code-expired': 'The OTP code has expired. Please request a new one.',
+        'auth/session-expired': 'Verification session expired. Please request a new OTP.'
+      };
+      
+      alert(errorMessages[error.code] || 'Invalid OTP. Please try again.');
     }
   };
 
