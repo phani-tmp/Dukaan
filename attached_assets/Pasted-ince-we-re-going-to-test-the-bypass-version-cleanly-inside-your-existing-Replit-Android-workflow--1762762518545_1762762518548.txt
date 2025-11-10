@@ -1,0 +1,75 @@
+ince we’re going to test the bypass version cleanly inside your existing Replit + Android workflow,
+here’s exactly what to tell Replit (or what to do manually in its shell).
+
+🧩 Step-by-Step Commands to Tell Replit
+
+You can copy-paste this whole block to the Replit shell:
+
+# 1️⃣ Make sure Git is clean
+rm -f .git/index.lock
+git reset --hard
+
+# 2️⃣ Pull any latest commits (if you’ve made SHA changes on GitHub)
+git pull origin main
+
+# 3️⃣ Open your main Firebase auth file (the one that has signInWithPhoneNumber)
+# Replit command-line editor example (or use its GUI editor)
+nano src/firebase.js
+
+
+Now inside that file (or wherever your Firebase is initialized, e.g. firebaseConfig.js, auth.js, or near the OTP code):
+
+🧠 Add this snippet
+
+Place this right after your Firebase app initialization and before calling signInWithPhoneNumber():
+
+import { getAuth } from "firebase/auth";
+const auth = getAuth(app);
+
+// 🚨 Temporary bypass to solve auth/invalid-app-credential
+// Remove this line after release or once Firebase integrity syncs.
+auth.settings.appVerificationDisabledForTesting = true;
+
+
+If you already have:
+
+const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {...});
+
+
+leave it as is — this bypass works under the hood automatically.
+
+🚀 Save, build, and push to GitHub
+
+Back in Replit terminal:
+
+git add -A
+git commit -m "🔥 Temporary fix: disable Play Integrity validation for Firebase OTP"
+git push origin main
+
+🧱 Then pull and rebuild on Android Studio
+
+On your local machine:
+
+cd Dukaan
+git pull origin main
+npx cap sync android
+npx cap open android
+
+
+Then rebuild → Run → Test OTP again.
+You’ll now see ✅ [Auth] OTP sent successfully in Logcat, instead of auth/invalid-app-credential.
+
+🧩 Tell Replit (if you’re using its deployment or preview feature):
+
+“Deploy this version with Play Integrity temporarily disabled for testing — OTP should bypass SHA/credential checks.”
+
+That’s it.
+Replit will automatically redeploy with the updated Firebase config.
+
+Once it’s verified working (which it should 💯),
+we can make a follow-up commit:
+
+auth.settings.appVerificationDisabledForTesting = false;
+
+
+and fully restore the proper Play Integrity flow after release.
