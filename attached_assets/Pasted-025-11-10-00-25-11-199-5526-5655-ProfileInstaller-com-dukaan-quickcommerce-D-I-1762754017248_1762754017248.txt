@@ -1,0 +1,53 @@
+025-11-10 00:25:11.199  5526-5655  ProfileInstaller        com.dukaan.quickcommerce             D  Installing profile for com.dukaan.quickcommerce
+2025-11-10 00:25:17.063  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-BPZxU8OD.js - Line 4362 - Msg: Geolocation error: [object GeolocationPositionError]
+2025-11-10 00:25:17.381  5526-5526  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:ba8b0af6: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+2025-11-10 00:25:17.386  5526-5526  InsetsController        com.dukaan.quickcommerce             D  show(ime(), fromIme=false)
+2025-11-10 00:25:17.387  5526-5526  InsetsController        com.dukaan.quickcommerce             D  Setting requestedVisibleTypes to -1 (was -9)
+2025-11-10 00:25:17.403  5526-5526  AssistStructure         com.dukaan.quickcommerce             I  Flattened final assist data: 2916 bytes, containing 1 windows, 6 views
+2025-11-10 00:25:18.009  5526-5526  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:ecc053bb: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+2025-11-10 00:25:18.009  5526-5526  InsetsController        com.dukaan.quickcommerce             D  show(ime(), fromIme=false)
+2025-11-10 00:25:18.009  5526-5526  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:ecc053bb: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+2025-11-10 00:25:18.011  5526-5663  InteractionJankMonitor  com.dukaan.quickcommerce             W  Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=com.dukaan.quickcommerce
+2025-11-10 00:25:18.189  5526-5532  n.quickcommerce         com.dukaan.quickcommerce             I  Background concurrent mark compact GC freed 5742KB AllocSpace bytes, 32(1196KB) LOS objects, 49% free, 4332KB/8664KB, paused 2.839ms,12.753ms total 818.266ms
+2025-11-10 00:25:18.221  5526-5526  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:ba8b0af6: onShown
+2025-11-10 00:25:27.111  5526-5526  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:c8695c07: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+2025-11-10 00:25:27.112  5526-5526  InsetsController        com.dukaan.quickcommerce             D  hide(ime(), fromIme=false)
+2025-11-10 00:25:27.112  5526-5526  WindowOnBackDispatcher  com.dukaan.quickcommerce             W  sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@32c546c
+2025-11-10 00:25:27.113  5526-5526  InsetsController        com.dukaan.quickcommerce             D  Setting requestedVisibleTypes to -9 (was -1)
+2025-11-10 00:25:27.367  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-BPZxU8OD.js - Line 3624 - Msg: [Auth] OTP-only user detected - sending OTP
+2025-11-10 00:25:27.367  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-BPZxU8OD.js - Line 3624 - Msg: [Auth] 🔵 Attempting OTP send for: +917993558836
+2025-11-10 00:25:27.367  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-BPZxU8OD.js - Line 3624 - Msg: [Auth] 🔵 Creating RecaptchaVerifier...
+2025-11-10 00:25:27.367  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-BPZxU8OD.js - Line 3624 - Msg: [Auth] 🔵 Calling signInWithPhoneNumber...
+2025-11-10 00:25:27.414  5526-5526  ImeTracker              com.dukaan.quickcommerce             I  system_server:38af47c7: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+2025-11-10 00:25:27.728  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-BPZxU8OD.js - Line 1473 - Msg: Failed to initialize reCAPTCHA Enterprise config. Triggering the reCAPTCHA v2 verification.
+2025-11-10 00:25:52.521  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-BPZxU8OD.js - Line 3624 - Msg: [Auth] ✅ reCAPTCHA verified successfully
+2025-11-10 00:25:52.727  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-BPZxU8OD.js - Line 3624 - Msg: [Auth] ❌ ============ FIREBASE OTP ERROR ============
+2025-11-10 00:25:52.727  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-BPZxU8OD.js - Line 3624 - Msg: [Auth] ❌ Error Code: auth/invalid-app-credential
+2025-11-10 00:25:52.727  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-BPZxU8OD.js - Line 3624 - Msg: [Auth] ❌ Error Message: Firebase: Error (auth/invalid-app-credential).
+2025-11-10 00:25:52.727  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-BPZxU8OD.js - Line 3624 - Msg: [Auth] ❌ Full Error Object: {
+                                                                                                      "stack": "FirebaseError: Firebase: Error (auth/invalid-app-credential).\n    at xg (https://localhost/assets/index-BPZxU8OD.js:453:480)\n    at Qi (https://localhost/assets/index-BPZxU8OD.js:453:30)\n    at NS (https://localhost/assets/index-BPZxU8OD.js:558:1420)\n    at async P1 (https://localhost/assets/index-BPZxU8OD.js:1473:1582)\n    at async b1 (https://localhost/assets/index-BPZxU8OD.js:1473:251)\n    at async k (https://localhost/assets/index-BPZxU8OD.js:3624:3731)\n    at async M (https://localhost/assets/index-BPZxU8OD.js:3624:2890)",
+                                                                                                      "message": "Firebase: Error (auth/invalid-app-credential).",
+                                                                                                      "code": "auth/invalid-app-credential",
+                                                                                                      "customData": {},
+                                                                                                      "name": "FirebaseError"
+                                                                                                    }
+2025-11-10 00:25:52.728  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-BPZxU8OD.js - Line 3624 - Msg: [Auth] ❌ Firebase Error Code: auth/invalid-app-credential
+2025-11-10 00:25:52.728  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-BPZxU8OD.js - Line 3624 - Msg: [Auth] ❌ Custom Data: [object Object]
+2025-11-10 00:25:52.728  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-BPZxU8OD.js - Line 3624 - Msg: [Auth] ❌ Stack Trace: FirebaseError: Firebase: Error (auth/invalid-app-credential). (Ask Gemini)
+                                                                                                        at xg (https://localhost/assets/index-BPZxU8OD.js:453:480)
+                                                                                                        at Qi (https://localhost/assets/index-BPZxU8OD.js:453:30)
+                                                                                                        at NS (https://localhost/assets/index-BPZxU8OD.js:558:1420)
+                                                                                                        at async P1 (https://localhost/assets/index-BPZxU8OD.js:1473:1582)
+                                                                                                        at async b1 (https://localhost/assets/index-BPZxU8OD.js:1473:251)
+                                                                                                        at async k (https://localhost/assets/index-BPZxU8OD.js:3624:3731)
+                                                                                                        at async M (https://localhost/assets/index-BPZxU8OD.js:3624:2890)
+2025-11-10 00:25:52.728  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-BPZxU8OD.js - Line 3624 - Msg: [Auth] ❌ Detailed Message: 🔴 INVALID_APP_CREDENTIAL: SHA-1 fingerprint mismatch or API key issue. Check Firebase Console.
+2025-11-10 00:25:52.728  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-BPZxU8OD.js - Line 3624 - Msg: [Auth] ❌ ============================================
+2025-11-10 00:25:52.744  5526-5526  CompatChangeReporter    com.dukaan.quickcommerce             D  Compat change id reported: 63938206; UID 10214; state: ENABLED
+2025-11-10 00:25:55.745  5526-5526  WindowOnBackDispatcher  com.dukaan.quickcommerce             W  sendCancelIfRunning: isInProgress=false callback=android.view.ViewRootImpl$$ExternalSyntheticLambda13@abbab83
+2025-11-10 00:25:55.749  5526-5543  HWUI                    com.dukaan.quickcommerce             D  endAllActiveAnimators on 0xb4000076b419fe20 (RippleDrawable) with handle 0xb400007544200950
+2025-11-10 00:25:55.808  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-BPZxU8OD.js - Line 3865 - Msg: TypeError: Cannot read properties of null (reading 'style')
+2025-11-10 00:25:55.809  5526-5526  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://www.gstatic.com/recaptcha/releases/naPR4A6FAh-yZLuCX253WaZq/recaptcha__en.js - Line 266 - Msg: Uncaught TypeError: Cannot read properties of null (reading 'style')
+2025-11-10 00:25:55.821  5526-5526  Capacitor               com.dukaan.quickcommerce             E  JavaScript Error: {"type":"js.error","error":{"message":"Uncaught TypeError: Cannot read properties of null (reading 'style')","url":"https://www.gstatic.com/recaptcha/releases/naPR4A6FAh-yZLuCX253WaZq/recaptcha__en.js","line":266,"col":295,"errorObject":"{}"}}
+2025-11-10 00:25:55.825  5526-5526  InsetsController        com.dukaan.quickcommerce             D  hide(ime(), fromIme=false)
+2025-11-10 00:25:55.825  5526-5526  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:918d348c: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN

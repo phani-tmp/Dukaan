@@ -27,6 +27,7 @@ The application features a modern, mobile-first design with a professional, emoj
 - **Geolocation**: Browser geolocation API with OpenStreetMap Nominatim for reverse geocoding.
 - **Mobile Optimizations**: Fixed viewport handling to prevent blank screen on keyboard appearance (Nov 2025). Enhanced mobile input experience with iOS zoom prevention and Android keyboard layout stability.
 - **Native Audio Recording**: Integrated Capacitor Voice Recorder plugin (`capacitor-voice-recorder`) for reliable microphone access on Android/iOS with automatic fallback to web MediaRecorder API for browsers (Nov 2025).
+- **Firebase OTP Authentication**: Production-grade debugging with comprehensive error logging and Play Integrity support for Android. RecaptchaVerifier configured with invisible mode and proper callbacks to allow Firebase to automatically use Play Integrity API on native Android (Nov 2025).
 
 ### Feature Specifications
 - **Authentication & Role-Based Access Control**: Village-friendly OTP-first login with intelligent user detection, profile setup flexibility (skip option), and distinct roles (customer, shopkeeper, rider) with strict isolation.

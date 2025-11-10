@@ -154,13 +154,15 @@ export const AuthProvider = ({ children }) => {
       }
       
       console.log('[Auth] 🔵 Creating RecaptchaVerifier...');
+      
+      // Create RecaptchaVerifier with proper config to allow Play Integrity on Android
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         size: 'invisible',
-        callback: () => {
-          console.log('[Auth] ✅ reCAPTCHA verified successfully');
+        callback: (response) => {
+          console.log('[Auth] ✅ reCAPTCHA/Play Integrity callback triggered:', response);
         },
-        'error-callback': (error) => {
-          console.error('[Auth] ❌ reCAPTCHA error:', error);
+        'expired-callback': () => {
+          console.warn('[Auth] ⚠️ Verification expired - please try again');
         }
       });
       

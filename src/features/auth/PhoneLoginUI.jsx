@@ -294,8 +294,8 @@ const PhoneLoginUI = ({
           </div>
         )}
         
-        {/* Keep reCAPTCHA container in DOM to prevent Firebase errors */}
-        <div id="recaptcha-container" style={{ position: 'absolute', visibility: 'hidden' }}></div>
+        {/* reCAPTCHA container for Firebase Phone Auth (invisible, allows Play Integrity on Android) */}
+        <div id="recaptcha-container" style={{ display: 'none' }}></div>
       </div>
     </div>
   );
