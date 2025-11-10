@@ -144,6 +144,10 @@ export const AuthProvider = ({ children }) => {
       const fullPhoneNumber = `${countryCode}${phoneNumber}`;
       console.log('[Auth] 🔵 Attempting OTP send for:', fullPhoneNumber);
       
+      // Check if app verification is disabled for testing
+      const isBypassEnabled = auth.settings?.appVerificationDisabledForTesting;
+      console.log('[Auth] 🔵 Bypass mode:', isBypassEnabled ? 'ENABLED' : 'DISABLED');
+      
       if (window.recaptchaVerifier) {
         try {
           window.recaptchaVerifier.clear();
@@ -153,20 +157,27 @@ export const AuthProvider = ({ children }) => {
         window.recaptchaVerifier = null;
       }
       
-      console.log('[Auth] 🔵 Creating RecaptchaVerifier...');
+      // Only create RecaptchaVerifier if bypass is NOT enabled
+      let appVerifier = null;
+      if (!isBypassEnabled) {
+        console.log('[Auth] 🔵 Creating RecaptchaVerifier...');
+        
+        // Create RecaptchaVerifier with proper config to allow Play Integrity on Android
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible',
+          callback: (response) => {
+            console.log('[Auth] ✅ reCAPTCHA/Play Integrity callback triggered:', response);
+          },
+          'expired-callback': () => {
+            console.warn('[Auth] ⚠️ Verification expired - please try again');
+          }
+        });
+        
+        appVerifier = window.recaptchaVerifier;
+      } else {
+        console.log('[Auth] ⚠️ Skipping RecaptchaVerifier (bypass enabled)');
+      }
       
-      // Create RecaptchaVerifier with proper config to allow Play Integrity on Android
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-        callback: (response) => {
-          console.log('[Auth] ✅ reCAPTCHA/Play Integrity callback triggered:', response);
-        },
-        'expired-callback': () => {
-          console.warn('[Auth] ⚠️ Verification expired - please try again');
-        }
-      });
-      
-      const appVerifier = window.recaptchaVerifier;
       console.log('[Auth] 🔵 Calling signInWithPhoneNumber...');
       const confirmation = await signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier);
       console.log('[Auth] ✅ OTP sent successfully! Confirmation:', confirmation);

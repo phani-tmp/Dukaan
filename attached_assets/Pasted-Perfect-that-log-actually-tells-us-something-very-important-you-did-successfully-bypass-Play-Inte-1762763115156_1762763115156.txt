@@ -1,0 +1,79 @@
+Perfect — that log actually tells us something very important:
+you did successfully bypass Play Integrity now ✅ (notice there’s no more auth/invalid-app-credential).
+The remaining issue — auth/captcha-check-failed — means the reCAPTCHA verifier wasn’t properly initialized in the Android WebView.
+
+That’s good news, because it means Firebase has stopped rejecting your app credentials.
+Now it’s just a front-end configuration fix.
+
+⚠️ Why it’s happening
+
+When you enable
+
+auth.settings.appVerificationDisabledForTesting = true;
+
+
+Firebase skips device verification, but still tries to create a dummy reCAPTCHA verifier.
+On Android (especially in Capacitor / Ionic WebView builds), this often fails with:
+
+Firebase: Recaptcha verification failed - MALFORMED (auth/captcha-check-failed)
+
+
+because the <div id="recaptcha-container"> element doesn’t exist or the WebView isn’t giving it DOM access.
+
+✅ 3-step fix (it’s quick)
+
+Make sure the reCAPTCHA container exists in your HTML.
+In your index.html (or whichever page triggers OTP):
+
+<div id="recaptcha-container"></div>
+
+
+Force-initialize the verifier manually in code before signInWithPhoneNumber:
+
+import { RecaptchaVerifier, signInWithPhoneNumber, getAuth } from "firebase/auth";
+const auth = getAuth(app);
+
+// temporary bypass
+auth.settings.appVerificationDisabledForTesting = true;
+
+// ✅ create dummy verifier if none exists
+if (!window.recaptchaVerifier) {
+  window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+    size: "invisible", // hides widget
+  });
+}
+
+const appVerifier = window.recaptchaVerifier;
+signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+  .then(confirmResult => console.log("OTP sent"))
+  .catch(err => console.error("OTP error", err));
+
+
+Clear cache & rebuild:
+
+npx cap sync android
+npx cap open android
+
+
+Then reinstall the app.
+
+💡 Optional (for Capacitor WebView quirk)
+
+If it still throws malformed, add this meta tag inside <head> of your index.html:
+
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+
+
+Capacitor sometimes blocks https://www.gstatic.com/recaptcha/... requests due to CSP.
+
+✅ Expected outcome
+
+Next run:
+
+[Auth] ✅ reCAPTCHA callback triggered
+[Auth] ✅ OTP sent successfully
+
+
+and no “invalid-app-credential” or “captcha-check-failed”.
+
+If you want, I can look at your exact OTP function (the JS snippet inside your project) and show exactly where to paste the verifier code.
