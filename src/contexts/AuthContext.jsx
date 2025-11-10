@@ -157,34 +157,25 @@ export const AuthProvider = ({ children }) => {
         window.recaptchaVerifier = null;
       }
       
-      // Create verifier based on bypass mode
-      let appVerifier;
-      if (!isBypassEnabled) {
-        console.log('[Auth] 🔵 Creating RecaptchaVerifier...');
-        
-        // Create RecaptchaVerifier with proper config to allow Play Integrity on Android
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible',
-          callback: (response) => {
-            console.log('[Auth] ✅ reCAPTCHA/Play Integrity callback triggered:', response);
-          },
-          'expired-callback': () => {
-            console.warn('[Auth] ⚠️ Verification expired - please try again');
-          }
-        });
-        
-        appVerifier = window.recaptchaVerifier;
-      } else {
-        console.log('[Auth] ⚠️ Creating dummy verifier (bypass enabled)');
-        // Create complete dummy verifier with all methods Firebase expects
-        appVerifier = {
-          type: 'recaptcha',
-          verify: () => Promise.resolve('bypass-verification-token'),
-          _reset: () => {},
-          _render: () => Promise.resolve(),
-          clear: () => {}
-        };
+      // Always create RecaptchaVerifier (Firebase auto-resolves in bypass mode)
+      console.log('[Auth] 🔵 Creating RecaptchaVerifier...');
+      if (isBypassEnabled) {
+        console.log('[Auth] ⚠️ Bypass mode: RecaptchaVerifier will auto-resolve (mock)');
+        console.log('[Auth] 📝 IMPORTANT: Only test phone numbers from Firebase Console will work!');
       }
+      
+      // Create RecaptchaVerifier with proper config to allow Play Integrity on Android
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'invisible',
+        callback: (response) => {
+          console.log('[Auth] ✅ reCAPTCHA/Play Integrity callback triggered:', response);
+        },
+        'expired-callback': () => {
+          console.warn('[Auth] ⚠️ Verification expired - please try again');
+        }
+      });
+      
+      const appVerifier = window.recaptchaVerifier;
       
       console.log('[Auth] 🔵 Calling signInWithPhoneNumber...');
       const confirmation = await signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier);

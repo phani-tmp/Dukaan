@@ -1,0 +1,49 @@
+5-11-10 03:50:37.256  8703-8703  WindowOnBackDispatcher  com.dukaan.quickcommerce             W  sendCancelIfRunning: isInProgress=false callback=android.view.ViewRootImpl$$ExternalSyntheticLambda13@d67880f
+2025-11-10 03:50:37.266  8703-8721  HWUI                    com.dukaan.quickcommerce             D  endAllActiveAnimators on 0xb4000076b4190980 (ListView) with handle 0xb4000075441fe340
+2025-11-10 03:50:37.278  8703-8703  AssistStructure         com.dukaan.quickcommerce             I  Flattened final assist data: 2916 bytes, containing 1 windows, 6 views
+2025-11-10 03:50:37.302  8703-8703  InsetsController        com.dukaan.quickcommerce             D  hide(ime(), fromIme=false)
+2025-11-10 03:50:37.302  8703-8703  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:e401c454: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+2025-11-10 03:50:38.208  8703-8703  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:38d4106d: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+2025-11-10 03:50:38.209  8703-8703  InsetsController        com.dukaan.quickcommerce             D  show(ime(), fromIme=false)
+2025-11-10 03:50:38.210  8703-8703  InsetsController        com.dukaan.quickcommerce             D  Setting requestedVisibleTypes to -1 (was -9)
+2025-11-10 03:50:38.218  8703-8703  AssistStructure         com.dukaan.quickcommerce             I  Flattened final assist data: 2916 bytes, containing 1 windows, 6 views
+2025-11-10 03:50:38.333  8703-8804  InteractionJankMonitor  com.dukaan.quickcommerce             W  Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=com.dukaan.quickcommerce
+2025-11-10 03:50:38.536  8703-8703  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:38d4106d: onShown
+2025-11-10 03:50:44.983  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CqTUutn7.js - Line 4362 - Msg: Geolocation error: [object GeolocationPositionError]
+2025-11-10 03:50:45.563  8703-8703  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:e7a6f5a1: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+2025-11-10 03:50:45.564  8703-8703  InsetsController        com.dukaan.quickcommerce             D  hide(ime(), fromIme=false)
+2025-11-10 03:50:45.565  8703-8703  WindowOnBackDispatcher  com.dukaan.quickcommerce             W  sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@4f432ab
+2025-11-10 03:50:45.565  8703-8703  InsetsController        com.dukaan.quickcommerce             D  Setting requestedVisibleTypes to -9 (was -1)
+2025-11-10 03:50:45.796  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-CqTUutn7.js - Line 3624 - Msg: [Auth] OTP-only user detected - sending OTP
+2025-11-10 03:50:45.804  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-CqTUutn7.js - Line 3624 - Msg: [Auth] 🔵 Attempting OTP send for: +12403554770
+2025-11-10 03:50:45.804  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-CqTUutn7.js - Line 3624 - Msg: [Auth] 🔵 Bypass mode: ENABLED
+2025-11-10 03:50:45.805  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-CqTUutn7.js - Line 3624 - Msg: [Auth] ⚠️ Creating dummy verifier (bypass enabled)
+2025-11-10 03:50:45.805  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-CqTUutn7.js - Line 3624 - Msg: [Auth] 🔵 Calling signInWithPhoneNumber...
+2025-11-10 03:50:45.820  8703-8703  ImeTracker              com.dukaan.quickcommerce             I  system_server:a2760f06: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+2025-11-10 03:50:45.978  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-CqTUutn7.js - Line 1473 - Msg: Failed to initialize reCAPTCHA Enterprise config. Triggering the reCAPTCHA v2 verification.
+2025-11-10 03:50:46.085  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CqTUutn7.js - Line 3624 - Msg: [Auth] ❌ ============ FIREBASE OTP ERROR ============
+2025-11-10 03:50:46.086  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CqTUutn7.js - Line 3624 - Msg: [Auth] ❌ Error Code: auth/captcha-check-failed
+2025-11-10 03:50:46.086  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CqTUutn7.js - Line 3624 - Msg: [Auth] ❌ Error Message: Firebase: Recaptcha verification failed - MALFORMED (auth/captcha-check-failed).
+2025-11-10 03:50:46.087  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CqTUutn7.js - Line 3624 - Msg: [Auth] ❌ Full Error Object: {
+                                                                                                      "stack": "FirebaseError: Firebase: Recaptcha verification failed - MALFORMED (auth/captcha-check-failed).\n    at CS (https://localhost/assets/index-CqTUutn7.js:453:157)\n    at NS (https://localhost/assets/index-CqTUutn7.js:558:1410)\n    at async P1 (https://localhost/assets/index-CqTUutn7.js:1473:1582)\n    at async b1 (https://localhost/assets/index-CqTUutn7.js:1473:251)\n    at async k (https://localhost/assets/index-CqTUutn7.js:3624:4209)\n    at async M (https://localhost/assets/index-CqTUutn7.js:3624:3006)",
+                                                                                                      "message": "Firebase: Recaptcha verification failed - MALFORMED (auth/captcha-check-failed).",
+                                                                                                      "code": "auth/captcha-check-failed",
+                                                                                                      "customData": {},
+                                                                                                      "name": "FirebaseError"
+                                                                                                    }
+2025-11-10 03:50:46.087  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CqTUutn7.js - Line 3624 - Msg: [Auth] ❌ Firebase Error Code: auth/captcha-check-failed
+2025-11-10 03:50:46.087  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CqTUutn7.js - Line 3624 - Msg: [Auth] ❌ Custom Data: [object Object]
+2025-11-10 03:50:46.087  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CqTUutn7.js - Line 3624 - Msg: [Auth] ❌ Stack Trace: FirebaseError: Firebase: Recaptcha verification failed - MALFORMED (auth/captcha-check-failed). (Ask Gemini)
+                                                                                                        at CS (https://localhost/assets/index-CqTUutn7.js:453:157)
+                                                                                                        at NS (https://localhost/assets/index-CqTUutn7.js:558:1410)
+                                                                                                        at async P1 (https://localhost/assets/index-CqTUutn7.js:1473:1582)
+                                                                                                        at async b1 (https://localhost/assets/index-CqTUutn7.js:1473:251)
+                                                                                                        at async k (https://localhost/assets/index-CqTUutn7.js:3624:4209)
+                                                                                                        at async M (https://localhost/assets/index-CqTUutn7.js:3624:3006)
+2025-11-10 03:50:46.087  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CqTUutn7.js - Line 3624 - Msg: [Auth] ❌ Detailed Message: 🔴 reCAPTCHA verification failed.
+2025-11-10 03:50:46.087  8703-8703  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-CqTUutn7.js - Line 3624 - Msg: [Auth] ❌ ============================================
+2025-11-10 03:50:46.138  8703-8703  ImeTracker              com.dukaan.quickcommerce             I  system_server:5ce6bf91: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+2025-11-10 03:50:47.982  8703-8703  WindowOnBackDispatcher  com.dukaan.quickcommerce             W  sendCancelIfRunning: isInProgress=false callback=android.view.ViewRootImpl$$ExternalSyntheticLambda13@2647d4e
+2025-11-10 03:50:48.000  8703-8721  HWUI                    com.dukaan.quickcommerce             D  endAllActiveAnimators on 0xb4000076b41abf40 (RippleDrawable) with handle 0xb4000075441ee4d0
+2025-11-10 03:50:48.039  8703-8703  InsetsController        com.dukaan.quickcommerce             D  hide(ime(), fromIme=false)
+2025-11-10 03:50:48.039  8703-8703  ImeTracker              com.dukaan.quickcommerce             I  com.dukaan.quickcommerce:40555323: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
