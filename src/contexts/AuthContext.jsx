@@ -157,8 +157,8 @@ export const AuthProvider = ({ children }) => {
         window.recaptchaVerifier = null;
       }
       
-      // Only create RecaptchaVerifier if bypass is NOT enabled
-      let appVerifier = null;
+      // Create verifier based on bypass mode
+      let appVerifier;
       if (!isBypassEnabled) {
         console.log('[Auth] 🔵 Creating RecaptchaVerifier...');
         
@@ -175,7 +175,12 @@ export const AuthProvider = ({ children }) => {
         
         appVerifier = window.recaptchaVerifier;
       } else {
-        console.log('[Auth] ⚠️ Skipping RecaptchaVerifier (bypass enabled)');
+        console.log('[Auth] ⚠️ Creating dummy verifier (bypass enabled)');
+        // Create dummy verifier to satisfy Firebase argument requirements
+        appVerifier = {
+          type: 'recaptcha',
+          verify: () => Promise.resolve('bypass-verification-token')
+        };
       }
       
       console.log('[Auth] 🔵 Calling signInWithPhoneNumber...');
@@ -204,7 +209,8 @@ export const AuthProvider = ({ children }) => {
         'auth/too-many-requests': '🔴 Too many OTP requests. Please wait and try again.',
         'auth/quota-exceeded': '🔴 Daily OTP quota exceeded.',
         'auth/operation-not-allowed': '🔴 Phone authentication not enabled in Firebase Console.',
-        'auth/captcha-check-failed': '🔴 reCAPTCHA verification failed.'
+        'auth/captcha-check-failed': '🔴 reCAPTCHA verification failed.',
+        'auth/argument-error': '🔴 Invalid arguments passed to Firebase. Check verifier configuration.'
       };
       
       const detailedMessage = errorMessages[error.code] || error.message;

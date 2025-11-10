@@ -1,0 +1,35 @@
+what is this new error bro 25-11-10 03:33:41.229  7603-7603  InsetsController        com.dukaan.quickcommerce             D  hide(ime(), fromIme=false)
+2025-11-10 03:33:41.229  7603-7603  WindowOnBackDispatcher  com.dukaan.quickcommerce             W  sendCancelIfRunning: isInProgress=false callback=android.view.ImeBackAnimationController@c79ef79
+2025-11-10 03:33:41.230  7603-7603  InsetsController        com.dukaan.quickcommerce             D  Setting requestedVisibleTypes to -9 (was -1)
+2025-11-10 03:33:41.517  7603-7603  ImeTracker              com.dukaan.quickcommerce             I  system_server:eb111e0e: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+2025-11-10 03:33:41.550  7603-7603  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-B019f6hM.js - Line 3624 - Msg: [Auth] OTP-only user detected - sending OTP
+2025-11-10 03:33:41.550  7603-7603  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-B019f6hM.js - Line 3624 - Msg: [Auth] 🔵 Attempting OTP send for: +917993558836
+2025-11-10 03:33:41.550  7603-7603  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-B019f6hM.js - Line 3624 - Msg: [Auth] 🔵 Bypass mode: ENABLED
+2025-11-10 03:33:41.551  7603-7603  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-B019f6hM.js - Line 3624 - Msg: [Auth] ⚠️ Skipping RecaptchaVerifier (bypass enabled)
+2025-11-10 03:33:41.551  7603-7603  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-B019f6hM.js - Line 3624 - Msg: [Auth] 🔵 Calling signInWithPhoneNumber...
+2025-11-10 03:33:41.866  7603-7603  Capacitor/Console       com.dukaan.quickcommerce             I  File: https://localhost/assets/index-B019f6hM.js - Line 1473 - Msg: Failed to initialize reCAPTCHA Enterprise config. Triggering the reCAPTCHA v2 verification.
+2025-11-10 03:33:41.868  7603-7603  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-B019f6hM.js - Line 3624 - Msg: [Auth] ❌ ============ FIREBASE OTP ERROR ============
+2025-11-10 03:33:41.868  7603-7603  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-B019f6hM.js - Line 3624 - Msg: [Auth] ❌ Error Code: auth/argument-error
+2025-11-10 03:33:41.870  7603-7603  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-B019f6hM.js - Line 3624 - Msg: [Auth] ❌ Error Message: Firebase: Error (auth/argument-error).
+2025-11-10 03:33:41.873  7603-7603  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-B019f6hM.js - Line 3624 - Msg: [Auth] ❌ Full Error Object: {
+                                                                                                      "stack": "FirebaseError: Firebase: Error (auth/argument-error).\n    at xg (https://localhost/assets/index-B019f6hM.js:453:480)\n    at Te (https://localhost/assets/index-B019f6hM.js:453:554)\n    at https://localhost/assets/index-B019f6hM.js:1473:1658\n    at $c (https://localhost/assets/index-B019f6hM.js:888:5106)\n    at async P1 (https://localhost/assets/index-B019f6hM.js:1473:1582)\n    at async b1 (https://localhost/assets/index-B019f6hM.js:1473:251)\n    at async k (https://localhost/assets/index-B019f6hM.js:3624:4081)\n    at async M (https://localhost/assets/index-B019f6hM.js:3624:3006)",
+                                                                                                      "message": "Firebase: Error (auth/argument-error).",
+                                                                                                      "code": "auth/argument-error",
+                                                                                                      "customData": {},
+                                                                                                      "name": "FirebaseError"
+                                                                                                    }
+2025-11-10 03:33:41.873  7603-7603  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-B019f6hM.js - Line 3624 - Msg: [Auth] ❌ Firebase Error Code: auth/argument-error
+2025-11-10 03:33:41.874  7603-7603  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-B019f6hM.js - Line 3624 - Msg: [Auth] ❌ Custom Data: [object Object]
+2025-11-10 03:33:41.875  7603-7603  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-B019f6hM.js - Line 3624 - Msg: [Auth] ❌ Stack Trace: FirebaseError: Firebase: Error (auth/argument-error). (Ask Gemini)
+                                                                                                        at xg (https://localhost/assets/index-B019f6hM.js:453:480)
+                                                                                                        at Te (https://localhost/assets/index-B019f6hM.js:453:554)
+                                                                                                        at https://localhost/assets/index-B019f6hM.js:1473:1658
+                                                                                                        at $c (https://localhost/assets/index-B019f6hM.js:888:5106)
+                                                                                                        at async P1 (https://localhost/assets/index-B019f6hM.js:1473:1582)
+                                                                                                        at async b1 (https://localhost/assets/index-B019f6hM.js:1473:251)
+                                                                                                        at async k (https://localhost/assets/index-B019f6hM.js:3624:4081)
+                                                                                                        at async M (https://localhost/assets/index-B019f6hM.js:3624:3006)
+2025-11-10 03:33:41.877  7603-7603  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-B019f6hM.js - Line 3624 - Msg: [Auth] ❌ Detailed Message: Firebase: Error (auth/argument-error).
+2025-11-10 03:33:41.877  7603-7603  Capacitor/Console       com.dukaan.quickcommerce             E  File: https://localhost/assets/index-B019f6hM.js - Line 3624 - Msg: [Auth] ❌ ============================================
+2025-11-10 03:33:41.897  7603-7603  CompatChangeReporter    com.dukaan.quickcommerce             D  Compat change id reported: 63938206; UID 10214; state: ENABLED
+2025-11-10 03:33:41.973  7603-7603  ImeTracker              com.dukaan.quickcommerce             I  system_server:d79b011e: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
