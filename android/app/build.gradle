@@ -8,8 +8,8 @@ android {
         applicationId "com.dukaan.quickcommerce"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         aaptOptions {
@@ -44,6 +44,10 @@ dependencies {
 
     implementation platform('com.google.firebase:firebase-bom:33.1.0')
     implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-auth-interop'
+    implementation 'com.google.android.gms:play-services-auth:21.1.1'
+    implementation "com.google.android.gms:play-services-base:18.4.0"
+    implementation "com.google.android.gms:play-services-tasks:18.2.0"
     implementation 'com.google.firebase:firebase-firestore'
 }
 

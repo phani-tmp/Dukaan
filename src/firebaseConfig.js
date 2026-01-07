@@ -22,3 +22,4 @@ export const firebaseConfig = {
 // This localAppId is typically only used for non-deployed local testing.
 
 export const localAppId = "dukaan-local-dev";
+

@@ -17,10 +17,29 @@ export const useCart = () => {
 export const CartProvider = ({ children }) => {
   const { user, userProfile } = useAuth();
   const { db } = getFirebaseInstances();
-  
-  const [cartItems, setCartItems] = useState({});
+
+  // Load initial cart from localStorage
+  const [cartItems, setCartItems] = useState(() => {
+    try {
+      const storedCart = localStorage.getItem('cartItems');
+      return storedCart ? JSON.parse(storedCart) : {};
+    } catch (error) {
+      console.error('Failed to load cart from storage:', error);
+      return {};
+    }
+  });
+
   const [deliveryMethod, setDeliveryMethod] = useState('delivery');
   const [selectedAddress, setSelectedAddress] = useState(null);
+
+  // Persistence Effect
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    } catch (error) {
+      console.error('Failed to save cart to storage:', error);
+    }
+  }, [cartItems]);
 
   const handleAddToCart = useCallback((product, quantityChange = 1) => {
     setCartItems(prev => {
@@ -42,6 +61,7 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = useCallback(() => {
     setCartItems({});
+    localStorage.removeItem('cartItems');
   }, []);
 
   const handleCheckout = useCallback(async (userAddresses, setCurrentView, language = 'en') => {
@@ -83,7 +103,7 @@ export const CartProvider = ({ children }) => {
 
     try {
       const orderNumber = await generateOrderNumber(db, appId);
-      
+
       const orderData = {
         orderNumber,
         userId: user.uid,
@@ -94,7 +114,7 @@ export const CartProvider = ({ children }) => {
           const originalPrice = Number(item.price) || 0;
           const discountedPrice = item.discountedPrice !== '' && item.discountedPrice != null ? Number(item.discountedPrice) : null;
           const finalPrice = discountedPrice != null ? discountedPrice : originalPrice;
-          
+
           return {
             id: item.id || '',
             name: item.name || '',

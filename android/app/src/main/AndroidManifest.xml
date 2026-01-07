@@ -23,6 +23,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="mydukaan" android:host="auth-complete" />
+            </intent-filter>
+
         </activity>
 
         <provider
@@ -34,6 +41,13 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+        <receiver
+            android:name="com.google.firebase.auth.PhoneAuthReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.firebase.auth.ACTION_RECEIVE_SMS" />
+            </intent-filter>
+        </receiver>
     </application>
 
     <!-- Permissions -->
@@ -49,4 +63,17 @@
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
     <uses-feature android:name="android.hardware.location" android:required="false" />
+
+    <!-- Required for Firebase Phone Auth Plugin -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+
+    <queries>
+        <intent>
+            <action android:name="com.google.android.gms.auth.api.phone.service.START"/>
+        </intent>
+    </queries>
+
+
 </manifest>

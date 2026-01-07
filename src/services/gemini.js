@@ -5,7 +5,7 @@ const genAI = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '
 export async function translateToProductName(userInput, productContext) {
   try {
     const productList = productContext.map(p => `${p.id}: ${p.name} (${p.teluguName}, ${p.hindiName})`).join('\n');
-    
+
     const prompt = `You are a product name translator for a quick commerce app in India.
 
 Available products (format: id: name (telugu, hindi)):
@@ -36,7 +36,7 @@ If no products match, return an empty array [].
 Only return valid JSON, no explanations.`;
 
     const result = await genAI.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-3-flash-preview',
       contents: [
         {
           role: 'user',
@@ -44,14 +44,14 @@ Only return valid JSON, no explanations.`;
         }
       ]
     });
-    
+
     const text = result.text || '';
-    
+
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
     }
-    
+
     return [];
   } catch (error) {
     console.error('[Gemini] Translation error:', error);
@@ -86,7 +86,7 @@ If information is missing or unclear, use null for that field.
 Only return valid JSON, no explanations.`;
 
     const result = await genAI.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-3-flash-preview',
       contents: [
         {
           role: 'user',
@@ -94,14 +94,14 @@ Only return valid JSON, no explanations.`;
         }
       ]
     });
-    
+
     const text = result.text || '';
-    
+
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
     }
-    
+
     return null;
   } catch (error) {
     console.error('[Gemini] Voice extraction error:', error);
@@ -118,7 +118,7 @@ Return only one of these language codes: "en" (English), "te" (Telugu), "hi" (Hi
 Only return the language code, nothing else.`;
 
     const result = await genAI.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-3-flash-preview',
       contents: [
         {
           role: 'user',
@@ -126,9 +126,9 @@ Only return the language code, nothing else.`;
         }
       ]
     });
-    
+
     const text_response = (result.text || '').trim().toLowerCase();
-    
+
     if (text_response.includes('te')) return 'te';
     if (text_response.includes('hi')) return 'hi';
     if (text_response.includes('mix')) return 'mix';
@@ -168,7 +168,7 @@ Return up to 10 most relevant matches.
 Only return valid JSON array, no explanations.`;
 
     const result = await genAI.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-3-flash-preview',
       contents: [
         {
           role: 'user',
@@ -176,15 +176,15 @@ Only return valid JSON array, no explanations.`;
         }
       ]
     });
-    
+
     const text = result.text || '';
-    
+
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
       const productIds = JSON.parse(jsonMatch[0]);
       return products.filter(p => productIds.includes(p.id));
     }
-    
+
     return [];
   } catch (error) {
     console.error('[Gemini] Semantic search error:', error);
@@ -195,7 +195,7 @@ Only return valid JSON array, no explanations.`;
 export async function chatAssistant(message, conversationHistory, products, cartItems) {
   try {
     const productList = products.map(p => `- ${p.name} (₹${p.discountedPrice || p.price})`).join('\n');
-    
+
     const systemContext = `You are a helpful shopping assistant for DUKAAN (దుకాణ్), a quick commerce app.
 
 Available products:
@@ -221,7 +221,7 @@ User: ${message}
 Your response:`;
 
     const result = await genAI.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-3-flash-preview',
       contents: [
         {
           role: 'user',
@@ -229,7 +229,7 @@ Your response:`;
         }
       ]
     });
-    
+
     return (result.text || '').trim();
   } catch (error) {
     console.error('[Gemini] Chat error:', error);
@@ -250,7 +250,7 @@ Rules:
 Translation:`;
 
     const result = await genAI.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-3-flash-preview',
       contents: [
         {
           role: 'user',
@@ -258,7 +258,7 @@ Translation:`;
         }
       ]
     });
-    
+
     return (result.text || text).trim();
   } catch (error) {
     console.error('[Gemini] Translation error:', error);
@@ -296,7 +296,7 @@ TELUGU: ఉల్లిపాయ
 Now generate for: "${text}"`;
 
     const result = await genAI.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-3-flash-preview',
       contents: [
         {
           role: 'user',
@@ -304,12 +304,12 @@ Now generate for: "${text}"`;
         }
       ]
     });
-    
+
     const responseText = (result.text || '').trim();
-    
+
     const englishMatch = responseText.match(/ENGLISH:\s*(.+)/i);
     const teluguMatch = responseText.match(/TELUGU:\s*(.+)/i);
-    
+
     return {
       english: englishMatch ? englishMatch[1].trim() : text,
       telugu: teluguMatch ? teluguMatch[1].trim() : text
@@ -323,9 +323,9 @@ Now generate for: "${text}"`;
 export async function transcribeAudio(audioBase64, mimeType = 'audio/webm') {
   try {
     console.log('[Gemini] Starting audio transcription...');
-    
+
     const result = await genAI.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-3-flash-preview',
       contents: [
         {
           role: 'user',
@@ -343,14 +343,14 @@ export async function transcribeAudio(audioBase64, mimeType = 'audio/webm') {
         }
       ]
     });
-    
+
     const transcribedText = (result.text || '').trim();
     console.log('[Gemini] Transcription result:', transcribedText);
-    
+
     if (!transcribedText) {
       throw new Error('No speech detected in audio');
     }
-    
+
     return transcribedText;
   } catch (error) {
     console.error('[Gemini] Audio transcription error:', error);

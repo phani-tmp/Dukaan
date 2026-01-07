@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { collection, query, onSnapshot, where, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, where, doc, updateDoc, limit } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getFirebaseInstances, appId } from '../services/firebase';
 import { categories as defaultCategories } from '../constants/categories';
@@ -16,10 +16,10 @@ export const useData = () => {
 };
 
 export const DataProvider = ({ children }) => {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const { db, auth } = getFirebaseInstances();
   const [authUser, setAuthUser] = useState(null);
-  
+
   const [products, setProducts] = useState([]);
   const [categoriesData, setCategoriesData] = useState([]);
   const [subcategoriesData, setSubcategoriesData] = useState([]);
@@ -89,7 +89,7 @@ export const DataProvider = ({ children }) => {
       collection(db, 'artifacts', appId, 'public', 'data', 'orders'),
       where('userId', '==', user.uid)
     );
-    
+
     const unsubscribe = onSnapshot(ordersQuery, (snapshot) => {
       const ordersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       ordersData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -99,21 +99,15 @@ export const DataProvider = ({ children }) => {
     return () => unsubscribe();
   }, [user, db]);
 
-  useEffect(() => {
-    if (!user && !authUser) return;
 
-    const allOrdersQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'orders'));
-    const unsubscribe = onSnapshot(allOrdersQuery, (snapshot) => {
-      const ordersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      ordersData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      setAllOrders(ordersData);
-    });
-
-    return () => unsubscribe();
-  }, [user, authUser, db]);
 
   useEffect(() => {
     if (!user && !authUser) return;
+
+    // SCALABILITY FIX: Only fetch users for shopkeepers/admins
+    if (!userProfile || (userProfile.role !== 'shopkeeper' && userProfile.role !== 'admin')) {
+      return;
+    }
 
     const usersQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'users'));
     const unsubscribe = onSnapshot(usersQuery, (snapshot) => {
@@ -122,10 +116,15 @@ export const DataProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, [user, authUser, db]);
+  }, [user, authUser, db, userProfile]);
 
   useEffect(() => {
     if (!user && !authUser) return;
+
+    // SCALABILITY FIX: Only fetch riders for shopkeepers/admins
+    if (!userProfile || (userProfile.role !== 'shopkeeper' && userProfile.role !== 'admin')) {
+      return;
+    }
 
     const ridersQuery = query(collection(db, 'artifacts', appId, 'public', 'data', 'riders'));
     const unsubscribe = onSnapshot(ridersQuery, (snapshot) => {
@@ -134,17 +133,17 @@ export const DataProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, [user, authUser, db]);
+  }, [user, authUser, db, userProfile]);
 
   const handleChangeDeliveryMethod = useCallback(async (orderId, newDeliveryMethod, selectedAddress = null) => {
     try {
       const orderRef = doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId);
-      
+
       const updateData = {
         deliveryMethod: newDeliveryMethod,
         updatedAt: new Date().toISOString()
       };
-      
+
       if (newDeliveryMethod === 'pickup') {
         updateData.deliveryAddress = 'Store Pickup';
         updateData.deliveryInstructions = '';
@@ -158,7 +157,7 @@ export const DataProvider = ({ children }) => {
         updateData.deliveryInstructions = selectedAddress.deliveryInstructions || '';
         updateData.selectedAddressId = selectedAddress.id;
       }
-      
+
       await updateDoc(orderRef, updateData);
       alert(`Order type changed to ${newDeliveryMethod === 'pickup' ? 'Store Pickup' : 'Home Delivery'} successfully!`);
     } catch (error) {
@@ -170,13 +169,13 @@ export const DataProvider = ({ children }) => {
   const handleCancelOrder = useCallback(async (orderId, cancellationReason) => {
     try {
       const orderRef = doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId);
-      
+
       await updateDoc(orderRef, {
         status: 'cancelled',
         cancellationReason: cancellationReason || 'Customer cancelled',
         updatedAt: new Date().toISOString()
       });
-      
+
       alert('Order cancelled successfully!');
     } catch (error) {
       console.error('Error cancelling order:', error);

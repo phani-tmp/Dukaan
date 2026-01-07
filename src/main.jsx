@@ -8,18 +8,30 @@ import { CartProvider } from './contexts/CartContext'
 import { AddressProvider } from './contexts/AddressContext'
 import { RiderProvider } from './contexts/RiderContext'
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <AuthProvider>
-      <DataProvider>
-        <CartProvider>
-          <AddressProvider>
-            <RiderProvider>
-              <App />
-            </RiderProvider>
-          </AddressProvider>
-        </CartProvider>
-      </DataProvider>
-    </AuthProvider>
-  </StrictMode>,
-)
+import HostedPhoneLogin from './features/auth/HostedPhoneLogin';
+
+const path = window.location.pathname;
+
+if (path === '/phone-login') {
+  createRoot(document.getElementById('root')).render(
+    <StrictMode>
+      <HostedPhoneLogin />
+    </StrictMode>
+  );
+} else {
+  createRoot(document.getElementById('root')).render(
+    <StrictMode>
+      <AuthProvider>
+        <DataProvider>
+          <CartProvider>
+            <AddressProvider>
+              <RiderProvider>
+                <App />
+              </RiderProvider>
+            </AddressProvider>
+          </CartProvider>
+        </DataProvider>
+      </AuthProvider>
+    </StrictMode>,
+  )
+}

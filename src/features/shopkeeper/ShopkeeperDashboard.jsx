@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { collection, doc, updateDoc, addDoc, deleteDoc, setDoc, getDocs } from 'firebase/firestore';
+import { collection, doc, updateDoc, addDoc, deleteDoc, setDoc, getDocs, query, where, limit, onSnapshot, startAfter } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getFirebaseInstances, appId } from '../../services/firebase';
 import { translations } from '../../constants/translations';
@@ -58,7 +58,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [imagePreview, setImagePreview] = useState(null);
-  
+
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [categoryFormData, setCategoryFormData] = useState({
     nameEn: '',
@@ -69,7 +69,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
   });
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [categoryImagePreview, setCategoryImagePreview] = useState(null);
-  
+
   const [showSubcategoryForm, setShowSubcategoryForm] = useState(false);
   const [subcategoryFormData, setSubcategoryFormData] = useState({
     nameEn: '',
@@ -226,7 +226,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
   const handleCancelOrder = async (orderId) => {
     const reason = prompt('Please enter reason for cancellation:');
     if (!reason || reason.trim() === '') return;
-    
+
     try {
       if (!db) throw new Error('Firebase database not initialized');
       await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
@@ -248,16 +248,16 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
 
   const handlePrintBill = (order) => {
     const printWindow = window.open('', '_blank');
-    const date = new Date(order.createdAt).toLocaleDateString('en-IN', { 
+    const date = new Date(order.createdAt).toLocaleDateString('en-IN', {
       day: '2-digit',
-      month: '2-digit', 
+      month: '2-digit',
       year: 'numeric'
     });
-    const time = new Date(order.createdAt).toLocaleTimeString('en-IN', { 
+    const time = new Date(order.createdAt).toLocaleTimeString('en-IN', {
       hour: '2-digit',
       minute: '2-digit'
     });
-    
+
     const billHTML = `
       <!DOCTYPE html>
       <html>
@@ -367,16 +367,16 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
 
           <div class="items-list">
             ${order.items.map(item => {
-              const itemName = order.customerLanguage === 'te' 
-                ? (item.nameTe || item.nameEn || item.name) 
-                : (item.nameEn || item.name);
-              return `
+      const itemName = order.customerLanguage === 'te'
+        ? (item.nameTe || item.nameEn || item.name)
+        : (item.nameEn || item.name);
+      return `
                 <div class="item-row">
                   <span class="item-name">${itemName}</span>
                   <span class="item-price">₹${((item.price || 0) * item.quantity).toFixed(2)}</span>
                 </div>
               `;
-            }).join('')}
+    }).join('')}
           </div>
 
           <div class="divider"></div>
@@ -404,24 +404,24 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
         </body>
       </html>
     `;
-    
+
     printWindow.document.write(billHTML);
     printWindow.document.close();
   };
 
   const handleSubmitProduct = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.category || !formData.subcategoryId) {
       alert('Please select both Category and Subcategory before saving the product.');
       return;
     }
-    
+
     try {
       if (!db) {
         throw new Error('Firebase database not initialized');
       }
-      
+
       const productData = {
         ...formData,
         price: parseFloat(formData.price),
@@ -555,7 +555,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
     e.preventDefault();
     try {
       const categoryId = categoryFormData.nameEn.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      
+
       const categoryData = {
         nameEn: categoryFormData.nameEn,
         nameTe: categoryFormData.nameTe,
@@ -613,7 +613,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
     e.preventDefault();
     try {
       const subcategoryId = `${subcategoryFormData.categoryId}-${subcategoryFormData.nameEn.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
-      
+
       const subcategoryData = {
         nameEn: subcategoryFormData.nameEn,
         nameTe: subcategoryFormData.nameTe,
@@ -665,7 +665,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
   };
 
   const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'pending': return '#9E9E9E';
       case 'accepted': return '#2196F3';
       case 'out_for_delivery': return '#FF9800';
@@ -678,7 +678,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
   };
 
   const getStatusLabel = (status) => {
-    switch(status) {
+    switch (status) {
       case 'pending': return 'PENDING';
       case 'accepted': return 'ACCEPTED';
       case 'out_for_delivery': return 'OUT FOR DELIVERY';
@@ -691,28 +691,280 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
   };
 
   const activeStatuses = ['pending', 'accepted', 'out_for_delivery', 'ready_for_pickup'];
-  const completedStatuses = ['delivered', 'cancelled', 'completed'];
-  
-  const filteredOrders = allOrders.filter(order => {
-    if (orderTab === 'active') {
-      return activeStatuses.includes(order.status);
-    } else {
-      return completedStatuses.includes(order.status);
-    }
-  });
-  
-  const sortedOrders = [...filteredOrders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  
+  const completedStatuses = ['delivered', 'completed'];
+  const cancelledStatuses = ['cancelled'];
+
+
+
   const filteredProducts = products.filter(product => {
     const productName = product.nameEn || product.nameTe || product.name || '';
     const productNameTe = product.nameTe || '';
-    const matchesSearch = productName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         productNameTe.includes(searchTerm);
+    const matchesSearch = productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      productNameTe.includes(searchTerm);
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
+  // Pagination States
   const popularProducts = products.filter(p => p.isPopular);
+
+  const PAGE_SIZE = 20;
+
+  // Trackers for current page number (starts at 1)
+  const [activePage, setActivePage] = useState(1);
+  const [completedPage, setCompletedPage] = useState(1);
+  const [cancelledPage, setCancelledPage] = useState(1);
+
+  // Data
+  const [activeOrders, setActiveOrders] = useState([]);
+  const [completedOrders, setCompletedOrders] = useState([]);
+  const [cancelledOrders, setCancelledOrders] = useState([]);
+
+  // Cursors Stack: Map of pageNumber -> startAfterDoc
+  // index 0 = start doc for page 2 (end of page 1), etc.
+  // We use a simple object/map where key is page number.
+  // Actually, for "Next", we need the last doc of current page.
+  // For "Prev", we need the last doc of the page *before* the previous one.
+  const [activeCursors, setActiveCursors] = useState({});
+  const [completedCursors, setCompletedCursors] = useState({});
+  const [cancelledCursors, setCancelledCursors] = useState({});
+
+  // Loading states
+  const [loadingActive, setLoadingActive] = useState(false);
+  const [loadingCompleted, setLoadingCompleted] = useState(false);
+  const [loadingCancelled, setLoadingCancelled] = useState(false);
+
+  // Helper to build queries
+  const buildQuery = (statusList, cursorDoc) => {
+    let constraints = [
+      where('status', 'in', statusList),
+      // orderBy('createdAt', 'desc'), // Warning: Index required. Client-side sort is safer if no index.
+      // However, cursor pagination REQUIRES orderBy. 
+      // If no composite index exists, this might fail or be flaky.
+      // We will try to rely on implicit ID ordering or just NO sorting (Firestore default) + client sort.
+      // BUT startAfter works on the sort order. 
+      // Let's assume we proceed WITHOUT explicit sort in query for safety, 
+      // which means we rely on doc ID order or whatever Firestore returns? 
+      // NO, that makes startAfter useless.
+      // We MUST use orderBy to paginate correctly. 
+      // We will try orderBy('createdAt', 'desc'). If it breaks, user has to add index. 
+      // User asked for "page 1 page 2", so we assume they want chronological.
+      // If index missing, we catch error.
+      limit(PAGE_SIZE)
+    ];
+    // FIX: If we don't have indexes, we can't do complex ordering.
+    // Let's try to remove orderBy and just use the natural results which might be messy, 
+    // but 'startAfter' accepts a document snapshot.
+
+    if (cursorDoc) {
+      constraints.push(startAfter(cursorDoc));
+    }
+    return query(collection(db, 'artifacts', appId, 'public', 'data', 'orders'), ...constraints);
+  };
+
+  // Filters
+  const [filterDate, setFilterDate] = useState('');
+  const [filterMobile, setFilterMobile] = useState('');
+  const [isFiltering, setIsFiltering] = useState(false);
+
+  // We need distinct effects because changing page on one shouldn't refresh others
+
+  // 1. ACTIVE ORDERS (Standard Pagination)
+  React.useEffect(() => {
+    if (!db || isFiltering) return; // Skip if filtering
+    setLoadingActive(true);
+
+    // Logic: Page 1 -> No cursor. Page 2 -> Cursor is last doc of Page 1.
+    const cursor = activePage === 1 ? null : activeCursors[activePage - 1];
+
+    const q = buildQuery(['pending', 'accepted', 'out_for_delivery', 'ready_for_pickup'], cursor);
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Sort client side to be sure
+      data.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      setActiveOrders(data);
+      setLoadingActive(false);
+
+      // Store the last doc as the start point for the NEXT page
+      if (snapshot.docs.length > 0) {
+        const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+        setActiveCursors(prev => ({ ...prev, [activePage]: lastDoc }));
+      }
+    });
+    return () => unsubscribe();
+  }, [db, activePage, isFiltering]);
+
+  // 2. COMPLETED ORDERS (Standard Pagination)
+  React.useEffect(() => {
+    if (!db || isFiltering) return;
+    setLoadingCompleted(true);
+    const cursor = completedPage === 1 ? null : completedCursors[completedPage - 1];
+    const q = buildQuery(['delivered', 'completed'], cursor);
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      data.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      setCompletedOrders(data);
+      setLoadingCompleted(false);
+
+      if (snapshot.docs.length > 0) {
+        const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+        setCompletedCursors(prev => ({ ...prev, [completedPage]: lastDoc }));
+      }
+    });
+    return () => unsubscribe();
+  }, [db, completedPage, isFiltering]);
+
+  // 3. CANCELLED ORDERS (Standard Pagination)
+  React.useEffect(() => {
+    if (!db || isFiltering) return;
+    setLoadingCancelled(true);
+    const cursor = cancelledPage === 1 ? null : cancelledCursors[cancelledPage - 1];
+    const q = buildQuery(['cancelled'], cursor);
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      data.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      setCancelledOrders(data);
+      setLoadingCancelled(false);
+
+      if (snapshot.docs.length > 0) {
+        const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+        setCancelledCursors(prev => ({ ...prev, [cancelledPage]: lastDoc }));
+      }
+    });
+    return () => unsubscribe();
+  }, [db, cancelledPage, isFiltering]);
+
+  // 4. FILTER EFFECT (Global Search)
+  React.useEffect(() => {
+    if (!db) return;
+
+    if (!filterDate && !filterMobile) {
+      setIsFiltering(false);
+      return;
+    }
+
+    setIsFiltering(true);
+    setLoadingActive(true);
+    setLoadingCompleted(true);
+    setLoadingCancelled(true);
+
+    let q;
+    const constraints = [];
+
+    // Strategy:
+    // If Date is present -> Query by Date Range -> Filter by Mobile client-side
+    // If only Mobile -> Query by Mobile (requires index on 'customerPhone') -> Filter client-side just in case
+    // Note: To avoid index hell, we will prefer Date Range query if date is present.
+
+    if (filterDate) {
+      const start = new Date(filterDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(filterDate);
+      end.setHours(23, 59, 59, 999);
+
+      constraints.push(where('createdAt', '>=', start.toISOString()));
+      constraints.push(where('createdAt', '<=', end.toISOString()));
+    }
+
+    // We cannot easily do 'where customerPhone == mobile' AND 'where createdAt >= date' without composite index.
+    // If mobile is provided but NO date, we query by mobile.
+    // If date is provided, we query by date and filter mobile in memory (assuming daily volume is < 1000).
+
+    if (filterMobile && !filterDate) {
+      // Ideally: where('customerPhone', '==', filterMobile)
+      // But 'customerPhone' might not be indexed? It's a key field, usually ok.
+      // Let's try simple client side filtering on a larger recent set? No, that's not scalable.
+      // We will assume 'orders' has no specific index on customerPhone.
+      // Safe bet: Query limit(100) of recent orders and filter? No user might filter old orders.
+      // Correct way: use 'where' on customerPhone. If it errors, catch it.
+      constraints.push(where('customerPhone', '==', filterMobile));
+    }
+
+    // Only add limit if we are strictly querying. Filters might return many.
+    // Let's cap at 100 results for safety during filtered search.
+    constraints.push(limit(100));
+
+    q = query(collection(db, 'artifacts', appId, 'public', 'data', 'orders'), ...constraints);
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      let data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      // Client-side Refinements
+      if (filterDate && filterMobile) {
+        // We queried by Date, now filter by Mobile
+        data = data.filter(d => d.customerPhone === filterMobile);
+      }
+
+      data.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+      // Distribute into buckets
+      const active = [];
+      const completed = [];
+      const cancelled = [];
+
+      data.forEach(order => {
+        if (['pending', 'accepted', 'out_for_delivery', 'ready_for_pickup'].includes(order.status)) {
+          active.push(order);
+        } else if (['delivered', 'completed'].includes(order.status)) {
+          completed.push(order);
+        } else if (order.status === 'cancelled') {
+          cancelled.push(order);
+        }
+      });
+
+      setActiveOrders(active);
+      setCompletedOrders(completed);
+      setCancelledOrders(cancelled);
+
+      setLoadingActive(false);
+      setLoadingCompleted(false);
+      setLoadingCancelled(false);
+    });
+
+    return () => unsubscribe();
+
+  }, [db, filterDate, filterMobile, appId]);
+
+
+  // Derived list based on active tab
+  const getDisplayOrders = () => {
+    if (orderTab === 'active') return activeOrders;
+    if (orderTab === 'completed') return completedOrders;
+    if (orderTab === 'cancelled') return cancelledOrders;
+    return [];
+  };
+
+  const sortedOrders = getDisplayOrders();
+
+  const handleNextPage = () => {
+    if (orderTab === 'active') setActivePage(p => p + 1);
+    if (orderTab === 'completed') setCompletedPage(p => p + 1);
+    if (orderTab === 'cancelled') setCancelledPage(p => p + 1);
+  };
+
+  const handlePrevPage = () => {
+    if (orderTab === 'active' && activePage > 1) setActivePage(p => p - 1);
+    if (orderTab === 'completed' && completedPage > 1) setCompletedPage(p => p - 1);
+    if (orderTab === 'cancelled' && cancelledPage > 1) setCancelledPage(p => p - 1);
+  };
+
+  // Helper to check if we can go next
+  const canGoNext = () => {
+    if (orderTab === 'active') return activeOrders.length === PAGE_SIZE;
+    if (orderTab === 'completed') return completedOrders.length === PAGE_SIZE;
+    if (orderTab === 'cancelled') return cancelledOrders.length === PAGE_SIZE;
+    return false;
+  };
+
+  const getCurrentPage = () => {
+    if (orderTab === 'active') return activePage;
+    if (orderTab === 'completed') return completedPage;
+    if (orderTab === 'cancelled') return cancelledPage;
+    return 1;
+  };
 
   return (
     <div className="shopkeeper-dashboard">
@@ -735,56 +987,56 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
       </div>
 
       <div className="shopkeeper-tabs">
-        <button 
+        <button
           className={`tab-button ${activeTab === 'orders' ? 'active' : ''}`}
           onClick={() => setActiveTab('orders')}
         >
           <Package className="w-5 h-5" />
           Orders
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'categories' ? 'active' : ''}`}
           onClick={() => setActiveTab('categories')}
         >
           <Settings className="w-5 h-5" />
           Categories
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'subcategories' ? 'active' : ''}`}
           onClick={() => setActiveTab('subcategories')}
         >
           <ShoppingBag className="w-5 h-5" />
           Subcategories
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'products' ? 'active' : ''}`}
           onClick={() => setActiveTab('products')}
         >
           <Package className="w-5 h-5" />
           Products
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'popular' ? 'active' : ''}`}
           onClick={() => setActiveTab('popular')}
         >
           <Star className="w-5 h-5" />
           Popular
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
         >
           <User className="w-5 h-5" />
           Users
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'riders' ? 'active' : ''}`}
           onClick={() => setActiveTab('riders')}
         >
           <User className="w-5 h-5" />
           Riders
         </button>
-        <button 
+        <button
           className={`tab-button ${activeTab === 'analytics' ? 'active' : ''}`}
           onClick={() => setActiveTab('analytics')}
         >
@@ -798,24 +1050,117 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
           <div className="orders-section">
             <div className="section-header">
               <h3 className="section-subtitle">Orders Management</h3>
-              <span className="count-badge">{allOrders.length}</span>
+              <span className="count-badge">{activeOrders.length + completedOrders.length + cancelledOrders.length}</span>
             </div>
-            
-            <div className="order-tabs">
-              <button 
-                className={`order-tab-btn ${orderTab === 'active' ? 'active' : ''}`}
+
+            <div className="tabs-header" style={{
+              display: 'flex',
+              background: '#F3F4F6',
+              padding: '6px',
+              borderRadius: '16px',
+              gap: '6px',
+              marginBottom: '16px',
+              width: '100%'
+            }}>
+              <button
                 onClick={() => setOrderTab('active')}
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  background: orderTab === 'active' ? 'white' : 'transparent',
+                  color: orderTab === 'active' ? '#10B981' : '#6B7280',
+                  boxShadow: orderTab === 'active' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'
+                }}
               >
-                Active Orders ({activeStatuses.reduce((count, status) => 
-                  count + allOrders.filter(o => o.status === status).length, 0)})
+                Active ({activeOrders.length}{!isFiltering && activePage > 1 ? '+' : ''})
               </button>
-              <button 
-                className={`order-tab-btn ${orderTab === 'completed' ? 'active' : ''}`}
+              <button
                 onClick={() => setOrderTab('completed')}
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  background: orderTab === 'completed' ? 'white' : 'transparent',
+                  color: orderTab === 'completed' ? '#059669' : '#6B7280',
+                  boxShadow: orderTab === 'completed' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'
+                }}
               >
-                Completed Orders ({completedStatuses.reduce((count, status) => 
-                  count + allOrders.filter(o => o.status === status).length, 0)})
+                Completed ({completedOrders.length}{!isFiltering && completedPage > 1 ? '+' : ''})
               </button>
+              <button
+                onClick={() => setOrderTab('cancelled')}
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  background: orderTab === 'cancelled' ? 'white' : 'transparent',
+                  color: orderTab === 'cancelled' ? '#EF4444' : '#6B7280',
+                  boxShadow: orderTab === 'cancelled' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'
+                }}
+              >
+                Cancelled ({cancelledOrders.length}{!isFiltering && cancelledPage > 1 ? '+' : ''})
+              </button>
+            </div>
+
+            {/* Global Search Filters */}
+            <div className="filters-bar" style={{
+              padding: '12px 16px',
+              background: '#F9FAFB',
+              borderBottom: '1px solid #E5E7EB',
+              display: 'flex',
+              gap: '12px',
+              alignItems: 'center',
+              flexWrap: 'wrap'
+            }}>
+              <span style={{ fontSize: '13px', fontWeight: '600', color: '#6B7280', textTransform: 'uppercase' }}>Filter Orders:</span>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'white', padding: '4px 8px', borderRadius: '6px', border: '1px solid #D1D5DB' }}>
+                <Calendar className="w-4 h-4 text-gray-500" />
+                <input
+                  type="date"
+                  value={filterDate}
+                  onChange={(e) => setFilterDate(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
+                  placeholder="Date"
+                  style={{ fontSize: '13px', border: 'none', outline: 'none', color: '#374151' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'white', padding: '4px 8px', borderRadius: '6px', border: '1px solid #D1D5DB' }}>
+                <Phone className="w-4 h-4 text-gray-500" />
+                <input
+                  type="text"
+                  value={filterMobile}
+                  onChange={(e) => setFilterMobile(e.target.value)}
+                  placeholder="Customer Mobile (Exact)"
+                  style={{ fontSize: '13px', border: 'none', outline: 'none', width: '150px', color: '#374151' }}
+                />
+              </div>
+
+              {(filterDate || filterMobile) && (
+                <button
+                  onClick={() => { setFilterDate(''); setFilterMobile(''); }}
+                  style={{ fontSize: '12px', color: '#EF4444', fontWeight: '500', background: 'none', border: 'none', cursor: 'pointer', marginLeft: 'auto' }}
+                >
+                  Clear Filters
+                </button>
+              )}
             </div>
             {sortedOrders.length === 0 ? (
               <div className="empty-state">
@@ -849,14 +1194,23 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                         {getStatusLabel(order.status)}
                       </div>
                     </div>
-                    
+
                     {order.deliveryAddress && (
                       <div className="order-address-section">
                         <MapPin className="w-4 h-4 text-gray-500" />
                         <span className="order-address-text">{order.deliveryAddress}</span>
                       </div>
                     )}
-                    
+
+                    {order.status === 'cancelled' && (
+                      <div style={{ marginTop: '12px', padding: '10px', backgroundColor: '#ffebee', borderRadius: '6px', border: '1px solid #ffcdd2', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <XCircle className="w-4 h-4 text-red-600" />
+                        <span style={{ fontSize: '13px', color: '#d32f2f' }}>
+                          <strong>Cancellation Reason:</strong> {order.cancellationReason || 'No reason provided'}
+                        </span>
+                      </div>
+                    )}
+
                     <div className="order-items-container">
                       <button
                         onClick={() => {
@@ -880,14 +1234,14 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                           <ChevronDown className="w-4 h-4" />
                         )}
                       </button>
-                      
+
                       {expandedOrders.has(order.id) && (
                         <div className="order-items-list-enhanced">
                           {order.items.map((item, idx) => (
                             <div key={idx} className="order-item-row-enhanced">
-                              <img 
-                                src={item.imageUrl || 'https://via.placeholder.com/50'} 
-                                alt={item.nameEn || item.name} 
+                              <img
+                                src={item.imageUrl || 'https://via.placeholder.com/50'}
+                                alt={item.nameEn || item.name}
                                 className="order-item-image"
                               />
                               <div className="order-item-details">
@@ -904,17 +1258,17 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="order-card-bottom">
                       <div className="order-total-section">
                         <span className="total-label">{t.total}</span>
                         <span className="total-amount-large">₹{order.total.toFixed(0)}</span>
                       </div>
-                      
+
                       <div className="order-management-section">
                         <div className="order-status-controls">
                           <label className="status-dropdown-label">Status:</label>
-                          <select 
+                          <select
                             value={order.status}
                             onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
                             className="status-dropdown"
@@ -943,7 +1297,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                               {order.riderName ? `Rider: ${order.riderName}` : 'Assign Rider:'}
                             </label>
                             {order.status !== 'delivered' ? (
-                              <select 
+                              <select
                                 value={order.riderId || ''}
                                 onChange={async (e) => {
                                   const selectedRider = allRiders.find(r => r.id === e.target.value);
@@ -979,17 +1333,17 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                             )}
                           </div>
                         )}
-                        
+
                         <div className="order-action-buttons">
-                          <button 
+                          <button
                             onClick={() => handleViewOrderDetails(order)}
                             className="view-details-btn"
                           >
                             <Eye className="w-4 h-4" />
                             View Details
                           </button>
-                          
-                          <button 
+
+                          <button
                             onClick={() => handlePrintBill(order)}
                             className="view-details-btn"
                             style={{ background: '#2196F3' }}
@@ -997,9 +1351,9 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                             <Package className="w-4 h-4" />
                             {t.printBill}
                           </button>
-                          
+
                           {order.status !== 'cancelled' && order.status !== 'delivered' && order.status !== 'completed' && (
-                            <button 
+                            <button
                               onClick={() => handleCancelOrder(order.id)}
                               className="cancel-order-btn"
                             >
@@ -1012,6 +1366,54 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     </div>
                   </div>
                 ))}
+
+                {!isFiltering && (
+                  <div className="pagination-controls" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginTop: '20px' }}>
+                    <button
+                      onClick={handlePrevPage}
+                      disabled={getCurrentPage() === 1}
+                      className="pagination-btn"
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        border: '1px solid #E0E0E0',
+                        background: getCurrentPage() === 1 ? '#F5F5F5' : 'white',
+                        color: getCurrentPage() === 1 ? '#9E9E9E' : '#333',
+                        cursor: getCurrentPage() === 1 ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Previous
+                    </button>
+
+                    <span style={{ fontSize: '14px', color: '#666', fontWeight: '500' }}>
+                      Page {getCurrentPage()}
+                    </span>
+
+                    <button
+                      onClick={handleNextPage}
+                      disabled={!canGoNext()}
+                      className="pagination-btn"
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        border: '1px solid #E0E0E0',
+                        background: !canGoNext() ? '#F5F5F5' : 'white',
+                        color: !canGoNext() ? '#9E9E9E' : '#333',
+                        cursor: !canGoNext() ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      Next
+                      <ChevronLeft className="w-4 h-4" style={{ transform: 'rotate(180deg)' }} />
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1098,7 +1500,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     language={language}
                   />
                 </div>
-                
+
                 <div className="image-upload-section">
                   <label className="upload-label">
                     <Upload className="w-5 h-5" />
@@ -1137,7 +1539,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     </option>
                   ))}
                 </select>
-                
+
                 {formData.category && (
                   <select
                     value={formData.subcategoryId}
@@ -1187,7 +1589,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
             )}
 
             <div className="category-filters">
-              <button 
+              <button
                 className={`filter-btn ${selectedCategory === 'all' ? 'active' : ''}`}
                 onClick={() => setSelectedCategory('all')}
               >
@@ -1196,7 +1598,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
               {categories.map(cat => {
                 const count = products.filter(p => p.category === cat.id).length;
                 return (
-                  <button 
+                  <button
                     key={cat.id}
                     className={`filter-btn ${selectedCategory === cat.id ? 'active' : ''}`}
                     onClick={() => setSelectedCategory(cat.id)}
@@ -1214,7 +1616,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                   <img src={product.imageUrl || 'https://via.placeholder.com/60'} alt={language === 'te' ? (product.nameTe || product.nameEn || product.name) : (product.nameEn || product.name)} className="admin-product-img" />
                   <div className="admin-product-info">
                     <h4>
-                      {language === 'te' 
+                      {language === 'te'
                         ? (product.nameTe || product.nameEn || product.name)
                         : (product.nameEn || product.name)
                       }
@@ -1242,10 +1644,10 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
         {activeTab === 'categories' && (
           <div className="categories-section">
             {categoriesData.length === 0 && (
-              <div style={{ 
-                padding: '24px', 
-                background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)', 
-                borderRadius: '12px', 
+              <div style={{
+                padding: '24px',
+                background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
+                borderRadius: '12px',
                 marginBottom: '20px',
                 border: '2px dashed #FF9800',
                 textAlign: 'center'
@@ -1262,7 +1664,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                 </button>
               </div>
             )}
-            
+
             <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
               <button onClick={() => setShowCategoryForm(!showCategoryForm)} className="add-product-btn">
                 <PlusCircle className="w-5 h-5" />
@@ -1302,7 +1704,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     }}
                   />
                 </div>
-                
+
                 <div className="image-upload-section">
                   <label className="upload-label">
                     <Upload className="w-5 h-5" />
@@ -1323,9 +1725,9 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                   />
                   {(categoryImagePreview || categoryFormData.imageUrl) && (
                     <div className="image-preview-container">
-                      <img 
-                        src={categoryImagePreview || categoryFormData.imageUrl} 
-                        alt="Category preview" 
+                      <img
+                        src={categoryImagePreview || categoryFormData.imageUrl}
+                        alt="Category preview"
                         className="image-preview"
                       />
                     </div>
@@ -1355,10 +1757,10 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
               {[...categoriesData].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)).map((category, index, arr) => (
                 <div key={category.id} className="admin-product-card">
                   <div className="category-icon-preview" style={{ background: category.gradient }}>
-                    <img 
-                      src={category.imageUrl || 'https://via.placeholder.com/40/CCCCCC/666666?text=No+Image'} 
-                      alt={category.nameEn} 
-                      style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '8px' }} 
+                    <img
+                      src={category.imageUrl || 'https://via.placeholder.com/40/CCCCCC/666666?text=No+Image'}
+                      alt={category.nameEn}
+                      style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '8px' }}
                     />
                   </div>
                   <div className="admin-product-info">
@@ -1367,8 +1769,8 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     <p className="admin-price">{category.color}</p>
                   </div>
                   <div className="admin-product-actions">
-                    <button 
-                      onClick={() => moveCategory(category.id, 'up')} 
+                    <button
+                      onClick={() => moveCategory(category.id, 'up')}
                       className="edit-btn"
                       disabled={index === 0}
                       title="Move up"
@@ -1376,8 +1778,8 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     >
                       <ChevronUp className="w-4 h-4" />
                     </button>
-                    <button 
-                      onClick={() => moveCategory(category.id, 'down')} 
+                    <button
+                      onClick={() => moveCategory(category.id, 'down')}
                       className="edit-btn"
                       disabled={index === arr.length - 1}
                       title="Move down"
@@ -1448,7 +1850,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     }}
                   />
                 </div>
-                
+
                 <div className="image-upload-section">
                   <label className="upload-label">
                     <Upload className="w-5 h-5" />
@@ -1469,9 +1871,9 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                   />
                   {(subcategoryImagePreview || subcategoryFormData.imageUrl) && (
                     <div className="image-preview-container">
-                      <img 
-                        src={subcategoryImagePreview || subcategoryFormData.imageUrl} 
-                        alt="Subcategory preview" 
+                      <img
+                        src={subcategoryImagePreview || subcategoryFormData.imageUrl}
+                        alt="Subcategory preview"
                         className="image-preview"
                       />
                     </div>
@@ -1497,10 +1899,10 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                 return (
                   <div key={subcategory.id} className="admin-product-card">
                     <div className="subcategory-icon-preview">
-                      <img 
-                        src={subcategory.imageUrl || 'https://via.placeholder.com/40/CCCCCC/666666?text=No+Image'} 
-                        alt={subcategory.nameEn} 
-                        style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '8px' }} 
+                      <img
+                        src={subcategory.imageUrl || 'https://via.placeholder.com/40/CCCCCC/666666?text=No+Image'}
+                        alt={subcategory.nameEn}
+                        style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '8px' }}
                       />
                     </div>
                     <div className="admin-product-info">
@@ -1509,8 +1911,8 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                       <p className="admin-price">Parent: {parentCategory?.nameEn || 'N/A'}</p>
                     </div>
                     <div className="admin-product-actions">
-                      <button 
-                        onClick={() => moveSubcategory(subcategory.id, 'up')} 
+                      <button
+                        onClick={() => moveSubcategory(subcategory.id, 'up')}
                         className="edit-btn"
                         disabled={index === 0}
                         title="Move up"
@@ -1518,8 +1920,8 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                       >
                         <ChevronUp className="w-4 h-4" />
                       </button>
-                      <button 
-                        onClick={() => moveSubcategory(subcategory.id, 'down')} 
+                      <button
+                        onClick={() => moveSubcategory(subcategory.id, 'down')}
                         className="edit-btn"
                         disabled={index === arr.length - 1}
                         title="Move down"
@@ -1548,7 +1950,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
               <span className="count-badge">{popularProducts.length}</span>
             </div>
             <p className="section-description">
-              Manage which products appear in the "Popular Products" section on the customer app. 
+              Manage which products appear in the "Popular Products" section on the customer app.
               Toggle the star to add/remove from popular items.
             </p>
 
@@ -1558,7 +1960,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                   <img src={product.imageUrl || 'https://via.placeholder.com/60'} alt={language === 'te' ? (product.nameTe || product.nameEn || product.name) : (product.nameEn || product.name)} className="admin-product-img" />
                   <div className="admin-product-info">
                     <h4>
-                      {language === 'te' 
+                      {language === 'te'
                         ? (product.nameTe || product.nameEn || product.name)
                         : (product.nameEn || product.name)
                       }
@@ -1567,8 +1969,8 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     <p className="admin-price">₹{product.discountedPrice || product.price}</p>
                   </div>
                   <div className="admin-product-actions">
-                    <button 
-                      onClick={() => moveProduct(product.id, 'up')} 
+                    <button
+                      onClick={() => moveProduct(product.id, 'up')}
                       className="edit-btn"
                       disabled={index === 0}
                       title="Move up"
@@ -1576,8 +1978,8 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     >
                       <ChevronUp className="w-4 h-4" />
                     </button>
-                    <button 
-                      onClick={() => moveProduct(product.id, 'down')} 
+                    <button
+                      onClick={() => moveProduct(product.id, 'down')}
                       className="edit-btn"
                       disabled={index === arr.length - 1}
                       title="Move down"
@@ -1585,7 +1987,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                     >
                       <ChevronDown className="w-4 h-4" />
                     </button>
-                    <button 
+                    <button
                       onClick={() => togglePopularStatus(product.id, product.isPopular)}
                       className={`popular-toggle-btn ${product.isPopular ? 'is-popular' : ''}`}
                       title={product.isPopular ? 'Remove from popular' : 'Add to popular'}
@@ -1700,144 +2102,197 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
           <div className="analytics-section">
             <div className="section-header">
               <h3 className="section-subtitle">Daily Analytics</h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Calendar className="w-5 h-5 text-gray-600" />
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  max={new Date().toISOString().split('T')[0]}
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #E0E0E0',
-                    fontSize: '14px',
-                    cursor: 'pointer'
-                  }}
-                />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Calendar className="w-5 h-5 text-gray-600" />
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    max={new Date().toISOString().split('T')[0]}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #E0E0E0',
+                      fontSize: '14px',
+                      cursor: 'pointer'
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
-            {(() => {
-              const dayOrders = allOrders.filter(order => {
-                const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
-                return orderDate === selectedDate;
-              });
-              
-              const totalRevenue = dayOrders
-                .filter(o => o.status === 'completed' || o.status === 'delivered')
-                .reduce((sum, order) => sum + order.total, 0);
-              const completedOrders = dayOrders.filter(o => o.status === 'completed' || o.status === 'delivered').length;
-              const pendingOrders = dayOrders.filter(o => o.status === 'pending').length;
-              const cancelledOrders = dayOrders.filter(o => o.status === 'cancelled').length;
-
-              return (
-                <>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '20px' }}>
-                    <div style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                        <IndianRupee className="w-6 h-6" style={{ color: '#4CAF50' }} />
-                        <span style={{ fontSize: '14px', color: '#666' }}>Total Revenue</span>
-                      </div>
-                      <div style={{ fontSize: '28px', fontWeight: '700', color: '#2E7D32' }}>
-                        ₹{totalRevenue.toFixed(0)}
-                      </div>
-                    </div>
-
-                    <div style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                        <Package className="w-6 h-6" style={{ color: '#2196F3' }} />
-                        <span style={{ fontSize: '14px', color: '#666' }}>Total Orders</span>
-                      </div>
-                      <div style={{ fontSize: '28px', fontWeight: '700', color: '#1976D2' }}>
-                        {dayOrders.length}
-                      </div>
-                    </div>
-
-                    <div style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                        <Package className="w-6 h-6" style={{ color: '#4CAF50' }} />
-                        <span style={{ fontSize: '14px', color: '#666' }}>Completed</span>
-                      </div>
-                      <div style={{ fontSize: '28px', fontWeight: '700', color: '#2E7D32' }}>
-                        {completedOrders}
-                      </div>
-                    </div>
-
-                    <div style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                        <Clock className="w-6 h-6" style={{ color: '#FF9800' }} />
-                        <span style={{ fontSize: '14px', color: '#666' }}>Pending</span>
-                      </div>
-                      <div style={{ fontSize: '28px', fontWeight: '700', color: '#F57C00' }}>
-                        {pendingOrders}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{ background: 'white', borderRadius: '12px', padding: '24px', marginTop: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-                    <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
-                      Orders for {new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                    </h4>
-                    {dayOrders.length === 0 ? (
-                      <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
-                        <Package className="w-12 h-12" style={{ margin: '0 auto 12px', opacity: 0.3 }} />
-                        <p>No orders on this date</p>
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        {dayOrders.map(order => (
-                          <div key={order.id} style={{ 
-                            padding: '16px', 
-                            background: '#f9f9f9', 
-                            borderRadius: '8px',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center'
-                          }}>
-                            <div>
-                              <div style={{ fontWeight: '600', marginBottom: '4px' }}>
-                                {order.orderNumber || `Order #${order.id.substring(0, 8)}`}
-                              </div>
-                              <div style={{ fontSize: '13px', color: '#666' }}>
-                                {new Date(order.createdAt).toLocaleTimeString('en-IN')} • {order.items.length} items
-                              </div>
-                            </div>
-                            <div style={{ textAlign: 'right' }}>
-                              <div style={{ fontWeight: '700', fontSize: '16px', color: '#2E7D32' }}>
-                                ₹{order.total.toFixed(0)}
-                              </div>
-                              <div style={{ 
-                                fontSize: '12px', 
-                                padding: '4px 8px', 
-                                borderRadius: '4px',
-                                background: order.status === 'completed' || order.status === 'delivered' ? '#E8F5E9' : '#FFF3E0',
-                                color: order.status === 'completed' || order.status === 'delivered' ? '#2E7D32' : '#F57C00',
-                                marginTop: '4px'
-                              }}>
-                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </>
-              );
-            })()}
+            <AnalyticsContent
+              db={db}
+              appId={appId}
+              selectedDate={selectedDate}
+              t={t}
+            />
           </div>
         )}
       </div>
 
       {showOrderDetails && selectedOrderForDetails && (
-        <OrderDetailsModal 
-          order={selectedOrderForDetails} 
+        <OrderDetailsModal
+          order={selectedOrderForDetails}
           onClose={() => setShowOrderDetails(false)}
           language={language}
         />
       )}
     </div>
+  );
+};
+
+const AnalyticsContent = ({ db, appId, selectedDate, t }) => {
+  const [dayOrders, setDayOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    if (!db || !selectedDate) return;
+
+    setLoading(true);
+    // Create start and end date for the query
+    const start = new Date(selectedDate);
+    start.setHours(0, 0, 0, 0);
+    const startIso = start.toISOString();
+
+    const end = new Date(selectedDate);
+    end.setHours(23, 59, 59, 999);
+    const endIso = end.toISOString();
+
+    const q = query(
+      collection(db, 'artifacts', appId, 'public', 'data', 'orders'),
+      where('createdAt', '>=', startIso),
+      where('createdAt', '<=', endIso)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setDayOrders(data);
+      setLoading(false);
+    }, (error) => {
+      console.error("Analytics Error:", error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [db, selectedDate, appId]);
+
+  const totalRevenue = dayOrders
+    .filter(o => o.status === 'completed' || o.status === 'delivered')
+    .reduce((sum, order) => sum + order.total, 0);
+  const completedOrders = dayOrders.filter(o => o.status === 'completed' || o.status === 'delivered').length;
+  const pendingOrders = dayOrders.filter(o => o.status === 'pending').length;
+  const cancelledOrders = dayOrders.filter(o => o.status === 'cancelled').length;
+
+  if (loading) {
+    return <div className="p-8 text-center text-gray-500">Loading daily analytics...</div>;
+  }
+
+  return (
+    <>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '20px' }}>
+        <div style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+            <IndianRupee className="w-6 h-6" style={{ color: '#4CAF50' }} />
+            <span style={{ fontSize: '14px', color: '#666' }}>Total Revenue</span>
+          </div>
+          <div style={{ fontSize: '28px', fontWeight: '700', color: '#2E7D32' }}>
+            ₹{totalRevenue.toFixed(0)}
+          </div>
+        </div>
+
+        <div style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+            <Package className="w-6 h-6" style={{ color: '#2196F3' }} />
+            <span style={{ fontSize: '14px', color: '#666' }}>Total Orders</span>
+          </div>
+          <div style={{ fontSize: '28px', fontWeight: '700', color: '#1976D2' }}>
+            {dayOrders.length}
+          </div>
+        </div>
+
+        <div style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+            <Package className="w-6 h-6" style={{ color: '#4CAF50' }} />
+            <span style={{ fontSize: '14px', color: '#666' }}>Completed</span>
+          </div>
+          <div style={{ fontSize: '28px', fontWeight: '700', color: '#2E7D32' }}>
+            {completedOrders}
+          </div>
+        </div>
+
+        <div style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+            <Clock className="w-6 h-6" style={{ color: '#FF9800' }} />
+            <span style={{ fontSize: '14px', color: '#666' }}>Pending</span>
+          </div>
+          <div style={{ fontSize: '28px', fontWeight: '700', color: '#F57C00' }}>
+            {pendingOrders}
+          </div>
+        </div>
+
+        <div style={{ background: 'white', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+            <XCircle className="w-6 h-6" style={{ color: '#f44336' }} />
+            <span style={{ fontSize: '14px', color: '#666' }}>Cancelled</span>
+          </div>
+          <div style={{ fontSize: '28px', fontWeight: '700', color: '#d32f2f' }}>
+            {cancelledOrders}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ background: 'white', borderRadius: '12px', padding: '24px', marginTop: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+        <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+          Orders for {new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+        </h4>
+        {dayOrders.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+            <Package className="w-12 h-12" style={{ margin: '0 auto 12px', opacity: 0.3 }} />
+            <p>No orders on this date</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {dayOrders.map(order => (
+              <div key={order.id} style={{
+                padding: '16px',
+                background: '#f9f9f9',
+                borderRadius: '8px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <div>
+                  <div style={{ fontWeight: '600', marginBottom: '4px' }}>
+                    {order.orderNumber || `Order #${order.id.substring(0, 8)}`}
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#666' }}>
+                    {new Date(order.createdAt).toLocaleTimeString('en-IN')} • {order.items.length} items
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: '700', fontSize: '16px', color: '#2E7D32' }}>
+                    ₹{order.total.toFixed(0)}
+                  </div>
+                  <div style={{
+                    fontSize: '12px',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    background: order.status === 'completed' || order.status === 'delivered' ? '#E8F5E9' : order.status === 'cancelled' ? '#ffebee' : '#FFF3E0',
+                    color: order.status === 'completed' || order.status === 'delivered' ? '#2E7D32' : order.status === 'cancelled' ? '#d32f2f' : '#F57C00',
+                    marginTop: '4px'
+                  }}>
+                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

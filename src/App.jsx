@@ -54,7 +54,9 @@ function App() {
     handlePasswordLogin,
     handleCompleteRegistration,
     handleLogout,
-    handleSaveProfile
+    handleSaveProfile,
+
+    handleHostedPhoneLogin
   } = useAuth();
 
   const {
@@ -114,6 +116,7 @@ function App() {
   const [isRiderMode, setIsRiderMode] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [isVoiceSearching, setIsVoiceSearching] = useState(false);
 
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'en' ? 'te' : 'en');
@@ -129,7 +132,7 @@ function App() {
               `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
             );
             const data = await response.json();
-            
+
             const city = data.city || data.locality || data.principalSubdivision || 'Unknown';
             const state = data.principalSubdivisionCode || '';
             setLocation(`${city}${state ? ', ' + state : ''}`);
@@ -161,6 +164,81 @@ function App() {
     console.log('[Mode] Shopkeeper mode:', mode === 'shopkeeper', 'Rider mode:', mode === 'rider', 'URL:', window.location.search);
   }, []);
 
+  // Deep Link Listener for Hosted Auth
+  useEffect(() => {
+    // 1. Handle Native Deep Links (existing logic)
+    import('@capacitor/app').then(({ App }) => {
+      App.addListener('appUrlOpen', async (event) => {
+        try {
+          const url = event.url;
+          console.log('[DeepLink] URL received:', url);
+
+          if (url.startsWith('mydukaan://auth-complete')) {
+            const queryString = url.split('?')[1] || '';
+            const params = new URLSearchParams(queryString);
+            const token = params.get('token');
+
+            if (token) {
+              console.log('[DeepLink] Token found, signing in...');
+              const { getAuth, signInWithCustomToken } = await import('firebase/auth');
+              const { getFirebaseInstances } = await import('./services/firebase');
+              const { auth } = getFirebaseInstances();
+
+              await signInWithCustomToken(auth, token);
+              console.log('[DeepLink] Signed in successfully via custom token');
+
+              setNotification({
+                message: 'Login successful!',
+                type: 'success'
+              });
+            }
+          }
+        } catch (err) {
+          console.error('[DeepLink] Error handling deep link:', err);
+          setNotification({
+            message: 'Login failed via deep link',
+            type: 'error'
+          });
+        }
+      });
+    });
+
+    // 2. Handle Web URL Parameters (New Fix for Localhost)
+    const checkWebToken = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+
+      if (token) {
+        console.log('[WebAuth] Token found in URL, signing in...');
+        try {
+          const { signInWithCustomToken } = await import('firebase/auth');
+          const { getFirebaseInstances } = await import('./services/firebase');
+          const { auth } = getFirebaseInstances();
+
+          await signInWithCustomToken(auth, token);
+          console.log('[WebAuth] Signed in successfully via URL token');
+
+          setNotification({
+            message: 'Login successful!',
+            type: 'success'
+          });
+
+          // Clear query params to clean up URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+
+        } catch (err) {
+          console.error('[WebAuth] Error signing in with token:', err);
+          setNotification({
+            message: 'Login failed. Please try again.',
+            type: 'error'
+          });
+        }
+      }
+    };
+
+    checkWebToken();
+  }, []);
+
   useEffect(() => {
     const loadLogo = async () => {
       try {
@@ -169,7 +247,7 @@ function App() {
         }));
         const { doc, getDoc } = await import('firebase/firestore');
         const { appId } = await import('./services/firebase');
-        
+
         const logoDoc = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'app'));
         if (logoDoc.exists() && logoDoc.data().logoUrl) {
           setLogoUrl(logoDoc.data().logoUrl);
@@ -232,7 +310,7 @@ function App() {
 
   const handleConfirmCheckout = (checkoutDeliveryMethod) => {
     setDeliveryMethod(checkoutDeliveryMethod);
-    
+
     if (checkoutDeliveryMethod === 'delivery') {
       if (!selectedAddress && userAddresses.length > 0) {
         const defaultAddr = userAddresses.find(addr => addr.isDefault) || userAddresses[0];
@@ -241,7 +319,7 @@ function App() {
     } else {
       setSelectedAddress(null);
     }
-    
+
     setShowCheckoutModal(false);
     handleCheckout(userAddresses, setCurrentView, language);
   };
@@ -272,7 +350,7 @@ function App() {
     if (riderLoading) {
       return <LoadingSpinner />;
     }
-    
+
     if (!rider) {
       return (
         <RiderLogin
@@ -281,7 +359,7 @@ function App() {
         />
       );
     }
-    
+
     return (
       <RiderDashboard
         rider={rider}
@@ -314,6 +392,8 @@ function App() {
           onVerifyOTP={handleVerifyOTP}
           onPasswordLogin={handlePasswordLogin}
           onCompleteRegistration={handleCompleteRegistration}
+
+          onHostedLogin={handleHostedPhoneLogin}
         />
         {notification && (
           <ToastNotification
@@ -336,7 +416,7 @@ function App() {
 
   return (
     <div className="app-container-modern">
-      <AppHeader 
+      <AppHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         location={location}
@@ -345,7 +425,34 @@ function App() {
         logoUrl={logoUrl}
         products={products}
         onVoiceSearch={handleVoiceSearch}
+        onVoiceProcessing={setIsVoiceSearching}
       />
+
+      {isVoiceSearching && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          zIndex: 2000,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#4CAF50'
+        }}>
+          <div className="voice-pulse-large" style={{
+            width: '80px', height: '80px', borderRadius: '50%',
+            background: '#4CAF50', animation: 'voicePulse 1.5s infinite',
+            marginBottom: '20px'
+          }}></div>
+          <h3 style={{ fontSize: '24px', fontWeight: 'bold' }}>
+            {language === 'te' ? 'వెతుకుతోంది...' : 'Searching...'}
+          </h3>
+        </div>
+      )}
 
       <div className="app-content">
         {currentView === 'Home' && (
@@ -420,8 +527,10 @@ function App() {
         language={language}
         onHomeClick={() => {
           setVoiceSearchResults(null);
+          setSearchTerm(''); // Clear search term
           setSelectedCategory(null);
           setSelectedSubcategory(null);
+          setCurrentView('Home'); // Ensure view is reset
         }}
       />
 
@@ -434,8 +543,8 @@ function App() {
       )}
 
       {selectedOrder && (
-        <OrderDetailsModal 
-          order={selectedOrder} 
+        <OrderDetailsModal
+          order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
           language={language}
         />

@@ -3,17 +3,17 @@ import { Search } from 'lucide-react';
 import { translations } from '../../constants/translations';
 import VoiceSearch from './VoiceSearch';
 
-const AppHeader = ({ searchTerm, setSearchTerm, language, toggleLanguage, logoUrl, products, onVoiceSearch }) => {
+const AppHeader = ({ searchTerm, setSearchTerm, language, toggleLanguage, logoUrl, products, onVoiceSearch, onVoiceProcessing }) => {
   const t = translations[language];
   const fallbackLogo = '/dukaan-logo.png';
-  
+
   return (
     <div className="app-header-modern">
       <div className="header-top">
         <div className="brand-section">
-          <img 
-            src={logoUrl || fallbackLogo} 
-            alt="DUKAAN Logo" 
+          <img
+            src={logoUrl || fallbackLogo}
+            alt="DUKAAN Logo"
             className="header-logo"
           />
           <h1 className="brand-name">
@@ -39,6 +39,7 @@ const AppHeader = ({ searchTerm, setSearchTerm, language, toggleLanguage, logoUr
             products={products}
             onProductsFound={onVoiceSearch}
             language={language}
+            onProcessingChange={onVoiceProcessing}
           />
         )}
       </div>

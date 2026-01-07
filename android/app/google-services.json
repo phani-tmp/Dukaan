@@ -18,13 +18,13 @@
           "client_type": 1,
           "android_info": {
             "package_name": "com.dukaan.quickcommerce",
-            "certificate_hash": "6f42609e4390b335763a1548acf1033a21ea00d6"
+            "certificate_hash": "2b74600d223f00f9856047c311afc7c337580fce"
           }
         }
       ],
       "api_key": [
         {
-          "current_key": ""
+          "current_key": "AIzaSyCBTRIjrSVMOBs9kmF8JeHOm6LeXqBYkmM"
         }
       ],
       "services": {

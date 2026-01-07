@@ -1,14 +1,18 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { 
-  signInWithPhoneNumber, 
-  RecaptchaVerifier, 
-  signOut, 
+import {
+  signInWithPhoneNumber,
+  RecaptchaVerifier,
+  signOut,
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword,
+  signInWithCustomToken
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, collection, addDoc, getDocs } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import { getFirebaseInstances, appId } from '../services/firebase';
+import { Capacitor } from '@capacitor/core';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 
 const AuthContext = createContext(null);
 
@@ -25,7 +29,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState(null);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
-  
+
   const [phoneNumber, setPhoneNumber] = useState('');
   const [countryCode, setCountryCode] = useState('+91');
   const [password, setPassword] = useState('');
@@ -34,7 +38,7 @@ export const AuthProvider = ({ children }) => {
   const [authStep, setAuthStep] = useState('phone'); // 'phone', 'password', 'otp', 'register'
   const [isNewUser, setIsNewUser] = useState(false);
 
-  const { auth, db } = getFirebaseInstances();
+  const { auth, db, functions } = getFirebaseInstances();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -63,12 +67,12 @@ export const AuthProvider = ({ children }) => {
         console.log('[Auth] Profile loaded:', profileData.name, 'Role:', profileData.role);
         setUserProfile(profileData);
         setShowProfileSetup(false); // Hide profile setup for existing users
-        
+
         // Auto-redirect based on role (only on initial login)
         const currentUrl = window.location.search;
         const urlParams = new URLSearchParams(currentUrl);
         const currentMode = urlParams.get('mode');
-        
+
         // Only redirect if user is on default view (no mode parameter)
         if (!currentMode) {
           if (profileData.role === 'shopkeeper') {
@@ -105,13 +109,13 @@ export const AuthProvider = ({ children }) => {
       const phoneEmail = `${countryCode}${phoneNumber}@dukaan.app`;
       const usersQuery = doc(db, 'artifacts', appId, 'public', 'data', 'users_by_phone', phoneNumber);
       const userDoc = await getDoc(usersQuery);
-      
+
       if (userDoc.exists()) {
         // Existing user found - get their full profile to check if they have a password
         const userId = userDoc.data().uid;
         const userProfileRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userId);
         const userProfile = await getDoc(userProfileRef);
-        
+
         if (userProfile.exists() && userProfile.data().password) {
           // User has a password - ask for password
           setIsNewUser(false);
@@ -143,95 +147,73 @@ export const AuthProvider = ({ children }) => {
     try {
       const fullPhoneNumber = `${countryCode}${phoneNumber}`;
       console.log('[Auth] 🔵 Attempting OTP send for:', fullPhoneNumber);
-      
-      // Check if app verification is disabled for testing
-      const isBypassEnabled = auth.settings?.appVerificationDisabledForTesting;
-      console.log('[Auth] 🔵 Bypass mode:', isBypassEnabled ? 'ENABLED' : 'DISABLED');
-      
-      if (window.recaptchaVerifier) {
-        try {
-          window.recaptchaVerifier.clear();
-        } catch (e) {
-          console.log('[Auth] Error clearing old verifier:', e);
-        }
-        window.recaptchaVerifier = null;
-      }
-      
-      // Create verifier based on bypass mode
-      let appVerifier;
-      if (!isBypassEnabled) {
-        console.log('[Auth] 🔵 Creating RecaptchaVerifier...');
-        
-        // Create RecaptchaVerifier with proper config to allow Play Integrity on Android
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible',
-          callback: (response) => {
-            console.log('[Auth] ✅ reCAPTCHA/Play Integrity callback triggered:', response);
-          },
-          'expired-callback': () => {
-            console.warn('[Auth] ⚠️ Verification expired - please try again');
-          }
+
+      // Check if running on native platform (Android/iOS)
+      const isNative = Capacitor.isNativePlatform();
+      console.log('[Auth] Platform:', isNative ? 'NATIVE' : 'WEB');
+
+      if (isNative) {
+        // NATIVE FLOW: Use @capacitor-firebase/authentication
+        console.log('[Auth] 📱 Using Native Phone Auth...');
+        const result = await FirebaseAuthentication.signInWithPhoneNumber({
+          phoneNumber: fullPhoneNumber,
         });
-        
-        appVerifier = window.recaptchaVerifier;
+
+        console.log('[Auth] ✅ Native OTP sent! Verification ID:', result.verificationId);
+        setConfirmationResult(result.verificationId); // Store verification ID string
+        setAuthStep('otp');
+        alert('OTP sent to your phone!');
+
       } else {
-        console.log('[Auth] ⚠️ Bypass mode: Using dummy verifier');
-        // Complete dummy verifier with proper token format
-        appVerifier = {
-          type: 'recaptcha',
-          verify: async () => {
-            // Return a token-like string that Firebase expects
-            return 'test-recaptcha-token';
-          },
-          _reset: () => {},
-          _render: () => Promise.resolve(),
-          clear: () => {}
-        };
-      }
-      
-      console.log('[Auth] 🔵 Calling signInWithPhoneNumber...');
-      const confirmation = await signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier);
-      console.log('[Auth] ✅ OTP sent successfully! Confirmation:', confirmation);
-      setConfirmationResult(confirmation);
-      setAuthStep('otp');
-      alert('OTP sent to your phone!');
-    } catch (error) {
-      // PRODUCTION-GRADE ERROR LOGGING
-      console.error('[Auth] ❌ ============ FIREBASE OTP ERROR ============');
-      console.error('[Auth] ❌ Error Code:', error.code);
-      console.error('[Auth] ❌ Error Message:', error.message);
-      console.error('[Auth] ❌ Full Error Object:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-      
-      // Log all error properties
-      if (error.code) console.error('[Auth] ❌ Firebase Error Code:', error.code);
-      if (error.customData) console.error('[Auth] ❌ Custom Data:', error.customData);
-      if (error.stack) console.error('[Auth] ❌ Stack Trace:', error.stack);
-      
-      // Specific error code handling
-      const errorMessages = {
-        'auth/invalid-app-credential': '🔴 INVALID_APP_CREDENTIAL: SHA-1 fingerprint mismatch or API key issue. Check Firebase Console.',
-        'auth/missing-app-credential': '🔴 MISSING_APP_CREDENTIAL: App not properly configured in Firebase.',
-        'auth/invalid-phone-number': '🔴 Invalid phone number format.',
-        'auth/too-many-requests': '🔴 Too many OTP requests. Please wait and try again.',
-        'auth/quota-exceeded': '🔴 Daily OTP quota exceeded.',
-        'auth/operation-not-allowed': '🔴 Phone authentication not enabled in Firebase Console.',
-        'auth/captcha-check-failed': '🔴 reCAPTCHA verification failed.',
-        'auth/argument-error': '🔴 Invalid arguments passed to Firebase. Check verifier configuration.'
-      };
-      
-      const detailedMessage = errorMessages[error.code] || error.message;
-      console.error('[Auth] ❌ Detailed Message:', detailedMessage);
-      console.error('[Auth] ❌ ============================================');
-      
-      if (window.recaptchaVerifier) {
-        try {
-          window.recaptchaVerifier.clear();
-        } catch (e) {
-          console.log('[Auth] Error clearing verifier:', e);
+        // WEB FLOW: Use Firebase JS SDK
+        console.log('[Auth] 🌐 Using Web Phone Auth...');
+
+        // Check if app verification is disabled for testing
+        const isBypassEnabled = auth.settings?.appVerificationDisabledForTesting;
+
+        if (window.recaptchaVerifier) {
+          try {
+            window.recaptchaVerifier.clear();
+          } catch (e) {
+            console.log('[Auth] Error clearing old verifier:', e);
+          }
+          window.recaptchaVerifier = null;
         }
-        window.recaptchaVerifier = null;
+
+        // Create verifier based on bypass mode
+        let appVerifier;
+        if (!isBypassEnabled) {
+          window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            size: 'invisible',
+            callback: (response) => {
+              console.log('[Auth] ✅ reCAPTCHA/Play Integrity callback triggered:', response);
+            },
+            'expired-callback': () => {
+              console.warn('[Auth] ⚠️ Verification expired - please try again');
+            }
+          });
+          appVerifier = window.recaptchaVerifier;
+        } else {
+          // Dummy verifier for bypass mode
+          appVerifier = {
+            type: 'recaptcha',
+            verify: async () => { return 'test-recaptcha-token'; },
+            _reset: () => { },
+            _render: () => Promise.resolve(),
+            clear: () => { }
+          };
+        }
+
+        const confirmation = await signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier);
+        console.log('[Auth] ✅ Web OTP sent successfully!');
+        setConfirmationResult(confirmation); // Store ConfirmationResult object
+        setAuthStep('otp');
+        alert('OTP sent to your phone!');
       }
-      alert(`Failed to send OTP: ${detailedMessage}`);
+
+    } catch (error) {
+      console.error('[Auth] ❌ OTP Error:', error);
+      alert(`Failed to send OTP: ${error.message}`);
     }
   };
 
@@ -241,7 +223,7 @@ export const AuthProvider = ({ children }) => {
       alert('Please enter a valid 6-digit OTP');
       return;
     }
-    
+
     console.log('[Auth] 🔵 Verifying OTP...');
 
     if (!confirmationResult) {
@@ -250,38 +232,46 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const result = await confirmationResult.confirm(otp);
-      console.log('[Auth] ✅ OTP verified successfully for user:', result.user.uid);
-      
-      // Check if this is a new user or existing OTP-only user
+      const isNative = Capacitor.isNativePlatform();
+      let userCredential;
+
+      if (isNative) {
+        // NATIVE FLOW
+        console.log('[Auth] 📱 Verifying Native OTP...');
+        const result = await FirebaseAuthentication.signInWithPhoneNumber({
+          verificationId: confirmationResult, // This is the string ID from native send
+          verificationCode: otp,
+        });
+        userCredential = result.user; // Plugin returns user object
+        console.log('[Auth] ✅ Native OTP Verified! User:', userCredential?.uid);
+
+        // Native plugin signs in automatically, but we might need to sync state
+        // The onAuthStateChanged listener in useEffect should handle the rest
+
+      } else {
+        // WEB FLOW
+        console.log('[Auth] 🌐 Verifying Web OTP...');
+        // confirmationResult is the ConfirmationResult object from JS SDK
+        const result = await confirmationResult.confirm(otp);
+        userCredential = result.user;
+        console.log('[Auth] ✅ Web OTP Verified! User:', userCredential.uid);
+      }
+
+      // Common Post-Verification Logic
       if (isNewUser) {
-        // New user - show registration form
         console.log('[Auth] New user - showing registration/profile setup');
         setShowProfileSetup(true);
         setAuthStep('register');
       } else {
-        // Existing OTP-only user - they're now authenticated
-        // onAuthStateChanged will load their profile automatically
         console.log('[Auth] Existing OTP-only user - login complete');
-        setShowProfileSetup(false); // Explicitly hide profile setup for existing users
+        setShowProfileSetup(false);
         setAuthStep('phone');
       }
       setOtp('');
+
     } catch (error) {
-      // PRODUCTION-GRADE OTP VERIFICATION ERROR LOGGING
-      console.error('[Auth] ❌ ============ OTP VERIFICATION ERROR ============');
-      console.error('[Auth] ❌ Error Code:', error.code);
-      console.error('[Auth] ❌ Error Message:', error.message);
-      console.error('[Auth] ❌ Full Error:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
-      console.error('[Auth] ❌ ================================================');
-      
-      const errorMessages = {
-        'auth/invalid-verification-code': 'The OTP code is invalid. Please check and try again.',
-        'auth/code-expired': 'The OTP code has expired. Please request a new one.',
-        'auth/session-expired': 'Verification session expired. Please request a new OTP.'
-      };
-      
-      alert(errorMessages[error.code] || 'Invalid OTP. Please try again.');
+      console.error('[Auth] ❌ Verification Error:', error);
+      alert('Invalid OTP. Please try again.');
     }
   };
 
@@ -324,11 +314,11 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const phoneEmail = `${countryCode}${phoneNumber}@dukaan.app`;
-      
+
       // Create password-based auth account
       // Note: User is already authenticated via phone, we need to link email/password
       // For simplicity, we'll store the profile and rely on phone auth
-      
+
       // Save user profile to Firestore
       const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid);
       await setDoc(userDocRef, {
@@ -360,7 +350,7 @@ export const AuthProvider = ({ children }) => {
           createdAt: new Date().toISOString()
         });
       }
-      
+
       setShowProfileSetup(false);
       setAuthStep('phone');
       setUserProfile({ id: user.uid, ...profileData, phoneNumber: `${countryCode}${phoneNumber}` });
@@ -386,30 +376,67 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const handleHostedPhoneLogin = async () => {
+    if (!phoneNumber || phoneNumber.length < 10) {
+      alert('Please enter a valid 10-digit phone number');
+      return;
+    }
+
+    try {
+      const { Browser } = await import('@capacitor/browser');
+      const callbackUrl = 'mydukaan://auth-complete';
+      const fullPhone = `${countryCode}${phoneNumber}`;
+
+      // Use the deployed Firebase Hosting URL or local IP if testing locally
+      // Ideally this should be an env var
+      // For now, assuming standard firebase hosting URL structure or localhost for dev
+      // Replace 'dukaan-476221.web.app' with your actual hosting domain
+      const hostingDomain = 'dukaan-476221.web.app';
+
+      // Fix: Determine redirect URL based on platform
+      let redirectTarget = callbackUrl; // Default to mydukaan://auth-complete
+
+      if (!Capacitor.isNativePlatform()) {
+        // If we are on web (localhost or deployed web), redirect back to current origin
+        redirectTarget = window.location.origin;
+        console.log('[Auth] Web detected, setting redirect to:', redirectTarget);
+      }
+
+      const url = `https://${hostingDomain}/phone-login?phone=${encodeURIComponent(fullPhone)}&redirect=${encodeURIComponent(redirectTarget)}`;
+
+      console.log('[Auth] Opening hosted login:', url);
+      await Browser.open({ url });
+
+    } catch (error) {
+      console.error('[Auth] Error opening hosted login:', error);
+      alert('Failed to open login page');
+    }
+  };
+
   const handleSaveProfile = async (profileData) => {
     if (!user) return;
-    
+
     try {
       // Get phone number from Firebase auth
       const phoneNum = user.phoneNumber || profileData.phoneNumber;
       const cleanPhone = phoneNum.replace(/[^\d]/g, '').slice(-10); // Get last 10 digits
-      
+
       // PREVENT DUPLICATE PHONE NUMBERS: Check if this phone is already registered to a different user
       const phoneDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users_by_phone', cleanPhone);
       const existingPhoneMapping = await getDoc(phoneDocRef);
-      
+
       if (existingPhoneMapping.exists() && existingPhoneMapping.data().uid !== user.uid) {
         // Phone number is already used by a different user - prevent duplicate
         alert('This phone number is already registered. Please use a different number or login with your existing account.');
         console.error('[Auth] Duplicate phone number detected:', cleanPhone, 'Existing UID:', existingPhoneMapping.data().uid, 'Current UID:', user.uid);
         return;
       }
-      
+
       // Check if user already has a profile (to preserve role)
       const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid);
       const existingDoc = await getDoc(userDocRef);
       const existingRole = existingDoc.exists() ? existingDoc.data().role : null;
-      
+
       // Generate auto username if name not provided (user clicked "Skip for Now")
       let userName = profileData.name;
       if (!userName) {
@@ -419,7 +446,7 @@ export const AuthProvider = ({ children }) => {
         userName = `User${userCount + 1}`;
         console.log('[Auth] Auto-generated username:', userName);
       }
-      
+
       // Create user document preserving existing role
       const userDoc = {
         name: userName,
@@ -439,7 +466,7 @@ export const AuthProvider = ({ children }) => {
       if (profileData.password) {
         userDoc.password = profileData.password; // In production, this should be hashed!
       }
-      
+
       // Save user profile to Firestore
       await setDoc(userDocRef, userDoc, { merge: true });
 
@@ -448,20 +475,20 @@ export const AuthProvider = ({ children }) => {
         uid: user.uid,
         phoneNumber: user.phoneNumber || phoneNum
       });
-      
+
       setShowProfileSetup(false);
-      const updatedProfile = { 
-        id: user.uid, 
+      const updatedProfile = {
+        id: user.uid,
         name: userName,
         phoneNumber: user.phoneNumber || phoneNum,
         email: profileData.email || null,
         role: existingRole || 'customer',
         profileCompleted: profileData.profileCompleted || false
       };
-      
+
       console.log('[Auth] Profile saved successfully:', updatedProfile);
       setUserProfile(updatedProfile);
-      
+
       if (profileData.profileCompleted) {
         alert('Welcome to DUKAAN! 🎉 You can now start shopping.');
       } else {
@@ -496,7 +523,9 @@ export const AuthProvider = ({ children }) => {
     handlePasswordLogin,
     handleCompleteRegistration,
     handleLogout,
-    handleSaveProfile
+    handleSaveProfile,
+
+    handleHostedPhoneLogin
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

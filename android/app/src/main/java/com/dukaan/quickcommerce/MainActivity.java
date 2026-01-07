@@ -9,6 +9,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.getcapacitor.BridgeActivity;
 
+import com.google.firebase.FirebaseApp;
+import android.util.Log;
+
 public class MainActivity extends BridgeActivity {
 
     private static final int RECORD_AUDIO_PERMISSION_REQUEST_CODE = 1;
@@ -16,6 +19,26 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // DEBUG: Explicitly initialize Firebase and log status
+        try {
+            if (FirebaseApp.getApps(this).isEmpty()) {
+                Log.d("DukaanFirebase", "🔴 FirebaseApp list is empty. Initializing...");
+                FirebaseApp.initializeApp(this);
+                Log.d("DukaanFirebase", "🟢 FirebaseApp initialized explicitly.");
+            } else {
+                Log.d("DukaanFirebase", "🟢 FirebaseApp was already initialized automatically.");
+            }
+            
+            FirebaseApp app = FirebaseApp.getInstance();
+            Log.d("DukaanFirebase", "✅ Firebase App Name: " + app.getName());
+            Log.d("DukaanFirebase", "✅ Firebase Options API Key: " + app.getOptions().getApiKey());
+            Log.d("DukaanFirebase", "✅ Firebase Options App ID: " + app.getOptions().getApplicationId());
+            
+        } catch (Exception e) {
+            Log.e("DukaanFirebase", "❌ FAILED to initialize Firebase: " + e.getMessage());
+            e.printStackTrace();
+        }
         
         // Check and request microphone permission
         if (isRecordAudioPermissionGranted()) {

@@ -16,7 +16,9 @@ const PhoneLoginUI = ({
   onSendOTP,
   onVerifyOTP,
   onPasswordLogin,
-  onCompleteRegistration
+  onCompleteRegistration,
+  onWhatsAppLogin,
+  onHostedLogin
 }) => {
   const [registrationData, setRegistrationData] = useState({
     name: '',
@@ -51,7 +53,7 @@ const PhoneLoginUI = ({
       alert('Please enter a valid 6-digit pincode');
       return;
     }
-    
+
     onCompleteRegistration(registrationData);
   };
 
@@ -71,10 +73,10 @@ const PhoneLoginUI = ({
         {authStep === 'phone' && (
           <div className="login-form">
             <h2 className="form-title">Phone Number</h2>
-            
+
             <div className="phone-input-group">
-              <select 
-                value={countryCode} 
+              <select
+                value={countryCode}
                 onChange={(e) => onCountryCodeChange(e.target.value)}
                 className="country-code-select"
               >
@@ -95,9 +97,9 @@ const PhoneLoginUI = ({
                 maxLength="10"
               />
             </div>
-            
-            <button 
-              onClick={onCheckUser} 
+
+            <button
+              onClick={onHostedLogin}
               className="login-btn"
               disabled={phoneNumber.length !== 10}
             >
@@ -111,7 +113,7 @@ const PhoneLoginUI = ({
           <div className="login-form">
             <h2 className="form-title">Enter Password</h2>
             <p className="form-hint">Phone: {countryCode}{phoneNumber}</p>
-            
+
             <div className="input-group">
               <Lock className="input-icon" />
               <input
@@ -122,14 +124,14 @@ const PhoneLoginUI = ({
                 className="password-input"
               />
             </div>
-            
+
             <button onClick={onPasswordLogin} className="login-btn">
               <CheckCircle className="w-5 h-5" />
               Login
             </button>
-            
-            <button 
-              onClick={onSendOTP} 
+
+            <button
+              onClick={onSendOTP}
               className="otp-link-btn"
               style={{
                 background: 'transparent',
@@ -141,9 +143,9 @@ const PhoneLoginUI = ({
               <Phone className="w-5 h-5" />
               Use OTP Instead
             </button>
-            
-            <button 
-              onClick={() => window.location.reload()} 
+
+            <button
+              onClick={() => window.location.reload()}
               className="back-btn"
             >
               Change Phone Number
@@ -155,7 +157,7 @@ const PhoneLoginUI = ({
           <div className="login-form">
             <h2 className="form-title">Enter OTP</h2>
             <p className="form-hint">We sent a 6-digit code to {countryCode}{phoneNumber}</p>
-            
+
             <input
               type="text"
               placeholder="Enter 6-digit OTP"
@@ -167,18 +169,18 @@ const PhoneLoginUI = ({
               className="otp-input"
               maxLength="6"
             />
-            
-            <button 
-              onClick={onVerifyOTP} 
+
+            <button
+              onClick={onVerifyOTP}
               className="login-btn"
               disabled={otp.length !== 6}
             >
               <CheckCircle className="w-5 h-5" />
               Verify OTP
             </button>
-            
-            <button 
-              onClick={() => window.location.reload()} 
+
+            <button
+              onClick={() => window.location.reload()}
               className="back-btn"
             >
               Change Phone Number
@@ -190,14 +192,14 @@ const PhoneLoginUI = ({
           <div className="login-form">
             <h2 className="form-title">Create Your Account</h2>
             <p className="form-hint">Phone verified: {countryCode}{phoneNumber}</p>
-            
+
             <div className="input-group">
               <User className="input-icon" />
               <input
                 type="text"
                 placeholder="Your Full Name *"
                 value={registrationData.name}
-                onChange={(e) => setRegistrationData({...registrationData, name: e.target.value})}
+                onChange={(e) => setRegistrationData({ ...registrationData, name: e.target.value })}
                 className="text-input"
               />
             </div>
@@ -208,7 +210,7 @@ const PhoneLoginUI = ({
                 type="password"
                 placeholder="Create Password (min 6 characters) *"
                 value={registrationData.password}
-                onChange={(e) => setRegistrationData({...registrationData, password: e.target.value})}
+                onChange={(e) => setRegistrationData({ ...registrationData, password: e.target.value })}
                 className="password-input"
               />
             </div>
@@ -219,7 +221,7 @@ const PhoneLoginUI = ({
                 type="password"
                 placeholder="Confirm Password *"
                 value={registrationData.confirmPassword}
-                onChange={(e) => setRegistrationData({...registrationData, confirmPassword: e.target.value})}
+                onChange={(e) => setRegistrationData({ ...registrationData, confirmPassword: e.target.value })}
                 className="password-input"
               />
             </div>
@@ -234,7 +236,7 @@ const PhoneLoginUI = ({
               value={registrationData.address.street}
               onChange={(e) => setRegistrationData({
                 ...registrationData,
-                address: {...registrationData.address, street: e.target.value}
+                address: { ...registrationData.address, street: e.target.value }
               })}
               className="registration-input"
             />
@@ -246,10 +248,10 @@ const PhoneLoginUI = ({
                 value={registrationData.address.city}
                 onChange={(e) => setRegistrationData({
                   ...registrationData,
-                  address: {...registrationData.address, city: e.target.value}
+                  address: { ...registrationData.address, city: e.target.value }
                 })}
                 className="registration-input"
-                style={{flex: 1}}
+                style={{ flex: 1 }}
               />
               <input
                 type="text"
@@ -259,11 +261,11 @@ const PhoneLoginUI = ({
                   const numbers = e.target.value.replace(/\D/g, '').slice(0, 6);
                   setRegistrationData({
                     ...registrationData,
-                    address: {...registrationData.address, pincode: numbers}
+                    address: { ...registrationData.address, pincode: numbers }
                   });
                 }}
                 className="registration-input"
-                style={{flex: 1}}
+                style={{ flex: 1 }}
                 maxLength="6"
               />
             </div>
@@ -272,7 +274,7 @@ const PhoneLoginUI = ({
               value={registrationData.address.state}
               onChange={(e) => setRegistrationData({
                 ...registrationData,
-                address: {...registrationData.address, state: e.target.value}
+                address: { ...registrationData.address, state: e.target.value }
               })}
               className="registration-select"
             >
@@ -282,9 +284,9 @@ const PhoneLoginUI = ({
               <option value="Karnataka">Karnataka</option>
               <option value="Other">Other</option>
             </select>
-            
-            <button 
-              onClick={handleRegistrationSubmit} 
+
+            <button
+              onClick={handleRegistrationSubmit}
               className="login-btn"
               disabled={!registrationData.name || !registrationData.password || !registrationData.confirmPassword}
             >
@@ -293,7 +295,7 @@ const PhoneLoginUI = ({
             </button>
           </div>
         )}
-        
+
         {/* reCAPTCHA container for Firebase Phone Auth (invisible, allows Play Integrity on Android) */}
         <div id="recaptcha-container" style={{ display: 'none' }}></div>
       </div>
