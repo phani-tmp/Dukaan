@@ -342,6 +342,7 @@ function App() {
         subcategoriesData={subcategoriesData}
         logoUrl={logoUrl}
         onLogoChange={setLogoUrl}
+        toggleLanguage={toggleLanguage}
       />
     );
   }

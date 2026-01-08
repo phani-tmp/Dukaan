@@ -32,7 +32,7 @@ import {
   IndianRupee
 } from 'lucide-react';
 
-const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit, categoriesData, subcategoriesData, logoUrl, onLogoChange }) => {
+const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit, categoriesData, subcategoriesData, logoUrl, onLogoChange, toggleLanguage }) => {
   const { db, storage } = getFirebaseInstances();
   const t = translations[language];
   const [activeTab, setActiveTab] = useState('orders');
@@ -973,6 +973,27 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
           <ChevronLeft className="w-6 h-6" />
         </button>
         <h2 className="view-title">{t.shopkeeperDashboard}</h2>
+        <button
+          onClick={toggleLanguage}
+          style={{
+            marginLeft: 'auto',
+            background: 'white',
+            color: '#333',
+            border: '1px solid #e5e7eb',
+            padding: '8px 16px',
+            borderRadius: '20px',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+          }}
+        >
+          <span style={{ fontSize: '16px' }}>Aa</span>
+          {language === 'en' ? 'తెలుగు' : 'English'}
+        </button>
       </div>
 
       <div className="shopkeeper-search-bar">
@@ -987,6 +1008,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
       </div>
 
       <div className="shopkeeper-tabs">
+
         <button
           className={`tab-button ${activeTab === 'orders' ? 'active' : ''}`}
           onClick={() => setActiveTab('orders')}
@@ -999,57 +1021,59 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
           onClick={() => setActiveTab('categories')}
         >
           <Settings className="w-5 h-5" />
-          Categories
+          {t.categories.groceries}
         </button>
         <button
           className={`tab-button ${activeTab === 'subcategories' ? 'active' : ''}`}
           onClick={() => setActiveTab('subcategories')}
         >
           <ShoppingBag className="w-5 h-5" />
-          Subcategories
+          {t.productsTab} ({t.categories.groceries})
         </button>
         <button
           className={`tab-button ${activeTab === 'products' ? 'active' : ''}`}
           onClick={() => setActiveTab('products')}
         >
           <Package className="w-5 h-5" />
-          Products
+          {t.productsTab}
         </button>
         <button
           className={`tab-button ${activeTab === 'popular' ? 'active' : ''}`}
           onClick={() => setActiveTab('popular')}
         >
           <Star className="w-5 h-5" />
-          Popular
+          {t.popular}
         </button>
         <button
           className={`tab-button ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
         >
           <User className="w-5 h-5" />
-          Users
+          {t.users}
         </button>
         <button
           className={`tab-button ${activeTab === 'riders' ? 'active' : ''}`}
           onClick={() => setActiveTab('riders')}
         >
           <User className="w-5 h-5" />
-          Riders
+          {t.riders}
         </button>
         <button
           className={`tab-button ${activeTab === 'analytics' ? 'active' : ''}`}
           onClick={() => setActiveTab('analytics')}
         >
           <TrendingUp className="w-5 h-5" />
-          Analytics
+          {t.analytics}
         </button>
+
+
       </div>
 
       <div className="shopkeeper-content">
         {activeTab === 'orders' && (
           <div className="orders-section">
             <div className="section-header">
-              <h3 className="section-subtitle">Orders Management</h3>
+              <h3 className="section-subtitle">{t.ordersManagement}</h3>
               <span className="count-badge">{activeOrders.length + completedOrders.length + cancelledOrders.length}</span>
             </div>
 
@@ -1128,7 +1152,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
               alignItems: 'center',
               flexWrap: 'wrap'
             }}>
-              <span style={{ fontSize: '13px', fontWeight: '600', color: '#6B7280', textTransform: 'uppercase' }}>Filter Orders:</span>
+              <span style={{ fontSize: '13px', fontWeight: '600', color: '#6B7280', textTransform: 'uppercase' }}>{t.filterOrders}:</span>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'white', padding: '4px 8px', borderRadius: '6px', border: '1px solid #D1D5DB' }}>
                 <Calendar className="w-4 h-4 text-gray-500" />
@@ -1137,7 +1161,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
                   max={new Date().toISOString().split('T')[0]}
-                  placeholder="Date"
+                  placeholder={t.date}
                   style={{ fontSize: '13px', border: 'none', outline: 'none', color: '#374151' }}
                 />
               </div>
@@ -1148,7 +1172,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                   type="text"
                   value={filterMobile}
                   onChange={(e) => setFilterMobile(e.target.value)}
-                  placeholder="Customer Mobile (Exact)"
+                  placeholder={t.customerPhone}
                   style={{ fontSize: '13px', border: 'none', outline: 'none', width: '150px', color: '#374151' }}
                 />
               </div>
@@ -1206,7 +1230,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                       <div style={{ marginTop: '12px', padding: '10px', backgroundColor: '#ffebee', borderRadius: '6px', border: '1px solid #ffcdd2', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <XCircle className="w-4 h-4 text-red-600" />
                         <span style={{ fontSize: '13px', color: '#d32f2f' }}>
-                          <strong>Cancellation Reason:</strong> {order.cancellationReason || 'No reason provided'}
+                          <strong>{t.cancellationReason}:</strong> {order.cancellationReason || t.noReasonProvided}
                         </span>
                       </div>
                     )}
@@ -1226,7 +1250,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                       >
                         <Package className="w-4 h-4" />
                         <span className="items-count-text">
-                          {order.items.length} {order.items.length === 1 ? 'Item' : 'Items'}
+                          {order.items.length} {order.items.length === 1 ? t.item : t.items}
                         </span>
                         {expandedOrders.has(order.id) ? (
                           <ChevronUp className="w-4 h-4" />
@@ -1267,34 +1291,34 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
 
                       <div className="order-management-section">
                         <div className="order-status-controls">
-                          <label className="status-dropdown-label">Status:</label>
+                          <label className="status-dropdown-label">{t.status}:</label>
                           <select
                             value={order.status}
                             onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
                             className="status-dropdown"
                             disabled={order.status === 'cancelled' || order.status === 'delivered' || order.status === 'completed'}
                           >
-                            <option value="pending">Pending</option>
-                            <option value="accepted">Accepted</option>
+                            <option value="pending">{t.pending}</option>
+                            <option value="accepted">{t.accepted}</option>
                             {order.deliveryMethod === 'pickup' ? (
                               <>
-                                <option value="ready_for_pickup">Ready for Pickup</option>
-                                <option value="completed">Completed</option>
+                                <option value="ready_for_pickup">{t.readyForPickup}</option>
+                                <option value="completed">{t.completed}</option>
                               </>
                             ) : (
                               <>
-                                <option value="out_for_delivery">Out for Delivery</option>
-                                <option value="delivered">Delivered</option>
+                                <option value="out_for_delivery">{t.outForDelivery}</option>
+                                <option value="delivered">{t.delivered}</option>
                               </>
                             )}
-                            <option value="cancelled">Cancelled</option>
+                            <option value="cancelled">{t.cancelled}</option>
                           </select>
                         </div>
 
                         {order.deliveryMethod === 'delivery' && (order.status === 'ready_for_pickup' || order.status === 'accepted' || order.status === 'out_for_delivery' || order.status === 'delivered') && (
                           <div className="rider-assignment-section" style={{ marginTop: '12px' }}>
                             <label className="status-dropdown-label" style={{ fontSize: '13px' }}>
-                              {order.riderName ? `Rider: ${order.riderName}` : 'Assign Rider:'}
+                              {order.riderName ? `${t.riderAssigned}: ${order.riderName}` : `${t.assignRider}:`}
                             </label>
                             {order.status !== 'delivered' ? (
                               <select
@@ -1340,7 +1364,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                             className="view-details-btn"
                           >
                             <Eye className="w-4 h-4" />
-                            View Details
+                            {t.viewDetails}
                           </button>
 
                           <button
@@ -1358,7 +1382,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                               className="cancel-order-btn"
                             >
                               <XCircle className="w-4 h-4" />
-                              Cancel
+                              {t.cancelOrder}
                             </button>
                           )}
                         </div>
@@ -1368,49 +1392,27 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                 ))}
 
                 {!isFiltering && (
-                  <div className="pagination-controls" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginTop: '20px' }}>
+                  <div className="pagination-controls-clean">
                     <button
                       onClick={handlePrevPage}
                       disabled={getCurrentPage() === 1}
-                      className="pagination-btn"
-                      style={{
-                        padding: '8px 16px',
-                        borderRadius: '8px',
-                        border: '1px solid #E0E0E0',
-                        background: getCurrentPage() === 1 ? '#F5F5F5' : 'white',
-                        color: getCurrentPage() === 1 ? '#9E9E9E' : '#333',
-                        cursor: getCurrentPage() === 1 ? 'not-allowed' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }}
+                      className={`pagination-btn-clean ${getCurrentPage() === 1 ? 'disabled' : ''}`}
                     >
                       <ChevronLeft className="w-4 h-4" />
-                      Previous
+                      {t.previous}
                     </button>
 
-                    <span style={{ fontSize: '14px', color: '#666', fontWeight: '500' }}>
-                      Page {getCurrentPage()}
+                    <span className="page-indicator">
+                      {t.page} {getCurrentPage()}
                     </span>
 
                     <button
                       onClick={handleNextPage}
                       disabled={!canGoNext()}
-                      className="pagination-btn"
-                      style={{
-                        padding: '8px 16px',
-                        borderRadius: '8px',
-                        border: '1px solid #E0E0E0',
-                        background: !canGoNext() ? '#F5F5F5' : 'white',
-                        color: !canGoNext() ? '#9E9E9E' : '#333',
-                        cursor: !canGoNext() ? 'not-allowed' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }}
+                      className={`pagination-btn-clean ${!canGoNext() ? 'disabled' : ''}`}
                     >
-                      Next
-                      <ChevronLeft className="w-4 h-4" style={{ transform: 'rotate(180deg)' }} />
+                      {t.next}
+                      <ChevronLeft className="w-4 h-4 rotate-180" />
                     </button>
                   </div>
                 )}
@@ -1514,7 +1516,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                   </label>
                   <input
                     type="text"
-                    placeholder="Or paste image URL"
+                    placeholder={t.pasteImageUrl}
                     value={formData.imageUrl}
                     onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                     className="form-input"
@@ -1668,7 +1670,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
             <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
               <button onClick={() => setShowCategoryForm(!showCategoryForm)} className="add-product-btn">
                 <PlusCircle className="w-5 h-5" />
-                Add Category
+                {t.addCategory}
               </button>
             </div>
 
@@ -1804,7 +1806,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
           <div className="subcategories-section">
             <button onClick={() => setShowSubcategoryForm(!showSubcategoryForm)} className="add-product-btn">
               <PlusCircle className="w-5 h-5" />
-              Add Subcategory
+              {t.addSubcategory}
             </button>
 
             {showSubcategoryForm && (
@@ -1815,7 +1817,7 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                   required
                   className="form-input"
                 >
-                  <option value="">Select Parent Category</option>
+                  <option value="">{t.selectParentCategory}</option>
                   {categoriesData.map(cat => (
                     <option key={cat.id} value={cat.id}>{cat.nameEn}</option>
                   ))}
@@ -1946,12 +1948,11 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
         {activeTab === 'popular' && (
           <div className="popular-section">
             <div className="section-header">
-              <h3 className="section-subtitle">Popular Products Management</h3>
+              <h3 className="section-subtitle">{t.popularProductsManagement}</h3>
               <span className="count-badge">{popularProducts.length}</span>
             </div>
             <p className="section-description">
-              Manage which products appear in the "Popular Products" section on the customer app.
-              Toggle the star to add/remove from popular items.
+              {t.noPopularProducts}
             </p>
 
             <div className="products-admin-list">
@@ -2008,24 +2009,24 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
         {activeTab === 'riders' && (
           <div className="riders-section">
             <div className="section-header">
-              <h3 className="section-subtitle">Riders Management ({allRiders?.length || 0})</h3>
+              <h3 className="section-subtitle">{t.ridersManagement} ({allRiders?.length || 0})</h3>
               <select
                 value={riderSortBy}
                 onChange={(e) => setRiderSortBy(e.target.value)}
                 className="form-input"
                 style={{ width: 'auto', padding: '8px 12px' }}
               >
-                <option value="orders">Sort by Orders</option>
-                <option value="name">Sort by Name</option>
+                <option value="orders">{t.sortByOrders}</option>
+                <option value="name">{t.sortByName}</option>
               </select>
             </div>
 
             {!allRiders || allRiders.length === 0 ? (
               <div className="empty-state">
                 <User className="w-16 h-16 text-gray-400" />
-                <p>No riders registered yet</p>
+                <p>{t.noRidersRegistered}</p>
                 <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
-                  Riders can register at: ?mode=rider
+                  {t.ridersRegisterStore}
                 </p>
               </div>
             ) : (
@@ -2046,16 +2047,16 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                       <button
                         onClick={async () => {
                           if (rider.activeOrders > 0) {
-                            alert(`Cannot delete rider ${rider.name}. They have ${rider.activeOrders} active delivery in progress.`);
+                            alert(t.cannotDeleteRider);
                             return;
                           }
-                          if (window.confirm(`Are you sure you want to delete rider ${rider.name}? This action cannot be undone.`)) {
+                          if (window.confirm(t.deleteRiderConfirm)) {
                             try {
                               await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'riders', rider.id));
-                              alert(`Rider ${rider.name} deleted successfully!`);
+                              alert(t.riderDeleted);
                             } catch (error) {
                               console.error('Error deleting rider:', error);
-                              alert('Failed to delete rider');
+                              alert(t.failedDeleteRider);
                             }
                           }
                         }}
@@ -2080,15 +2081,15 @@ const ShopkeeperDashboard = ({ products, allOrders, allRiders, language, onExit,
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
                         <div style={{ textAlign: 'center' }}>
                           <div style={{ fontSize: '24px', fontWeight: '700', color: '#333' }}>{rider.totalOrders}</div>
-                          <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>Total Orders</div>
+                          <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>{t.totalOrders}</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
                           <div style={{ fontSize: '24px', fontWeight: '700', color: '#FF9800' }}>{rider.activeOrders}</div>
-                          <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>Active</div>
+                          <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>{t.active}</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
                           <div style={{ fontSize: '24px', fontWeight: '700', color: '#4CAF50' }}>{rider.completedOrders}</div>
-                          <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>Completed</div>
+                          <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>{t.completed}</div>
                         </div>
                       </div>
                     </div>
